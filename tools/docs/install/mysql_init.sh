@@ -1,0 +1,1 @@
+SELECT CONCAT('ALTER TABLE ', TABLE_NAME, ' auto_increment = 10000', ';' ) FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'hjsg2_dev' ; 

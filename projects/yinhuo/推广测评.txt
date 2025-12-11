@@ -1,0 +1,122 @@
+一. MBTI性格测试专业版
+1. 5个选项 （非常像，比较像，居中，比较像，非常像）
+心芝的链接（版本选择页）：https://tx.51ce.top/chooseGender2?puid=657972a4&guid=65727f6a
+
+链接（版本选择页）: http://192.168.3.25:8080/chooseGender2?promotionId=1
+链接（首页）http://192.168.3.25:8080/detail?promotionId=1
+
+二. MBTI性格测试2024版 
+1. 2个选项
+心芝的链接（入口）：https://tx.51ce.top/goods?puid=64132671&guid=63fb0da9&hasParams=1&source=wb-mbti
+链接（入口）http://192.168.3.25:8080/detail?promotionId=2
+
+
+三. 瑞文
+心芝链接（答题页）：https://tx.51ce.top/exam?puid=65114043&guid=6425525d&source=wb
+链接（入口）http://192.168.3.25:8080/detail?promotionId=3
+链接（答题页）http://192.168.3.25:8080/exam?promotionId=3
+
+
+心芝链接（答题页）：https://tx.51ce.top/exam?puid=64aad4a6&guid=64aad4a6&source=wb
+
+四. ABO
+
+心芝的链接（入口）https://tx.51ce.top/goods?puid=65a4f081&guid=64229ea2&source=wb
+
+链接（入口）http://192.168.3.25:8080/detail?promotionId=4
+
+
+五.  盖洛普
+链接（入口）http://192.168.3.25:8080/chooseGender2?promotionId=5
+
+六. 霍兰德职业兴趣测评
+心芝的链接（入口）https://tx.51ce.top/goods?puid=6669a943&guid=61ddd4de&source=wb
+链接（入口）http://192.168.3.25:8080/detail?promotionId=6
+====================================================
+备注：
+1. 移动端 
+	答题页：exam/component/Common/index.vue文件
+	支付页：pay/General/index.vue文件
+	答题样式：  白色
+	解锁报告页：  虚化的图片“解锁我的”个人报告
+
+2. pc端
+	答题页：exam/component/Promotion/index.vue文件
+	支付页：pay/Promotion/index.vue文件
+	答题样式： 红色
+	解锁报告页：  虚化的图片“解锁我的”个人报告
+=====================================
+http://192.168.3.25:8080/chooseGender2?promotionId=1
+
+http://192.168.3.25:8080/detail?promotionId=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+推广测评链接
+
+MBTI
+http://192.168.3.25:8080/chooseGender2?promotionId=1
+http://192.168.3.25:8080/detail?promotionId=3
+
+
+http://192.168.3.25:8080/chooseGender2?promotionId=3
+
+
+
+
+
+
+线上：
+http://192.168.3.25:8080/chooseGender2?promotionId=1&hasParams=1
+
+http://192.168.3.25:8080/detail?promotionId=1&hasParams=1
+
+http://192.168.3.25:8080/detail?promotionId=2&hasParams=1
+
+http://192.168.3.25:8080/detail?promotionId=4&hasParams=1
+
+
+霍兰德职业兴趣测评
+http://192.168.3.25:8080/detail?promotionId=6&hasParams=1
+https://tx.51ce.top/goods?puid=6669a943&guid=61ddd4de&source=wb
+
+霍兰德职业兴趣测评
+http://192.168.3.25:8080/detail?promotionId=5&hasParams=1
+https://tx.51ce.top/goods?puid=6669a943&guid=61ddd4de&source=wb
+
+
+
+
+
+
+
+
+
+
+
+
+	const NAME_RAVEN = '瑞文国际标准智商测试';
+	const NAME_ABO = 'ABO性别角色评估';
+
+	
+	const NAME_ENNEAGRAM = '九型人格测试 ';
+	const NAME_PDP = 'PDP性格测试';
+	const NAME_DISC = 'DISC个性测试';
+	const NAME_A_TENDENCY = 'A型人格倾向评估';
+// 10	
+
+	const NAME_MBTI_LOVE = 'MBTI专业爱情测试'; // 数据太复杂了 暂时不弄
+	const NAME_BIG_FIVE_PERSONALITY = '大五人格专业测式';
+
+	const NAME_MULTIPLE_IQ = '多元智力';

@@ -1,0 +1,108 @@
+用于后台执行的程序程序逻辑
+
+主队列类: Master
+作用: 管理子队列,用于其他服务的启动与重启.
+===========================================================================================
+1. 在线队列 Online
+/**
+ * 在线队列
+ *
+ * 对外接口: login,logout
+ * <code>
+ * // 用户上线
+ * Online::login($userId, array('loginTime' => $this->frame->now));
+ * // 用户下线
+ * Online::logout($userId, array('loginTime' => $this->frame->now));
+ * </code>
+ *
+ * @package service
+ */
+ 作用: 用于处理用户在线,下线时间,在线时长等的统计, 防沉迷处理,在线奖励的推送发放,在线提醒等.
+===========================================================================================
+2. 守护队列 Daemon
+ /**
+  * 守护进程
+  * 对外接口: send
+  * <code>
+  * Daemon::send($keys);
+  * </code>
+  * @package service
+  */
+作用: 用于对系统异常的处理, 例如 缓存key的删除
+===========================================================================================
+3. 后台跟踪进程 Tracer
+/**
+ * 后台跟踪进程
+ *
+ * 对外接口: send
+ * <code>
+ * Tracer::trace($userId, Tracer::TYPE_LOGIN, array(
+ *  'ip'            => Client::getIP(),
+ *  'requestMethod' => Client::requestMethod(),
+ *  'browser'       => Client::getBrowser(),
+ *  'os'            => Client::getOS(),
+ *));
+ * </code>
+ *
+ * 用于对用户行为的跟踪,日志,活动事件的记录及处理
+ *
+ * @package service
+ */
+日志消息的格式:
+ $msg = array(
+     'serverId'  => 1,
+     'type'      => 1,
+     'op'        => 102,
+     'userId'    => 4,
+     'time'      => 1384916990,
+     'params'    => array(
+                     'ip'            => '127.0.0.1',
+                     'requestMethod' => 'GET',
+                     'browser'       => 'Mozilla/5.0',
+                     'os'            => 'Linux',
+                 )
+ );
+ 事件处理:
+ // 加载历史进度
+$progress = array('num' => 9);
+$this->handleTracerEvent($serverId, $type, $userId, $params, $progress);
+===========================================================================================
+4. 日志记录进程
+/**
+ * 日志记录进程
+ *
+ * 用于将flielog的数据写入到日志中
+ *
+ * @package service
+ */
+===========================================================================================
+5. 消息进程
+/**
+ * 消息进程
+ *
+ * 对外接口: send
+ * <code>
+ *Messager::send(Messager::TYPE_USER_MENTANNOUNCEMENT, Messager::SUB_TYPE_USER_LOGIN, $userId, array(
+ *  'ip'            => Client::getIP(),
+ *  'requestMethod' => Client::requestMethod(),
+ *  'browser'       => Client::getBrowser(),
+ *  'os'            => Client::getOS(),
+ *));
+ * </code>
+ * 用于广播,公告,消息的推送
+ * @package service
+ */
+===========================================================================================
+6. 后台执行线程
+/**
+ * 后台执行线程
+ *对外接口: send
+ *<code>
+ *Thread::send($callBack, $priorityFlag)
+ *</code>
+ *用于将任务推送到后台执行
+ * @package service
+ */
+===========================================================================================
+
+===========================================================================================

@@ -1,0 +1,7 @@
+01 09 * * * /usr/sbin/ntpdate ntp.api.bz > /dev/null 2>&1 && hwclock -w
+00 00 * * * /bin/bash  /data/www/bin/cut_nginx_log.sh >> /dev/null 2>&1
+*/1 * * * * /bin/php /data/www/trunk/Shell/main.php -h 192.168.21.57:80 Shell.crontab&
+*/1 * * * * /bin/bash /data/www/bin/epoll_monitor.sh 192.168.21.57:80 hjsg2_dev&
+
+
+

@@ -1,0 +1,69 @@
+
+二. 安装 php(php 5.6.17)
+	#下载地址 wget http://cn2.php.net/get/php-5.6.17.tar.bz2/from/this/mirror
+	./configure --prefix=/usr/local/php --enable-zip --enable-opcache --with-zlib --with-mcrypt --with-config-file-path=/usr/local/php/etc --with-mysql=/usr/local/mysql --with-mysqli=/usr/local/mysql/bin/mysql_config --with-openssl --enable-sysvmsg --enable-mbstring --enable-sockets --enable-soap --enable-pcntl --enable-cgi --with-curl --with-gettext --enable-zend-multibyte --enable-static --with-pcre-regex --enable-fastcgi --enable-fpm --enable-sysvsem --enable-sysvshm
+	make ZEND_EXTRA_LIBS='-liconv'
+	make install
+	cp php.ini-production /usr/local/php/etc/php.ini
+	#安装php自带扩展 
+	pdo_mysql
+	cd ext/pdo_mysql
+	/usr/local/php/bin/phpize
+	./configure --with-php-config=/usr/local/php/bin/php-config --with-pdo-mysql=/usr/local/mysql
+	make && make install
+	vim /usr/local/php/etc/php-fpm.conf
+----------------------------------------------------------------------
+[global]
+pid = /usr/local/php/logs/php-fpm.pid
+error_log = /usr/local/php/logs/php-fpm.log
+log_level = notice
+emergency_restart_threshold = 10
+emergency_restart_interval = 1m
+process_control_timeout = 5s
+daemonize = yes
+[www]
+listen = 127.0.0.1:9000
+listen.backlog = -1
+listen.allowed_clients = 127.0.0.1
+user = www
+group = www
+listen.mode=0666
+pm = static
+pm.max_children = 8
+pm.start_servers = 20
+pm.min_spare_servers = 5
+pm.max_spare_servers = 35
+pm.max_requests = 1024
+
+request_terminate_timeout = 0s
+request_slowlog_timeout = 0s
+slowlog = logs/slow.log
+rlimit_files = 65535
+rlimit_core = 0
+chroot =
+chdir =
+catch_workers_output = yes
+env[HOSTNAME] = $HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+
+php_flag[display_errors] = off
+----------------------------------------------------------------------
+安装 msgpack扩展
+msgpack-0.5.2.tgz
+wget -c http://pecl.php.net/get/msgpack-0.5.2.tgz 
+
+# msgpack
+tar xzvf msgpack-0.5.2.tgz
+cd msgpack-0.5.2/
+/usr/local/php/bin/phpize
+./configure --with-php-config=/usr/local/php/bin/php-config
+make && make install
+安装 redis扩展
+tar xzvf redis-2.2.5.tgz
+cd redis-2.2.5
+/usr/local/php/bin/phpize
+ ./configure --with-php-config=/usr/local/php/bin/php-config  --disable-redis-session --enable-redis
+make && make install

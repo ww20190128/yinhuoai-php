@@ -1,0 +1,14 @@
+{
+	"config": {
+		"vendor-dir": "vendor"
+	},
+	"require": {
+		"kosinix/grafika": "dev-master",
+		"nmred/kafka-php": "v0.2.0.8",
+		"tecnickcom/tcpdf": "^6.6",
+		"wechatpay/wechatpay": "^1.4",
+		"alipaysdk/openapi": "*@dev",
+		"chillerlan/php-qrcode": "^5.0",
+		"endroid/qr-code": "^4.6"
+	}
+}
