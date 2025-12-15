@@ -38,22 +38,5 @@ class User extends CtrlBase
         $userSv = \service\User::singleton();
         return $userSv->userInfo($this->userId);
     }
-    
-    /**
-     * 获取用户测试报告
-     *
-     * @return array
-     */
-    public function testOrderList()
-    {
-    	$params = $this->params;
-    	if (empty($this->userId)) {
-    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
-    	}
-    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
-    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
-    	$userSv = \service\User::singleton();
-    	return $userSv->testOrderList($this->userId, $pageNum, $pageLimit);
-    }
-   
+
 }
