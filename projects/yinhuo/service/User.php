@@ -42,24 +42,24 @@ class User extends ServiceBase
     	$appId = $weChat['appId'];
     	$appSecret = $weChat['appSecret'];
     	// 第二步：通过code换取网页授权access_token
-   
     	$url = "https://api.weixin.qq.com/sns/jscode2session/access_token?appid={$appId}&secret={$appSecret}&js_code={$code}&grant_type=authorization_code";
     	$response = httpGetContents($url);
     	$now = $this->frame->now;
     	$response = empty($response) ? array() : json_decode($response, true);
     	
-
     	$userInfo = array();
-    	if (empty($response['access_token'])) {
+    	if (empty($response['session_key'])) {
     	    return $response;
     	    throw new $this->exception('2.获取用户授权失败' . empty($response['errmsg']) ? '' : '：' . $response['errmsg'], array('status' => 2));
     	}
-    	$openid = empty($response['openid']) ? '' : $response['openid'];
-    	$access_token = empty($response['access_token']) ? '' : $response['access_token'];
+    	$openid = empty($response['openid']) ? '' : $response['openid']; // 用户唯一标识
+    	$unionid = empty($response['unionid']) ? '' : $response['unionid']; // 用户唯一标识
+    	$session_key = empty($response['session_key']) ? '' : $response['session_key'];
     	$userInfo = $response;
     	
     	// 第三步：刷新access_token（如果需要）
     	// 第四步：拉取用户信息(需scope为 snsapi_userinfo)
+  
     	$url = "https://api.weixin.qq.com/sns/userinfo?access_token={$access_token}&openid={$openid}&lang=zh_CN";
     	$response = httpGetContents($url);
     	$response = empty($response) ? array() : json_decode($response, true);

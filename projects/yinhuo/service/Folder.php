@@ -292,16 +292,21 @@ class Folder extends ServiceBase
      *
      * @return array
      */
-    public function info($folderEtt, $userId)
+    public function info($folderEtt, $userEtt)
     {
     	$folderDao = \dao\Folder::singleton();
     	if (is_numeric($folderEtt)) {
     		$folderEtt = $folderDao->readByPrimary($folderEtt);
     	}
+    	$userDao = \dao\User::singleton();
+    	if (is_numeric($userEtt)) {
+    		$userEtt = $userDao->readByPrimary($userEtt);
+    	}
     	if (empty($folderEtt) || $folderEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('文件夹已删除');
     	}
-    	if ($folderEtt->userId != $userId) {
+   
+    	if ($folderEtt->userId != $userEtt->userId) {
     		throw new $this->exception('文件夹已删除');
     	}
     	$mediaIds = empty($folderEtt->mediaIds) ? array() : explode(',', $folderEtt->mediaIds);
