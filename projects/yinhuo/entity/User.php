@@ -38,7 +38,6 @@ class User extends ModelBase
      */
     public $openid;
     
-
     /**
      * 头像
      *
@@ -108,41 +107,7 @@ class User extends ModelBase
      * @var varchar
      */
     public $city = '';
-    
-    /**
-     * 分享收益
-     *
-     * @var varchar
-     */
-    public $shareYield = '0.00';
-    
-    /**
-     * 已提现金额
-     *
-     * @var varchar
-     */
-    public $withdrawAmount = '0.00';
-
-    /**
-     * 解锁的正念课程Id
-     *
-     * @var varchar
-     */
-    public $mindfulnessIds = '';
-    
-    /**
-     * 账号类型
-     *
-     * @var varchar
-     */
-    public $type = 0;
-    
-    /**
-     * 分成比例
-     *
-     * @var int
-     */
-    public $commissionRate = 30;
+ 
 // 表结构end
 
     /**
