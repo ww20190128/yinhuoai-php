@@ -249,7 +249,7 @@ class Folder extends ServiceBase
     	}
     	$allMediaIds = array_unique($allMediaIds);
     	$subFolderEttList = empty($folderModels) ? array() : 
-    		$folderDao->readListByWhere("`parentId` in (" . implode(',', array_keys($folderModels)));
+    		$folderDao->readListByWhere("`parentId` in (" . implode(',', array_keys($folderModels)) . ")");
     	$subFolderMap = array();
     	if (!empty($subFolderEttList)) foreach ($subFolderEttList as $subFolderEtt) {
     		if ($subFolderEtt->status == \constant\Common::DATA_DELETE) {
