@@ -42,7 +42,8 @@ class User extends ServiceBase
     	$appId = $weChat['appId'];
     	$appSecret = $weChat['appSecret'];
     	// 第二步：通过code换取网页授权access_token
-    	$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={$appId}&secret={$appSecret}&code={$code}&grant_type=authorization_code";
+   
+    	$url = "https://api.weixin.qq.com/sns/jscode2session/access_token?appid={$appId}&secret={$appSecret}&js_code={$code}&grant_type=authorization_code";
     	$response = httpGetContents($url);
     	$now = $this->frame->now;
     	$response = empty($response) ? array() : json_decode($response, true);

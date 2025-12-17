@@ -86,8 +86,9 @@ $conf = array(
 
     'fileDir' => '/data/www/static-kjs/file/',
 	'weChat' => array(
-		'appId' => 'wx6cce18d692093684',
-		'appSecret' => '1a6ebc6a68eccc584bd67f326f2a3a47',
+		'appId' => 'wxde609c2255df3268',
+		'appSecret' => '341a3503556f33ccea14c02e442c3182',
+			//=========================================
 		'merchantId' => '1708405300', // 微信支付分配的商户号
 		'APICertificateKey' => '407D6C1B24DBF31F53D46E20B4C76C38117C196D', // 商户API证书
 // 		'APIv2Key' => '1C4E4D3E89FFC9EAD0583AD6993A8ECBC6BFDC77', // 商户APIv2密钥
