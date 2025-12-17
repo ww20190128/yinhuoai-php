@@ -1,0 +1,6 @@
+Lib
+Lib/*
+vendor
+.project
+.git
+.settings
