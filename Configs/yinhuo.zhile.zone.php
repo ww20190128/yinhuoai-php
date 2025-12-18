@@ -6,6 +6,8 @@
  * 注释带*号的为必选项
  * 服务器id段:测试{1, 10}, 正式  {100, 999}
  */
+
+
 $conf = array(
     'id' 					=> 110, 							// *服务器id
     'type' 					=> 1, 								// *服务器类型, 必须与[project_code]一一对应
@@ -28,7 +30,7 @@ $conf = array(
 		    'db_host' 		=> '127.0.0.1',
 		    'db_port' 		=> '3306',
 		    'db_user' 		=> 'root',
-		    'db_pass' 		=> 'yinhuoai@abcCBA',
+		    'db_pass' 		=> '295012469',
 		    'db_name' 		=> 'yinhuo',
 		    'persistence' 	=> false,
 		    'log_query' 	=> false,
