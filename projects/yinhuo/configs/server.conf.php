@@ -80,25 +80,30 @@ return array(
         ),
 	),
     
-
-
 	/**
 	 *平台充值ip白名单列表
 	 */
 	'platformIps' => array( 
 		'192.168.21.1-255',
 	),
+		
 	/**
 	 * 阿里云上传
 	 */
 	'oss' => array(
-		'prod' => array(
+		'zhile' => array( // 智乐服务器
+			'ACCESS_KEY_ID'     => 'LTAI5tQsEmW1ExBivMpZ4tFF',
+			'ACCESS_KEY_SECRET' => 'C1Hty5gnWUHZrQTF8rl29Ovkv6p12n',
+			'BUCKET'            => 'wb-yinhuo',
+			'OSS'               => 'oss-cn-beijing.aliyuncs.com',
+			'JSOSS'             => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/',
+		),
+		'yinhuo' => array( // 外包-因火服务器（未配置）
 			'ACCESS_KEY_ID'     => 'LTAI5tPbtx6vVzHuymUoUcEM',
 			'ACCESS_KEY_SECRET' => '5Yql9pRUMiuLYD7lweR0AYa66xU4Ae',
 			'BUCKET'            => 'zhile-static',
 			'OSS'               => 'oss-cn-beijing.aliyuncs.com',
 			'JSOSS'             => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/',
 		),
-			
 	)
 );

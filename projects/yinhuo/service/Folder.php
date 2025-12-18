@@ -35,6 +35,14 @@ class Folder extends ServiceBase
      */
     public function createFolder($userId, $type, $name, $parentId = 0)
     {
+    	
+
+    	
+    	
+    	
+    	
+    	
+    	
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
@@ -141,22 +149,21 @@ class Folder extends ServiceBase
     	if (empty($folderEtt) || $folderEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('文件夹已删除');
     	}
-    	$urlBase = 'https://static.yinhuoai.com';
     	$mediaDao = \dao\Media::singleton();
-    	$dir = "/data/www/yinhuo-static/" . $folderEtt->type . "/";
     	$now = $this->frame->now;
     	$folderMediaIds = empty($folderEtt->mediaIds) ? array() : explode(',', $folderEtt->mediaIds);
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	if (is_iteratable($uploadFiles)) foreach ($uploadFiles as $uploadFile) {
-    		$file = $uploadFile['file'];
-    		$fileInfo = selfPathInfo($file);
+    		$file = $uploadFile['file']; // 文件
+    		$fileInfo = pathInfo($url);
     		$fileName = md5(implode('', file($file)));
     		$extension = $fileInfo['extension'];
-    		$mediaFile = $dir . "{$fileName}.{$extension}";
-    		$url = $urlBase . "{$fileName}.{$extension}";
-    		if (file_exists($file) && !file_exists($mediaFile)) {
-    			@copy($file, $mediaFile);
-    		}
-    		if (!file_exists($mediaFile)) {
+    		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
+    		$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $file);
+    		if (empty($ossResult)) {
     			continue;
     		}
     		// 创建媒体
