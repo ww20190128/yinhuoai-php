@@ -30,6 +30,7 @@ class Folder extends CtrlBase
 		if (mb_strlen($name) >= 30) {
 			throw new $this->exception('文件名最多30个汉字');
 		}
+		
 		$folderSv = \service\Folder::singleton();
 		return $folderSv->createFolder($this->userId, $type, $name, $parentId);
 	}

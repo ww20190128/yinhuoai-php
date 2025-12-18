@@ -1,6 +1,6 @@
 <?php
 /**
- * 心理产品 - 配置文件
+ * 因火产品 - 配置文件
  *
  * 说明:
  * 注释带*号的为必选项
@@ -9,8 +9,8 @@
 $conf = array(
     'id' 					=> 110, 							// *服务器id
     'type' 					=> 1, 								// *服务器类型, 必须与[project_code]一一对应
-    'mark' 					=> 'mood-2', 				        // *服务器标识
-    'project_code' 			=> 'mood', 					        // *项目代号, 必须与projects对应的项目名称一致
+    'mark' 					=> 'yinhuo-2', 				        // *服务器标识
+    'project_code' 			=> 'yinhuo', 					        // *项目代号, 必须与projects对应的项目名称一致
     'debug' 				=> true, 							// *调试模式
     'session_switch' 		=> true, 							// *是否启用session
     'language' 				=> 'zh_CN', 						// 语言
@@ -24,12 +24,12 @@ $conf = array(
 	'web_url'				=> 'https://xinlice.top',			// 前端地址
 	'serve_url'				=> 'https://xince.zhile.zone', 		// 服务器地址
 	'database' => array ( // *数据库
-		'mood_xince' 	=>	array ( // 服务器数据库
+		'yinhuo' 	=>	array ( // 服务器数据库
 		    'db_host' 		=> '127.0.0.1',
 		    'db_port' 		=> '3306',
 		    'db_user' 		=> 'root',
-		    'db_pass' 		=> '295012469',
-		    'db_name' 		=> 'mood_xince',
+		    'db_pass' 		=> 'yinhuoai@abcCBA',
+		    'db_name' 		=> 'yinhuo',
 		    'persistence' 	=> false,
 		    'log_query' 	=> false,
 		    'is_main' 		=> true,			// *是否为主数据库
@@ -83,24 +83,12 @@ $conf = array(
     	'images' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/',
 //     	'images' => 'http://static.zhile.ink/resources/',
 	),
-	'tmpDir'  => '/data/www/static-kjs/tmp/',
-    'epubDir' => '/data/www/static-kjs/epub/',
+
     'fileDir' => '/data/www/static-kjs/file/',
-    'epubTmpDir' => '/data/www/static-kjs/tmp/',
-	'imageDir' => '/data/www/static-kjs/images/',
-	'dingdingParams' => array(
-		'login' => array(
-			'appid'     => 'dingoanbz65dopa8ta2ql4',
-			'appsecret' => 'hT04gE2gXM0T_LIexmm1Z0mdO-OnU7Sv28_W6VRlPaxviRfnD5mSwMaKC5YTN5jH',
-		),
-			'user'  => array(
-			'appkey'    => 'dinglywycyyrwf8ircbp',
-			'appsecret' => '1KSuHJATfjo1PcrxvKKUcm84OnhQiuafCZgEkmn7DEQgyNrcVqPzJzzQpY7Zod48',
-		)
-	),
 	'weChat' => array(
-		'appId' => 'wx6cce18d692093684',
-		'appSecret' => '1a6ebc6a68eccc584bd67f326f2a3a47',
+		'appId' => 'wxde609c2255df3268',
+		'appSecret' => '341a3503556f33ccea14c02e442c3182',
+			//=========================================
 		'merchantId' => '1708405300', // 微信支付分配的商户号
 		'APICertificateKey' => '407D6C1B24DBF31F53D46E20B4C76C38117C196D', // 商户API证书
 // 		'APIv2Key' => '1C4E4D3E89FFC9EAD0583AD6993A8ECBC6BFDC77', // 商户APIv2密钥
@@ -127,7 +115,7 @@ $conf = array(
 );
 
 $conf['dao'] = array( // dao数据库操作组件配置
-    'mysql' => $conf['database']['mood'],
+    'mysql' => $conf['database']['yinhuo'],
     'redis' => $conf['cache']['Redis']['dynamic'],
 );
 return $conf;
