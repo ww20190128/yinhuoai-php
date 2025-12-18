@@ -236,13 +236,17 @@ class Folder extends ServiceBase
     		if ($folderEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
+    		if (!empty($folderEtt->parentId)) {
+    			continue;
+    		}
     		// 媒体
     		$mediaIds = empty($folderEtt->mediaIds) ? array() : explode(',', $folderEtt->mediaIds);
     		$folderModels[$folderEtt->id] = array(
-    			'id' 		=> intval($folderEtt->id),
-    			'name'		=> $folderEtt->name,
-    			'type'		=> $folderEtt->type,
-    			'mediaIds'	=> $mediaIds,
+    			'id' 			=> intval($folderEtt->id),
+    			'name'			=> $folderEtt->name,
+    			'type'			=> $folderEtt->type,
+    			'mediaIds'		=> $mediaIds,
+    			'createTime'	=> intval($folderEtt->createTime),
     		);
     		$allMediaIds = array_merge($allMediaIds, $mediaIds);
     	}
@@ -264,10 +268,11 @@ class Folder extends ServiceBase
     			continue;
     		}
     		$allMediaModels[$mediaEtt->id] = array(
-    			'id' 		=> intval($mediaEtt->id),
-    			'fileName'	=> $mediaEtt->name,
-    			'type'		=> $mediaEtt->type,
-    			'url'		=> $mediaEtt->url,
+    			'id' 			=> intval($mediaEtt->id),
+    			'fileName'		=> $mediaEtt->name,
+    			'type'			=> $mediaEtt->type,
+    			'url'			=> $mediaEtt->url,
+    			'createTime'	=> intval($mediaEtt->createTime),
     		);
     	}
     	foreach ($folderModels as $folderId => $folderModel) {
@@ -283,6 +288,8 @@ class Folder extends ServiceBase
     		$folderModel['subNum'] = empty($subFolderMap[$folderId]) ? 0 : count($subFolderMap[$folderId]);
     		$folderModels[$folderId] = $folderModel;
     	}
+    	$commonSv   = \service\Common::singleton();
+    	uasort($folderModels, array($commonSv, 'sortByCreateTime'));
     	return $folderModels;
     }
     
@@ -317,12 +324,13 @@ class Folder extends ServiceBase
     			continue;
     		}
     		$mediaModels[] = array(
-    			'id' 		=> intval($mediaEtt->id),
-    			'name'		=> $mediaEtt->name,
-    			'type'		=> $mediaEtt->type,
-    			'url'		=> $mediaEtt->url,
-    			'size'		=> 100, // 大小
-    			'duration'	=> 100, // 播放时长
+    			'id' 			=> intval($mediaEtt->id),
+    			'name'			=> $mediaEtt->name,
+    			'type'			=> $mediaEtt->type,
+    			'url'			=> $mediaEtt->url,
+    			'size'			=> 100, // 大小
+    			'duration'		=> 100, // 播放时长
+    			'createTime'	=> intval($mediaEtt->createTime),
     		);
     	}
     	$subFolderEttList = $folderDao->readListByIndex(array(
@@ -335,12 +343,16 @@ class Folder extends ServiceBase
     		}
     		$subMediaIds = empty($subFolderEtt->mediaIds) ? array() : explode(',', $subFolderEtt->mediaIds);
     		$subList[] = array(
-    			'id' 		=> intval($subFolderEtt->id),
-    			'name'		=> $subFolderEtt->name,
-    			'type'		=> $subFolderEtt->type,
-    			'mediaNum'	=> count($subMediaIds),
+    			'id' 			=> intval($subFolderEtt->id),
+    			'name'			=> $subFolderEtt->name,
+    			'type'			=> $subFolderEtt->type,
+    			'mediaNum'		=> count($subMediaIds),
+    			'createTime'	=> intval($subFolderEtt->createTime),
     		);
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($subList, array($commonSv, 'sortByCreateTime'));
+    	uasort($mediaModels, array($commonSv, 'sortByCreateTime'));
     	return array(
     		'id' 		=> intval($folderEtt->id),
     		'name'		=> $folderEtt->name,
