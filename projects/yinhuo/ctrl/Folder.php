@@ -162,6 +162,6 @@ class Folder extends CtrlBase
 			throw new $this->exception('请求参数错误');
 		}
 		$folderSv = \service\Folder::singleton();
-		return $folderSv->info($this->userId, $id);
+		return $folderSv->info($id, $this->userId);
 	}
 }
