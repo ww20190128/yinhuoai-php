@@ -88,6 +88,7 @@ $conf = array(
 	'weChat' => array(
 		'appId' => 'wxde609c2255df3268',
 		'appSecret' => '341a3503556f33ccea14c02e442c3182',
+			
 			//=========================================
 		'merchantId' => '1708405300', // 微信支付分配的商户号
 		'APICertificateKey' => '407D6C1B24DBF31F53D46E20B4C76C38117C196D', // 商户API证书

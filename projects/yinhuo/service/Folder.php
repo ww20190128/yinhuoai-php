@@ -35,14 +35,6 @@ class Folder extends ServiceBase
      */
     public function createFolder($userId, $type, $name, $parentId = 0)
     {
-    	
-
-    	
-    	
-    	
-    	
-    	
-    	
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {

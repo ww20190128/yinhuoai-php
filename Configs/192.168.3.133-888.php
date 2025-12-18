@@ -81,8 +81,8 @@ $conf = array(
 
 	// 用vip930531微信扫码
 	'weChat' => array(
-		'appId' => 'wx384f41ca8d135b58',
-		'appSecret' => 'a18700b930b418dd75131289232809c0',
+		'appId' => 'wxde609c2255df3268',
+		'appSecret' => '341a3503556f33ccea14c02e442c3182',
 		'merchantId' => '1696193979', // 微信支付分配的商户号
 		'APICertificateKey' => '19DA57F2314830A34CD6268FDEF225491046646D', // 商户API证书
 // 		'APIv2Key' => '194CD48DA6268FD3157F2330AEF22514', // 商户APIv2密钥
