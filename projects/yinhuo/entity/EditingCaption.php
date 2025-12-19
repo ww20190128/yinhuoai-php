@@ -2,11 +2,11 @@
 namespace entity;
 
 /**
- * Lens 实体类
+ * EditingCaption 实体类
  * 
  * @author 
  */
-class Lens extends EntityBase
+class EditingCaption extends EntityBase
 {
 
     /**
@@ -14,7 +14,7 @@ class Lens extends EntityBase
      *
      * @var string
      */
-    const MAIN_TABLE = 'lens';
+    const MAIN_TABLE = 'editingCaption';
 
     /**
      * 主键
@@ -24,53 +24,32 @@ class Lens extends EntityBase
     const PRIMARY_KEY = 'id';
 
     /**
-     * 镜头ID
+     * 主键ID
      *
      * @var int
      */
     public $id;
 
     /**
-     * 所属剪辑ID
-     *
-     * @var int
-     */
-    public $editingId;
-    
-    /**
-     * 素材ID列表
-     *
-     * @var string
-     */
-    public $mediaIds;
-    
-    /**
-     * 镜头名称
+     * 文本
      *
      * @var varchar
      */
-    public $name = '';
+    public $text = '';
 
     /**
-     * 是否开启原声
+     * 字体
      *
      * @var varchar
      */
-    public $originalSound = '';
+    public $font = '';
 
     /**
-     * 选择时长
+     * 样式
      *
      * @var varchar
      */
-    public $duration = '';
-
-    /**
-     * 字幕ID列表
-     *
-     * @var varchar
-     */
-    public $captionIds = '';
+    public $style = '';
 
     /**
      * 状态

@@ -131,29 +131,33 @@ class Editing extends ServiceBase
     public function reviseLens($userId, $lensId, $info)
     {
     	$lensDao = \dao\Lens::singleton();
-    	$lensEtt = $lensDao->readByPrimary($editingId);
+    	$lensEtt = $lensDao->readByPrimary($lensId);
     	if (empty($lensEtt) || $lensEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('镜头已删除');
     	}
     	if ($lensEtt->userId == $userId) {
     		throw new $this->exception('镜头已删除');
     	}
-    	if (!empty($info['name']) && $info['name'] != $lensEtt->name) { // 镜头名称
+    	// 修改镜头名称
+    	if (!empty($info['name']) && $info['name'] != $lensEtt->name) {
     		$lensEtt->set('name', $info['name']);
     	}
-    	if (!empty($info['transitionIds'])) { // 转场Id列表
+    	// 设置转场
+    	if (!empty($info['transitionIds'])) {
     		$lensEtt->set('transitionIds', implode(',', $info['transitionIds']));
     	}
     	if (!empty($info['duration']) && $info['duration'] != $lensEtt->duration) { // 选择时长
     		$lensEtt->set('duration', $info['duration']);
     	}
-    	if (!empty($info['originalSound']) && $info['originalSound'] != $lensEtt->originalSound) { // 原声
+    	// 原声
+    	if (!empty($info['originalSound']) && $info['originalSound'] != $lensEtt->originalSound) {
     		$lensEtt->set('originalSound', $info['originalSound']);
     	}
-    	if (!empty($info['removeMediaIds'])) { // 删除素材
+    	// 删除素材
+    	if (!empty($info['deleteMediaIds'])) {
     		$haveMediaIds = empty($lensEtt->mediaIds) ? array() : explode(',', $lensEtt->mediaIds);
     		foreach ($haveMediaIds as $key => $haveMediaId) {
-    			if (in_array($haveMediaId, $info['removeMediaIds'])) {
+    			if (in_array($haveMediaId, $info['deleteMediaIds'])) {
     				unset($haveMediaIds[$key]);
     			}
     		}
@@ -161,7 +165,36 @@ class Editing extends ServiceBase
     	}
     	$lensEtt->set('updateTime', $now);
     	$lensDao->update($lensEtt);
-    	
     	return ;
+    }
+    
+    /**
+     * 设置镜头
+     *
+     * @return array
+     */
+    public function editingInfo($userId, $editingEtt)
+    {
+    	$editingDao = \dao\Editing::singleton();
+    	if (is_numeric($editingEtt)) {
+    		$editingEtt = $editingDao->readByPrimary($editingEtt);
+    	}
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    }
+    
+    /**
+     * 修改剪辑
+     *
+     * @return array
+     */
+    public function reviseEditing($userId, $editingId)
+    {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingEtt);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
     }
 }

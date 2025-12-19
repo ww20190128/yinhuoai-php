@@ -299,7 +299,7 @@ class Folder extends ServiceBase
      *
      * @return array
      */
-    public function info($folderEtt, $userEtt)
+    public function info($folderEtt, $userEtt, $pageNum = 0, $pageLimit = 20)
     {
     	$folderDao = \dao\Folder::singleton();
     	if (is_numeric($folderEtt)) {
@@ -354,13 +354,19 @@ class Folder extends ServiceBase
     	$commonSv = \service\Common::singleton();
     	uasort($subList, array($commonSv, 'sortByCreateTime'));
     	uasort($mediaModels, array($commonSv, 'sortByCreateTime'));
+    	
+    	// 符合条件的总条数
+    	$mediaTotalNum = count($mediaModels); // 素材总数量
+    	if (!empty($pageNum)) {
+    		$mediaModels = array_slice($mediaModels, ($pageNum - 1) * $pageLimit, $pageLimit);
+    	}
     	return array(
     		'id' 		=> intval($folderEtt->id),
     		'name'		=> $folderEtt->name,
     		'type'		=> $folderEtt->type,
     		'subList'	=> $subList,
     		'mediaList'	=> $mediaModels,
-    		'mediaNum'	=> count($mediaModels),
+    		'mediaNum'  => $mediaTotalNum,
     	);
     }
     

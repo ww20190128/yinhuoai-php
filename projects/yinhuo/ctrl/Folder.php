@@ -143,9 +143,16 @@ class Folder extends CtrlBase
 			throw new $this->exception('请求参数错误');
 		}
 		$folderSv = \service\Folder::singleton();
-		$list = $folderSv->getList($this->userId, $type);
+		$dataList = $folderSv->getList($this->userId, $type);
+		$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+		$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+		// 符合条件的总条数
+		$totalNum = count($dataList);
+		// 分页显示
+		$dataList = array_slice($dataList, ($pageNum - 1) * $pageLimit, $pageLimit);
 		return array(
-			'list' => array_values($list),
+			'totalNum' => $totalNum,
+			'list' => array_values($dataList),
 		);
 	}
 	
@@ -161,7 +168,12 @@ class Folder extends CtrlBase
 		if (empty($id)) {
 			throw new $this->exception('请求参数错误');
 		}
+		$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+		$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+		
 		$folderSv = \service\Folder::singleton();
-		return $folderSv->info($id, $this->userId);
+		$info = $folderSv->info($id, $this->userId, $pageNum, $pageLimit);
+		return $info;
 	}
+	
 }
