@@ -148,21 +148,24 @@ class Folder extends ServiceBase
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	if (is_iteratable($uploadFiles)) foreach ($uploadFiles as $uploadFile) {
-    		$file = $uploadFile['file']; // 文件
+    		$file = $uploadFile['file']; // 文件内容
+    		$fileSize = filesize($file); // 文件大小
     		$fileInfo = pathInfo($file);
     		$fileName = md5(implode('', file($file)));
     		$extension = $fileInfo['extension'];
     		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
     		$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
-    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $file);
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, file_get_contents($file));
     		if (empty($ossResult)) {
     			continue;
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     		// 创建媒体
+    		
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
     		$mediaEtt->type = $folderEtt->type;
+    		$mediaEtt->size = $fileSize;
     		$mediaEtt->url = $url;
     		$mediaEtt->createTime = $now;
     		$mediaEtt->updateTime = $now;

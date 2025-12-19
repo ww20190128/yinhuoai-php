@@ -59,6 +59,13 @@ class Media extends EntityBase
     public $url = '';
 
     /**
+     * 文件大小
+     *
+     * @var int
+     */
+    public $size = 0;
+    
+    /**
      * 创建时间
      *
      * @var int
