@@ -90,18 +90,21 @@ class Folder extends CtrlBase
 			throw new $this->exception('请求参数错误');
 		}
 		$uploadFiles = array();
-		$files 	= empty($_FILES) ? array() : $_FILES; // 上传的图片信息
-		foreach ($files as $file) {
+		$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+		if (!empty($files)) foreach ($files as $file) {
 			$fileInfo = pathinfo($file['name']);
 			$fileTmp = '/tmp/' .  $file['name'];
 			move_uploaded_file($file['tmp_name'], $fileTmp);
 			if (!file_exists($fileTmp)) {
 				throw new $this->exception('文件上传失败');
 			}
+			$pictureFile = '';
+			@copy($fileTmp, '/data/www/yinhuo-static/' . $file['name']);
+			
 			$uploadFiles[] = array(
 				'extension' => $fileInfo['extension'],
 				'file' 		=> $fileTmp,
-				'name' 		=> $file["name"],
+				'name' 		=> $file['name'],
 			);
 		}	
 		$folderSv = \service\Folder::singleton();

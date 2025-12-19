@@ -29,26 +29,54 @@ class Editing extends ServiceBase
     }
 
     /**
-     * 创建剪辑或模板
-     *[id] => 
-    [name] => 
-    [userId] => 0
-    [type] => 
-    [status] => 0
-    [voiceIds] => 
-    [showCaption] => 0
-    [createTime] => 0
-    [updateTime] => 0
+     * 剪辑详情
+     *
      * @return array
      */
-    public function createEditing($editingId)
+    public function editingInfo($userEtt, $editingEtt)
     {
+    	$userDao = \dao\User::singleton();
+    	if (is_numeric($userEtt)) {
+    		$userEtt = $userDao->readByPrimary($userEtt);
+    	}
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$now = $this->frame->now;
     	$editingDao = \dao\Editing::singleton();
-    	$editingEtt = $editingDao->getNewEntity();
-    	
-    	print_r($editingEtt);exit;
-    	
-        return ;
+    	if (empty($editingEtt)) { // 获取用户最近一次的剪辑工程
+    		$where = "`userId` = {$userEtt->userId} and `status` !=" . \constant\Common::DATA_DELETE;
+    		$userEditingEttList = $editingDao->readListByWhere($where);
+    		$lastEditingEtt = null;
+    		foreach ($userEditingEttList as $userEditingEtt) {
+    			if (empty($lastEditingEtt) || $userEditingEtt->updateTime >= $editingEtt->updateTime) {
+    				$lastEditingEtt = $userEditingEtt;
+    			}
+    		}
+    		if (empty($lastEditingEtt)) { // 第一次创建
+    			$editingEtt = $editingDao->getNewEntity();
+    			$editingEtt->name = date('Ymd') . '剪辑工程';
+    			$editingEtt->userId = $userEtt->userId;
+    			$editingEtt->createTime = $now;
+    			$editingEtt->updateTime = $now;
+    			$editingId = $editingDao->create($editingEtt);
+    		} else {
+    			$editingEtt = $lastEditingEtt;
+    		}
+    	}
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    	if ($editingEtt->userId == $userEtt->status) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    	return array(
+    		'id' 			=> intval($editingEtt->id),
+    		'name'			=> $editingEtt->name,
+    		'updateTime' 	=> intval($editingEtt->updateTime),
+    		'createTime' 	=> intval($editingEtt->createTime),
+    		'lensList' 		=> array(), // 镜头列表
+    	);
     }
 
     /**
@@ -168,21 +196,7 @@ class Editing extends ServiceBase
     	return ;
     }
     
-    /**
-     * 设置镜头
-     *
-     * @return array
-     */
-    public function editingInfo($userId, $editingEtt)
-    {
-    	$editingDao = \dao\Editing::singleton();
-    	if (is_numeric($editingEtt)) {
-    		$editingEtt = $editingDao->readByPrimary($editingEtt);
-    	}
-    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('剪辑工程已删除');
-    	}
-    }
+    
     
     /**
      * 修改剪辑

@@ -9,16 +9,16 @@ namespace ctrl;
 class Editing extends CtrlBase
 {
 	/**
-	 * 创建剪辑或模板
+	 * 剪辑工程详情
 	 *
 	 * @return array
 	 */
-	public function createEditing()
+	public function editingInfo()
 	{
 		$params = $this->params;
-		$editingId = $this->paramFilter('editingId', 'intval'); // 剪辑Id
+		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		$editingSv = \service\Editing::singleton();
-		return $editingSv->createEditing($editingId);
+		return $editingSv->editingInfo($this->userId, $editingId);
 	}
 	
 	/**
@@ -69,21 +69,7 @@ class Editing extends CtrlBase
 		return $editingSv->reviseLens($userId, $lensId, $info);
 	}
 	
-	/**
-	 * 剪辑工程详情
-	 *
-	 * @return array
-	 */
-	public function editingInfo()
-	{
-		$params = $this->params;
-		$editingId = $this->paramFilter('editingId', 'intval'); // 剪辑Id
-		if (empty($editingId)) {
-			throw new $this->exception('请求参数错误');
-		}
-		$editingSv = \service\Editing::singleton();
-		return $editingSv->editingInfo($this->userId, $editingId);
-	}
+	
 	
 	/**
 	 * 修改字幕
