@@ -327,7 +327,7 @@ class Editing extends ServiceBase
     		$where = "`userId` = {$userEtt->userId} and `status` !=" . \constant\Common::DATA_DELETE;
     		$userEditingEttList = $editingDao->readListByWhere($where);
     		$lastEditingEtt = null; // 用户最近一次的编辑
-    		if (empty($userEditingEttList)) foreach ($userEditingEttList as $userEditingEtt) {
+    		if (!empty($userEditingEttList)) foreach ($userEditingEttList as $userEditingEtt) {
     			if (empty($lastEditingEtt) || $userEditingEtt->updateTime >= $lastEditingEtt->updateTime) {
     				$lastEditingEtt = $userEditingEtt;
     			}
