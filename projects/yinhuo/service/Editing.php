@@ -59,10 +59,10 @@ class Editing extends ServiceBase
     
     /**
      * 添加镜头
-     *
+     * $type  1 片头   2 片中  3片尾
      * @return array
      */
-    public function createLens($userId, $editingId)
+    public function createLens($userId, $editingId, $type = 0)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -80,8 +80,20 @@ class Editing extends ServiceBase
     	$editingLensDao = \dao\EditingLens::singleton();
     	$editingLensEtt = $editingLensDao->getNewEntity();
     	$editingLensEtt->editingId = $editingId;
-    	$editingLensEtt->name = '镜头' . (count($lensList) + 1);
+
     	$editingLensEtt->originalSound = 0; // 默认关闭原声
+    	if ($type == 1) { // 片头
+    		$editingLensEtt->index = -1;
+    		$editingLensEtt->name = '片头';
+    	} elseif ($type == 2) { // 片中
+    		$editingLensEtt->index = 1;
+    		$editingLensEtt->name = '片中' . 1;
+    	} elseif($type == 3) {
+    		$editingLensEtt->index = 100;
+    		$editingLensEtt->name = '片尾';
+    	} else {
+    		$editingLensEtt->name = '镜头' . (count($lensList) -1);
+    	}
     	$editingLensEtt->createTime = $now;
     	$editingLensEtt->updateTime = $now;
     	$editingLensId = $editingLensDao->create($editingLensEtt);
@@ -139,9 +151,18 @@ class Editing extends ServiceBase
  			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
  			$dubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubCaptionIds)); // 配音-手动设置-字幕
  			$dubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubMediaIds)); // 配音-文件-素材(旁白配音)
+ 			$type = 2;
+ 			if ($editingLensEtt->index < 0) {
+ 				$type = 1;
+ 			}
+ 			if ($editingLensEtt->index >= 100) {
+ 				$type = 3;
+ 			}
  			$editingLensModels[$editingLensEtt->id] = array(
  				'id' => intval($editingLensEtt->id),
  				'name' => $editingLensEtt->name,
+ 				'index' => intval($editingLensEtt->index), // 次序
+ 				'type' => $type, // 类型 1 片头 2 片中 3片尾
  				'createTime' => intval($editingLensEtt->createTime),
  				'updateTime' => intval($editingLensEtt->updateTime),
  				'mediaIds' => $mediaIds,
@@ -339,6 +360,10 @@ class Editing extends ServiceBase
     			$editingEtt->createTime = $now;
     			$editingEtt->updateTime = $now;
     			$editingId = $editingDao->create($editingEtt);
+    			// 创建片头，片中，片尾
+    			$this->createLens($userId, $editingId, 1);
+    			$this->createLens($userId, $editingId, 2);
+    			$this->createLens($userId, $editingId, 3);
     		} else {
     			$editingEtt = $lastEditingEtt;
     		}

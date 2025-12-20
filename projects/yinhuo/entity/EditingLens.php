@@ -38,6 +38,13 @@ class EditingLens extends EntityBase
     public $name = '';
 
     /**
+     * 次序
+     *
+     * @var int
+     */
+    public $index = 0;
+    
+    /**
      * 所属剪辑Id
      *
      * @var int

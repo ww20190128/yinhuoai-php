@@ -232,6 +232,7 @@ class Editing extends CtrlBase
 	public function reviseLens()
 	{
 		$params = $this->params;
+		$params = (array)$params;
 		$lensId = $this->paramFilter('lensId', 'intval', 0); // 镜头Id
 		if (empty($lensId)) {
 			throw new $this->exception('请求参数错误');
@@ -294,6 +295,7 @@ class Editing extends CtrlBase
 	public function reviseEditing()
 	{
 		$params = $this->params;
+		$params = (array)$params;
 		$editingId = $this->paramFilter('editingId', 'intval'); // 剪辑Id
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
