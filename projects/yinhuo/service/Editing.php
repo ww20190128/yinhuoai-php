@@ -361,9 +361,9 @@ class Editing extends ServiceBase
     			$editingEtt->updateTime = $now;
     			$editingId = $editingDao->create($editingEtt);
     			// 创建片头，片中，片尾
-    			$this->createLens($userId, $editingId, 1);
-    			$this->createLens($userId, $editingId, 2);
-    			$this->createLens($userId, $editingId, 3);
+    			$this->createLens($userEtt->userId, $editingId, 1);
+    			$this->createLens($userEtt->userId, $editingId, 2);
+    			$this->createLens($userEtt->userId, $editingId, 3);
     		} else {
     			$editingEtt = $lastEditingEtt;
     		}
