@@ -2,11 +2,11 @@
 namespace entity;
 
 /**
- * EditingCaption 实体类
+ * EditingMusic 实体类
  * 
  * @author 
  */
-class EditingCaption extends EntityBase
+class EditingMusic extends EntityBase
 {
 
     /**
@@ -14,7 +14,7 @@ class EditingCaption extends EntityBase
      *
      * @var string
      */
-    const MAIN_TABLE = 'editingCaption';
+    const MAIN_TABLE = 'editingMusic';
 
     /**
      * 主键
@@ -24,39 +24,32 @@ class EditingCaption extends EntityBase
     const PRIMARY_KEY = 'id';
 
     /**
-     * 主键ID
+     * 镜头ID
      *
      * @var int
      */
     public $id;
 
     /**
-     * 剪辑ID
+     * 所属剪辑Id
      *
      * @var int
      */
-    public $editingId;
-    
-    /**
-     * 文本
-     *
-     * @var varchar
-     */
-    public $text = '';
+    public $editingId = 0;
 
     /**
-     * 字体
+     * 音乐类型
      *
-     * @var varchar
+     * @var int
      */
-    public $font = '';
+    public $type = 0;
 
     /**
-     * 样式
+     * 音乐id
      *
-     * @var varchar
+     * @var int
      */
-    public $style = '';
+    public $musicId = 0;
 
     /**
      * 状态

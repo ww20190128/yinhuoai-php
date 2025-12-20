@@ -2,11 +2,11 @@
 namespace entity;
 
 /**
- * EditingCaption 实体类
+ * EditingTitle 实体类
  * 
  * @author 
  */
-class EditingCaption extends EntityBase
+class EditingTitle extends EntityBase
 {
 
     /**
@@ -14,7 +14,7 @@ class EditingCaption extends EntityBase
      *
      * @var string
      */
-    const MAIN_TABLE = 'editingCaption';
+    const MAIN_TABLE = 'editingTitle';
 
     /**
      * 主键
@@ -24,7 +24,7 @@ class EditingCaption extends EntityBase
     const PRIMARY_KEY = 'id';
 
     /**
-     * 主键ID
+     * 标题组ID
      *
      * @var int
      */
@@ -38,25 +38,11 @@ class EditingCaption extends EntityBase
     public $editingId;
     
     /**
-     * 文本
+     * 字幕ID列表
      *
      * @var varchar
      */
-    public $text = '';
-
-    /**
-     * 字体
-     *
-     * @var varchar
-     */
-    public $font = '';
-
-    /**
-     * 样式
-     *
-     * @var varchar
-     */
-    public $style = '';
+    public $captionIds = '';
 
     /**
      * 状态

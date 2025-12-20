@@ -2,11 +2,11 @@
 namespace dao;
 
 /**
- * Caption 数据库类
+ * EditingCaption 数据库类
  * 
  * @author 
  */
-class Caption extends DaoBase
+class EditingCaption extends DaoBase
 {
     /**
      * 单例
@@ -18,12 +18,12 @@ class Caption extends DaoBase
     /**
      * 单例模式
      *
-     * @return Caption
+     * @return EditingCaption
      */
     public static function singleton()
     {
         if (!isset(self::$instance)) {
-            self::$instance = new Caption();
+            self::$instance = new EditingCaption();
         }
         return self::$instance;
     }

@@ -2,11 +2,11 @@
 namespace dao;
 
 /**
- * Lens 数据库类
+ * EditingTitle 数据库类
  * 
  * @author 
  */
-class Lens extends DaoBase
+class EditingTitle extends DaoBase
 {
     /**
      * 单例
@@ -18,12 +18,12 @@ class Lens extends DaoBase
     /**
      * 单例模式
      *
-     * @return Lens
+     * @return EditingTitle
      */
     public static function singleton()
     {
         if (!isset(self::$instance)) {
-            self::$instance = new Lens();
+            self::$instance = new EditingTitle();
         }
         return self::$instance;
     }

@@ -31,20 +31,6 @@ class EditingLens extends EntityBase
     public $id;
 
     /**
-     * 所属剪辑ID
-     *
-     * @var int
-     */
-    public $editingId;
-    
-    /**
-     * 素材ID列表
-     *
-     * @var string
-     */
-    public $mediaIds;
-    
-    /**
      * 镜头名称
      *
      * @var varchar
@@ -52,25 +38,67 @@ class EditingLens extends EntityBase
     public $name = '';
 
     /**
-     * 是否开启原声
+     * 所属剪辑Id
+     *
+     * @var int
+     */
+    public $editingId = 0;
+
+    /**
+     * 素材Id列表
      *
      * @var varchar
      */
-    public $originalSound = '';
+    public $mediaIds = '';
+
+    /**
+     * 是否开启原声
+     *
+     * @var tinyint
+     */
+    public $originalSound = 0;
 
     /**
      * 选择时长
      *
-     * @var varchar
+     * @var int
      */
-    public $duration = '';
+    public $duration = 0;
 
     /**
-     * 字幕ID列表
+     * 转场类型 1 自选 2 随机
+     *
+     * @var tinyint
+     */
+    public $transitionType = 1;
+
+    /**
+     * 选择的转场ID
      *
      * @var varchar
      */
-    public $captionIds = '';
+    public $transitionIds = '';
+
+    /**
+     * 配音类型  1 手动设置  2 配音文件
+     *
+     * @var tinyint
+     */
+    public $dubType = 1;
+
+    /**
+     * 手动设置 字幕ID列表
+     *
+     * @var varchar
+     */
+    public $dubCaptionIds = '';
+
+    /**
+     * 配音文件 旁白素材ID列表
+     *
+     * @var varchar
+     */
+    public $dubMediaIds = '';
 
     /**
      * 状态

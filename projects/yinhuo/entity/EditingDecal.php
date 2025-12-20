@@ -2,11 +2,11 @@
 namespace entity;
 
 /**
- * EditingCaption 实体类
+ * EditingDecal 实体类
  * 
  * @author 
  */
-class EditingCaption extends EntityBase
+class EditingDecal extends EntityBase
 {
 
     /**
@@ -14,7 +14,7 @@ class EditingCaption extends EntityBase
      *
      * @var string
      */
-    const MAIN_TABLE = 'editingCaption';
+    const MAIN_TABLE = 'editingDecal';
 
     /**
      * 主键
@@ -24,39 +24,53 @@ class EditingCaption extends EntityBase
     const PRIMARY_KEY = 'id';
 
     /**
-     * 主键ID
+     * 镜头ID
      *
      * @var int
      */
     public $id;
 
     /**
-     * 剪辑ID
+     * 所属剪辑Id
      *
      * @var int
      */
-    public $editingId;
-    
-    /**
-     * 文本
-     *
-     * @var varchar
-     */
-    public $text = '';
+    public $editingId = 0;
 
     /**
-     * 字体
+     * 适用的镜头ID列表
      *
      * @var varchar
      */
-    public $font = '';
+    public $useLensIds = '';
 
     /**
-     * 样式
+     * 素材1
      *
-     * @var varchar
+     * @var int
      */
-    public $style = '';
+    public $mediaId1 = 0;
+
+    /**
+     * 素材1大小
+     *
+     * @var int
+     */
+    public $mediaSize1 = 0;
+
+    /**
+     * 素材2
+     *
+     * @var int
+     */
+    public $mediaId2 = 0;
+
+    /**
+     * 素材2大小
+     *
+     * @var int
+     */
+    public $mediaSize2 = 0;
 
     /**
      * 状态

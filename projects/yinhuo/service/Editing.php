@@ -27,6 +27,285 @@ class Editing extends ServiceBase
         }
         return self::$instance;
     }
+    
+    /**
+     * 镜头详情
+     *
+     * @return array
+     */
+    public function lensInfo($lensId, $userId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$editingLensDao = \dao\EditingLens::singleton();
+    	$editingLensEtt = $editingLensDao->readByPrimary($lensId);
+    	if (empty($editingLensEtt) || $editingLensEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('镜头已删除');
+    	}
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingLensEtt->editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	if ($editingEtt->userId == $userEtt->userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$getEditingLensModels = $this->getEditingLensModels(array($editingLensEtt));
+    	return $getEditingLensModels[$lensId];
+    }
+    
+    /**
+     * 添加镜头
+     *
+     * @return array
+     */
+    public function createLens($userId, $editingId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$now = $this->frame->now;
+    	$info = $this->editingInfo($userEtt, $editingEtt);
+    	$lensList = empty($info['lensList']) ? array() : $info['lensList'];
+    	$editingLensDao = \dao\EditingLens::singleton();
+    	$editingLensEtt = $editingLensDao->getNewEntity();
+    	$editingLensEtt->editingId = $editingId;
+    	$editingLensEtt->name = '镜头' . (count($lensList) + 1);
+    	$editingLensEtt->originalSound = 0; // 默认关闭原声
+    	$editingLensEtt->createTime = $now;
+    	$editingLensEtt->updateTime = $now;
+    	$editingLensId = $editingLensDao->create($editingLensEtt);
+    	$getEditingLensModels = $this->getEditingLensModels(array($editingLensEtt));
+    	return $getEditingLensModels[$editingLensId];
+    }
+    
+    /**
+     * 删除镜头
+     *
+     * @return array
+     */
+    public function deleteLens($userId, $lensId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$editingLensDao = \dao\EditingLens::singleton();
+    	$editingLensEtt = $editingLensDao->readByPrimary($lensId);
+    	if (empty($editingLensEtt) || $editingLensEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('镜头已删除');
+    	}
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingLensEtt->editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	if ($editingEtt->userId == $userEtt->userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$editingLensDao->remove($editingLensEtt);
+    	// 删除字幕 dubCaptionIds
+    	return array(
+    		'result' => 1,	
+    	);
+    }
+    
+    /**
+     * 镜头详情
+     *
+     * @return array
+     */
+    private function getEditingLensModels($editingLensEttList)
+    {
+   	 	$editingLensModels = array();
+ 		$allMediaIds = array();
+ 		$allCaptionIds = array();
+ 		if (!empty($editingLensEttList)) foreach ($editingLensEttList as $editingLensEtt) {
+	 		if ($editingLensEtt->status == \constant\Common::DATA_DELETE) {
+	    		continue;
+	    	}
+ 			$mediaIds = empty($editingLensEtt->mediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->mediaIds)); // 素材
+ 			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
+ 			$dubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubCaptionIds)); // 配音-手动设置-字幕
+ 			$dubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubMediaIds)); // 配音-文件-素材(旁白配音)
+ 			$editingLensModels[$editingLensEtt->id] = array(
+ 				'id' => intval($editingLensEtt->id),
+ 				'name' => $editingLensEtt->name,
+ 				'createTime' => intval($editingLensEtt->createTime),
+ 				'updateTime' => intval($editingLensEtt->updateTime),
+ 				'mediaIds' => $mediaIds,
+ 				'originalSound' => intval($editingLensEtt->originalSound), // 是否关闭原声
+ 				'transitionType' => intval($editingLensEtt->transitionType), // 转场类型  1 自选转场  2 随机转场
+ 				'transitionIds'	=> $transitionIds, // 随机转场选择的ID
+ 				'duration' => intval($editingLensEtt->duration), // 自定义时长(秒)
+ 				'dubType' => intval($editingLensEtt->dubType), // 配音类型  1 手动设置  2  配音文件
+ 				'dubCaptionIds' => $dubCaptionIds, // 配音-手动设置-字幕
+ 				'dubMediaIds' => $dubMediaIds, // 配音-文件-素材(旁白配音)
+ 				'mediaList' => array(), // 素材列表
+ 				'dubCaptionList' => array(), // 配音-手动设置-字幕
+ 				'dubMediaList' => array(), // 配音-文件-素材(旁白配音)
+ 			);
+ 			$allMediaIds = array_merge($allMediaIds, $mediaIds, $dubMediaIds);
+ 			$allCaptionIds = array_merge($allCaptionIds, $dubCaptionIds);
+ 		}
+ 		// 字幕
+ 		$editingCaptionDao = \dao\EditingCaption::singleton();
+ 		$editingCaptionEttList = empty($allCaptionIds) ? array() : $editingCaptionDao->readListByPrimary($allCaptionIds);
+ 		$editingCaptionModels = $this->getCaptionModels($editingCaptionEttList);
+ 		// 素材
+    	$mediaDao = \dao\Media::singleton();
+    	$mediaEttList = empty($allMediaIds) ? array() : $mediaDao->readListByPrimary($allMediaIds);
+    	$mediaModels = $this->getMediaModels($mediaEttList);
+    	$commonSv = \service\Common::singleton();
+    	if (!empty($editingLensModels)) foreach ($editingLensModels as $key => $editingLensModel) {
+    		$mediaList = array();
+    		foreach ($editingLensModel['mediaIds'] as $mediaId) {
+    			if (empty($mediaModels[$mediaId])) {
+    				continue;
+    			}
+    			$mediaList[$mediaId] = $mediaModels[$mediaId];
+    		}
+    		$dubCaptionList = array();
+    		foreach ($editingLensModel['dubCaptionIds'] as $dubCaptionId) {
+    			if (empty($editingCaptionModels[$dubCaptionId])) {
+    				continue;
+    			}
+    			$dubCaptionList[$dubCaptionId] = $editingCaptionModels[$dubCaptionId];
+    		}
+    		$dubMediaList = array();
+    		foreach ($editingLensModel['dubMediaIds'] as $dubMediaId) {
+    			if (empty($mediaModels[$dubMediaId])) {
+    				continue;
+    			}
+    			$dubMediaList[$dubMediaId] = $mediaModels[$dubMediaId];
+    		}
+    		uasort($mediaList, array($commonSv, 'sortByCreateTime'));
+    		uasort($dubCaptionList, array($commonSv, 'sortByCreateTime'));
+    		uasort($dubMediaList, array($commonSv, 'sortByCreateTime'));
+    		$editingLensModel['mediaList'] = $mediaList;
+    		$editingLensModel['dubCaptionList'] = $dubCaptionList;
+    		$editingLensModel['dubMediaList'] = $dubMediaList;
+    	}
+    	return $editingLensModels;
+    }
+    
+    /**
+     * 字幕模型
+     *
+     * @return array
+     */
+    private function getCaptionModels($editingCaptionEttList)
+    {
+    	$editingCaptionModels = array();
+    	if (!empty($editingCaptionEttList)) foreach ($editingCaptionEttList as $editingCaptionEtt) {
+    		if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$fontArr = empty($editingCaptionEtt->font) ? array(
+    			'text-align' => 'left',
+    			'position' => 0,
+    			'font-size' => 12,
+    			'font-family' => '',
+    		) : json_decode($editingCaptionEtt->font, true);
+    		$styleArr = empty($editingCaptionEtt->style) ? array(
+    			'styleType' => 1,
+    			'color' => '#ffff',
+    			'fontType' => 1,
+    			'background' => '#ffff',
+    			'border-color' => '#ffff',
+    			'border-size' => 1,
+    			'effectColorStyle' => '',
+    		) : json_decode($editingCaptionEtt->style, true);
+    		$editingCaptionModels[$editingCaptionEtt->id] = array(
+    			'id' 		=> intval($editingCaptionEtt->id),
+    			'editingId' => intval($editingCaptionEtt->editingId),
+    			'text'		=> $editingCaptionEtt->text,
+    			'font'  	=> $fontArr,
+    			'style' 	=> $styleArr,
+    			'createTime' => intval($editingCaptionEtt->createTime),
+ 				'updateTime' => intval($editingCaptionEtt->updateTime),
+    		);
+    	}
+    	return $editingCaptionModels;
+    }
+    
+    /**
+     * 创建字幕
+     * 
+     * @return array
+     */
+    public function createCaption($userId, $editingId, $captionId, $info)
+    {
+    	$editingCaptionDao = \dao\EditingCaption::singleton();
+    	$now = $this->frame->now;
+    	if (!empty($captionId)) {
+    		$editingCaptionEtt = $editingCaptionDao->readByPrimary($captionId);
+    	} else {
+    		$editingCaptionEtt = $editingCaptionDao->getNewEntity();
+    		$editingCaptionEtt->editingId = $editingId;
+    		$editingCaptionEtt->createTime = $now;
+    		$editingCaptionEtt->updateTime = $now;
+    		$captionId = $editingCaptionDao->create($editingCaptionEtt);
+    	}
+    	$editingCaptionModels = $this->getCaptionModels(array($editingCaptionEtt));
+    	$editingCaptionModel = $editingCaptionModels[$captionId];
+    	$fontArr = $editingCaptionModel['font'];
+    	$styleArr = $editingCaptionModel['style'];
+    	if (isset($info['text'])) {
+    		$editingCaptionEtt->set('text', $info['text']);
+    	}
+    	if (isset($info['text-align'])) {
+    		$fontArr['text-align'] = $info['text-align'];
+    	}
+    	if (isset($info['position'])) {
+    		$fontArr['position'] = intval($info['position']);
+    	}
+    	if (isset($info['font-size'])) {
+    		$fontArr['font-size'] = intval($info['font-size']);
+    	}
+    	if (isset($info['font-family'])) {
+    		$fontArr['font-family'] = $info['font-family'];
+    	}
+    	if (isset($info['styleType'])) {
+    		$styleArr['styleType'] = intval($info['styleType']);
+    	}
+    	if (isset($info['color'])) {
+    		$styleArr['color'] = $info['color'];
+    	}
+    	if (isset($info['fontType'])) {
+    		$styleArr['fontType'] = intval($info['fontType']);
+    	}
+    	if (isset($info['background'])) {
+    		$styleArr['background'] = $info['background'];
+    	}
+    	if (isset($info['border-color'])) {
+    		$styleArr['border-color'] = $info['border-color'];
+    	}
+    	if (isset($info['border-size'])) {
+    		$styleArr['border-size'] = intval($info['border-size']);
+    	}
+    	if (isset($info['effectColorStyle'])) {
+    		$styleArr['effectColorStyle'] = $info['effectColorStyle'];
+    	}
+    	$editingCaptionEtt->set('font', json_encode($fontArr));
+    	$editingCaptionEtt->set('style', json_encode($styleArr));
+    	$editingCaptionEtt->set('updateTime', $now);
+    	$editingCaptionDao->update($editingCaptionEtt);
+    	$editingCaptionModels = $this->getCaptionModels(array($editingCaptionEtt));
+    	$editingCaptionModel = $editingCaptionModels[$captionId];
+    	return $editingCaptionModel;
+    }
 
     /**
      * 剪辑详情
@@ -47,15 +326,15 @@ class Editing extends ServiceBase
     	if (empty($editingEtt)) { // 获取用户最近一次的剪辑工程
     		$where = "`userId` = {$userEtt->userId} and `status` !=" . \constant\Common::DATA_DELETE;
     		$userEditingEttList = $editingDao->readListByWhere($where);
-    		$lastEditingEtt = null;
-    		foreach ($userEditingEttList as $userEditingEtt) {
-    			if (empty($lastEditingEtt) || $userEditingEtt->updateTime >= $editingEtt->updateTime) {
+    		$lastEditingEtt = null; // 用户最近一次的编辑
+    		if (empty($userEditingEttList)) foreach ($userEditingEttList as $userEditingEtt) {
+    			if (empty($lastEditingEtt) || $userEditingEtt->updateTime >= $lastEditingEtt->updateTime) {
     				$lastEditingEtt = $userEditingEtt;
     			}
     		}
     		if (empty($lastEditingEtt)) { // 第一次创建
     			$editingEtt = $editingDao->getNewEntity();
-    			$editingEtt->name = date('Ymd') . '剪辑工程';
+    			$editingEtt->name = date('Ymd') . '-剪辑';
     			$editingEtt->userId = $userEtt->userId;
     			$editingEtt->createTime = $now;
     			$editingEtt->updateTime = $now;
@@ -64,92 +343,116 @@ class Editing extends ServiceBase
     			$editingEtt = $lastEditingEtt;
     		}
     	}
-    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('剪辑工程已删除');
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE 
+    		|| $editingEtt->userId != $userEtt->userId) {
+    		throw new $this->exception('剪辑已删除');
     	}
-    	if ($editingEtt->userId == $userEtt->status) {
-    		throw new $this->exception('剪辑工程已删除');
-    	}
-    	return array(
+ 		// 获取镜头
+ 		$editingLensDao = \dao\EditingLens::singleton();
+ 		$editingLensEttList = $editingLensDao->readListByIndex(array(
+ 			'editingId' => $editingEtt->id,
+ 		));
+ 		$editingLensModels = $this->getEditingLensModels($editingLensEttList);
+ 		// 获取标题
+ 		$editingTitleDao = \dao\EditingTitle::singleton();
+ 		$editingTitleEttList = $editingTitleDao->readListByIndex(array(
+ 			'editingId' => $editingEtt->id,
+ 		));
+ 		$editingTitleModels = $this->getTitleModels($editingTitleEttList);
+ 		// 获取音乐
+ 		$editingMusicDao = \dao\EditingMusic::singleton();
+ 		$editingMusicEttList = $editingMusicDao->readListByIndex(array(
+ 			'editingId' => $editingEtt->id,
+ 		));
+ 		$editingMusicModels = array();
+ 		if (!empty($editingMusicEttList)) foreach ($editingMusicEttList as $key => $editingMusicEtt) {
+ 			if ($editingMusicEtt->status == \constant\Common::DATA_DELETE) {
+ 				continue;
+ 			}
+ 			$editingMusicModels[$editingMusicEtt->id] = array(
+ 				'id' 			=> intval($editingMusicEtt->id),
+ 				'updateTime' 	=> intval($editingMusicEtt->updateTime),
+ 				'type' 			=> intval($editingMusicEtt->type),
+ 				'musicId' 		=> intval($editingMusicEtt->musicId),
+ 				'name'			=> 'xx',
+ 				'url'			=> 'xxx',
+ 				'size'			=> 111, // 大小
+    			'duration'		=> 100, // 播放时长
+ 			);
+ 		}
+ 		// 获取贴纸
+ 		$editingDecalDao = \dao\EditingDecal::singleton();
+ 		$editingDecalEttList = $editingDecalDao->readListByIndex(array(
+ 			'editingId' => $editingEtt->id,
+ 		));
+ 		$editingDecalModels = $this->getDecalModels($editingDecalEttList);
+ 		
+ 		// 音量调节
+ 		$volumeArr = empty($editingEtt->volume) ? array(
+ 			'dubVolume' => 1, // 配音音量  取值范围  0~3
+			'backgroundVolume' => 0.2, // 背景音量  取值范围 0 ~ 1
+			'dubSpeed' => 1, // 背景音量 取值范围 0.2 ~ 3
+ 		) : json_decode($editingEtt->volume, true);
+ 		// 颜色调整
+ 		$colorArr = empty($editingEtt->color) ? array(
+ 			'contrast' => 0, // 对比度 取值范围 -100 ~ 100
+ 			'saturability' => 0, // 饱和度  取值范围 -100 ~ 100ss
+ 			'luminance' => 0, // 亮度   取值范围 -100 ~ 100
+ 			'chroma' => 0, // 色度  取值范围 -100 ~ 100
+ 		) : array_map('intval', explode(',', json_decode($editingEtt->color, true)));
+ 		// 背景填充
+ 		$backgroundArr = empty($editingEtt->background) ? array(
+ 			'type' => 1, 
+ 			'color' => '',
+ 			'mediaList' => array(),
+ 		) : json_decode($editingEtt->background, true);
+ 		$mediaDao = \dao\Media::singleton();
+		if (!empty($backgroundArr['mediaIds'])) { // 组织素材
+			$mediaEttList = $mediaDao->readListByPrimary($backgroundArr['mediaIds']);
+			$mediaModels = $this->getMediaModels($mediaEttList);
+			$backgroundArr['mediaList'] = array_values($mediaModels);
+		}
+		// 演员列表
+		$actorIds = empty($editingEtt->actorIds) ? array() : array_map('intval', explode(',', $editingEtt->actorIds));
+		$actorList = array();
+    	
+		$dubCaptionIds = empty($editingEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingEtt->dubCaptionIds));
+		$dubMediaIds = empty($editingEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingEtt->dubMediaIds));
+		
+		$mediaEttList = $mediaDao->readListByPrimary($dubMediaIds);
+		$mediaModels = $this->getMediaModels($mediaEttList);
+		$dubMediaList = array_values($mediaModels);
+
+		$editingCaptionDao = \dao\EditingCaption::singleton();
+		$editingCaptionEttList = empty($dubCaptionIds) ? array() : $editingCaptionDao->readListByPrimary($dubCaptionIds);
+		$editingCaptionModels = $this->getCaptionModels($editingCaptionEttList);
+		$dubCaptionList = array_values($editingCaptionModels);
+    	$model = array(
     		'id' 			=> intval($editingEtt->id),
-    		'name'			=> $editingEtt->name,
+    		'name'			=> $editingEtt->name, // 剪辑名称
+    		'ratio'			=> $editingEtt->ratio, // 视频比例 可选 9:16/16:9/1:1 
+    		'durationType' 	=> intval($editingEtt->durationType), // 视频时长类型 1  按视频时长  2  按配音时长
+    		'fps' 			=> intval($editingEtt->fps), //  视频帧率  取值：25/30/60
+    		'volume' 		=> $volumeArr,
+    		'transitionIds' => empty($editingEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingEtt->transitionIds)),
+    		'filterIds' 	=> empty($editingEtt->filterIds) ? array() : array_map('intval', explode(',', $editingEtt->filterIds)),
+    		'color' 		=> $colorArr,
+    		'background' 	=> $backgroundArr,
+    		'showCaption' 	=> intval($editingEtt->showCaption),
+    		'actorList' 	=> $actorList, // TODO
+    		'dubType' 		=> intval($editingEtt->dubType),
+    		'dubCaptionList' => $dubCaptionList,
+    		'dubMediaList' 	=> $dubMediaList,
     		'updateTime' 	=> intval($editingEtt->updateTime),
     		'createTime' 	=> intval($editingEtt->createTime),
-    		'lensList' 		=> array(), // 镜头列表
+    		'lensList' 		=> array_values($editingLensModels), // 镜头列表
+    		'titleList' 	=> array_values($editingTitleModels), // 标题列表
+    		'musicList'		=> array_values($editingMusicModels),
+    		'decalList'		=> array_values($editingDecalModels),
     	);
+    	return $model;
     }
 
-    /**
-     * 创建剪辑或模板
-     * 
-     * @return array
-     */
-    public function addLensMedias($userId, $editingId, $lensId, $mediaIds)
-    {
-    	// 素材（视频或者图片）
-    	$mediaDao = \dao\Media::singleton();
-    	$mediaEttList = $mediaDao->readListByPrimary($mediaIds);
-    	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
-    	if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaId => $mediaEtt) {
-    		if (in_array($mediaEtt->type, array(
-    			\constant\Folder::FOLDER_TYPE_VIDEO,
-    			\constant\Folder::FOLDER_TYPE_IMAGE,
-    		))) {
-    			throw new $this->exception('仅支持上传视频或者图片');
-    		}
-    		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
-				unset($mediaEttList[$mediaId]);
-				continue;
-			}
-    	}
-    	if (empty($mediaEttList)) {
-    		throw new $this->exception('请选择上传的素材');
-    	}
-    	$now = $this->frame->now;
-    	// 剪辑任务
-    	$editingDao = \dao\Editing::singleton();
-    	if (empty($editingId)) { // 创建剪辑工程
-    		$editingEtt = $editingDao->getNewEntity();
-    		$editingEtt->name = '';
-    		$editingEtt->userId = $userId;
-    		$editingEtt->createTime = $now;
-    		$editingEtt->updateTime = $now;
-    		$editingId = $editingDao->create($editingEtt);
-    	} else {
-    		$editingEtt = $editingDao->readByPrimary($editingId);
-    		if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
-    			throw new $this->exception('剪辑工程已删除');
-    		}
-    		if ($editingEtt->userId == $userId) {
-    			throw new $this->exception('剪辑工程已删除');
-    		}
-    	}
-    	// 镜头
-    	$lensDao = \dao\Lens::singleton();
-    	if (empty($lensId)) {
-    		$lensEtt = $lensDao->getNewEntity();
-    		$lensEtt->name = '镜头6';
-    		$lensEtt->editingId = $editingId;
-    		$lensEtt->mediaIds = implode(',', array_keys($mediaEttList));
-    		$lensEtt->createTime = $now;
-    		$lensEtt->updateTime = $now;
-    		$lensDao->create($lensEtt);
-    	} else {
-    		$lensEtt = $lensDao->readByPrimary($lensId);
-    		if (empty($lensEtt) || $lensEtt->status == \constant\Common::DATA_DELETE) {
-    			throw new $this->exception('镜头已删除');
-    		}
-    		if ($lensEtt->editingId == $editingId) {
-    			throw new $this->exception('镜头已删除');
-    		}
-    		$haveMediaIds = empty($lensEtt->mediaIds) ? array() : explode(',', $lensEtt->mediaIds);
-    		$haveMediaIds = array_merge(array_keys($mediaEttList), $haveMediaIds);
-    		$lensEtt->set('mediaIds', implode(',', array_keys($mediaEttList)));
-    		$lensEtt->set('updateTime', $now);
-    		$lensDao->update($lensEtt);
-    	} 
-    	return ;
-    }
     
     /**
      * 设置镜头
@@ -158,45 +461,120 @@ class Editing extends ServiceBase
      */
     public function reviseLens($userId, $lensId, $info)
     {
-    	$lensDao = \dao\Lens::singleton();
-    	$lensEtt = $lensDao->readByPrimary($lensId);
-    	if (empty($lensEtt) || $lensEtt->status == \constant\Common::DATA_DELETE) {
+    	$editingLensDao = \dao\EditingLens::singleton();
+    	$editingLensEtt = $editingLensDao->readByPrimary($lensId);
+    	if (empty($editingLensEtt) || $editingLensEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('镜头已删除');
     	}
-    	if ($lensEtt->userId == $userId) {
+    	if ($editingLensEtt->userId == $userId) {
     		throw new $this->exception('镜头已删除');
     	}
-    	// 修改镜头名称
-    	if (!empty($info['name']) && $info['name'] != $lensEtt->name) {
-    		$lensEtt->set('name', $info['name']);
-    	}
-    	// 设置转场
-    	if (!empty($info['transitionIds'])) {
-    		$lensEtt->set('transitionIds', implode(',', $info['transitionIds']));
-    	}
-    	if (!empty($info['duration']) && $info['duration'] != $lensEtt->duration) { // 选择时长
-    		$lensEtt->set('duration', $info['duration']);
-    	}
-    	// 原声
-    	if (!empty($info['originalSound']) && $info['originalSound'] != $lensEtt->originalSound) {
-    		$lensEtt->set('originalSound', $info['originalSound']);
-    	}
-    	// 删除素材
-    	if (!empty($info['deleteMediaIds'])) {
-    		$haveMediaIds = empty($lensEtt->mediaIds) ? array() : explode(',', $lensEtt->mediaIds);
-    		foreach ($haveMediaIds as $key => $haveMediaId) {
-    			if (in_array($haveMediaId, $info['deleteMediaIds'])) {
-    				unset($haveMediaIds[$key]);
+    	$mediaDao = \dao\Media::singleton();
+    	$editingCaptionDao = \dao\EditingCaption::singleton();
+    	$haveMediaIds = empty($editingLensEtt->mediaIds) ? array() : explode(',', $editingLensEtt->mediaIds);
+    	if (!empty($info['addMediaIds'])) { // 添加素材
+    		// 素材（视频或者图片）
+    		$mediaEttList = $mediaDao->readListByPrimary($info['addMediaIds']);
+    		$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    		if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaId => $mediaEtt) {
+    			if (!in_array($mediaEtt->type, array(
+    				\constant\Folder::FOLDER_TYPE_VIDEO,
+    				\constant\Folder::FOLDER_TYPE_IMAGE,
+    			))) {
+    				throw new $this->exception('请选择视频或图片');
+    			}
+    			if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
+    				unset($mediaEttList[$mediaId]);
+    				continue;
     			}
     		}
-    		$lensEtt->set('mediaIds', implode(',', $haveMediaIds));
+    		if (empty($mediaEttList)) {
+    			throw new $this->exception('请选择视频或图片');
+    		}
+    		$haveMediaIds = array_merge($haveMediaIds, array_keys($mediaEttList));
+    		$haveMediaIds = array_unique($haveMediaIds);
+    		$editingLensEtt->set('mediaIds', implode(',', $haveMediaIds));
     	}
-    	$lensEtt->set('updateTime', $now);
-    	$lensDao->update($lensEtt);
-    	return ;
+    	if (!empty($info['deleteMediaIds'])) { // 删除素材
+    		$haveMediaIds = array_diff($haveMediaIds, $info['deleteMediaIds']);
+    		$editingLensEtt->set('mediaIds', implode(',', $haveMediaIds));
+    	}
+    	// 修改镜头名称
+    	if (!empty($info['name']) && $info['name'] != $editingLensEtt->name) {
+    		$editingLensEtt->set('name', $info['name']);
+    	}
+    	// 选择时长
+    	if (isset($info['duration']) && $info['duration'] != $editingLensEtt->duration) {
+    		$editingLensEtt->set('duration', $info['duration']);
+    	}
+    	// 原声
+    	if (isset($info['originalSound']) && $info['originalSound'] != $editingLensEtt->originalSound) {
+    		$editingLensEtt->set('originalSound', $info['originalSound']);
+    	}
+    	// 设置转场
+    	if (isset($info['transitionType']) && $info['transitionType'] != $editingLensEtt->transitionType) {
+    		$editingLensEtt->set('transitionType', $info['transitionType']);
+    	}
+    	if (isset($info['transitionIds'])) { // 自选ID
+    		$editingLensEtt->set('transitionIds', implode(',', $info['transitionIds']));
+    	}
+    	// 配音-类型设置
+    	if (isset($info['dubType']) && $info['dubType'] != $editingLensEtt->dubType) {
+    		$editingLensEtt->set('dubType', $info['dubType']);
+    	}
+    	// 配音-手动设置
+    	$haveDubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : explode(',', $editingLensEtt->dubCaptionIds);
+    	if (!empty($info['addDubCaptionIds'])) { // 配音-手动设置-添加配音
+    		$editingCaptionEttList = $editingCaptionDao->readListByPrimary($info['addDubCaptionIds']);
+    		$editingCaptionEttList = $editingCaptionDao->refactorListByKey($editingCaptionEttList);
+    		if (!empty($editingCaptionEttList)) foreach ($editingCaptionEttList as $captionId => $editingCaptionEtt) {
+    			if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
+    				unset($editingCaptionEttList[$captionId]);
+    				continue;
+    			}
+    		}
+    		if (empty($editingCaptionEttList)) {
+    			throw new $this->exception('请选择配音');
+    		}
+    		$haveDubCaptionIds = array_merge($haveDubCaptionIds, array_keys($editingCaptionEttList));
+    		$haveDubCaptionIds = array_unique($haveDubCaptionIds);
+    		$editingLensEtt->set('dubCaptionIds', implode(',', $haveDubCaptionIds));
+    	}
+    	if (!empty($info['deleteDubCaptionIds'])) { // 配音-手动设置-删除配音
+    		$haveDubCaptionIds = array_diff($haveDubCaptionIds, $info['deleteDubCaptionIds']);
+    		$editingLensEtt->set('dubCaptionIds', implode(',', $haveDubCaptionIds));
+    	}
+    	// 配音-配音文件
+    	$haveDubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : explode(',', $editingLensEtt->dubMediaIds);
+    	if (!empty($info['addDubMediaIds'])) { // 添加素材
+    		$mediaEttList = $mediaDao->readListByPrimary($info['addDubMediaIds']);
+    		$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    		if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaId => $mediaEtt) {
+    			if (!in_array($mediaEtt->type, array(
+    				\constant\Folder::FOLDER_TYPE_TEXT,
+    			))) {
+    				throw new $this->exception('选择旁白配音');
+    			}
+    			if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
+    				unset($mediaEttList[$mediaId]);
+    				continue;
+    			}
+    		}
+    		if (empty($mediaEttList)) {
+    			throw new $this->exception('请选择旁白配音');
+    		}
+    		$haveDubMediaIds = array_merge($haveDubMediaIds, array_keys($mediaEttList));
+    		$haveDubMediaIds = array_unique($haveDubMediaIds);
+    		$editingLensEtt->set('dubMediaIds', implode(',', $haveDubMediaIds));
+    	}
+    	if (!empty($info['deleteDubMediaIds'])) { // 删除素材
+    		$haveDubMediaIds = array_diff($haveDubMediaIds, $info['deleteDubMediaIds']);
+    		$editingLensEtt->set('dubMediaIds', implode(',', $haveDubMediaIds));
+    	}
+    	$editingLensEtt->set('updateTime', $now);
+    	$editingLensDao->update($editingLensEtt);
+    	return $this->lensInfo($editingLensEtt->id, $userId);
     }
-    
-    
     
     /**
      * 修改剪辑
@@ -205,10 +583,359 @@ class Editing extends ServiceBase
      */
     public function reviseEditing($userId, $editingId)
     {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
     	$editingDao = \dao\Editing::singleton();
     	$editingEtt = $editingDao->readByPrimary($editingEtt);
     	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('剪辑工程已删除');
+    		throw new $this->exception('剪辑已删除');
     	}
+    	if ($editingEtt->userId != $userEtt->userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	if (!empty($info['name'])) { // 名称
+    		$editingEtt->set('name', $info['name']);
+    	}
+    	// 视频配置-背景填充
+    	$backgroundArr = empty($editingEtt->background) ? array(
+ 			'type' => 1, 
+ 			'color' => '',
+ 			'mediaList' => array(),
+ 		) : json_decode($editingEtt->background, true);
+    	if (isset($info['backgroundType'])) {
+    		$backgroundArr['type'] = intval($info['backgroundType']);
+    	}
+    	if (isset($info['backgroundColor'])) {
+    		$backgroundArr['color'] = $info['backgroundColor'];
+    	}
+    	if (isset($info['backgroundMediaIds'])) {
+    		$backgroundArr['mediaIds'] = $info['backgroundMediaIds'];
+    	}
+    	$editingEtt->set('background', json_encode($backgroundArr));
+    	// 视频配置-字幕/配音-字幕显示
+    	if (isset($info['showCaption'])) {
+    		$editingEtt->set('showCaption', $info['showCaption']);
+    	}
+  
+    	$actorIds = empty($editingEtt->actorIds) ? array() : array_map('intval', explode(',', $editingEtt->actorIds));
+    	if (isset($info['addActorIds'])) {
+    		$actorIds = array_merge($info['addActorIds'], $actorIds);
+    		$actorIds = array_unique($actorIds);
+    		$editingEtt->set('actorIds', implode(',', $actorIds));
+    	}
+    	if (isset($info['deleteActorIds'])) {
+    		$actorIds = array_diff($actorIds, $info['deleteActorIds']);
+    		$editingEtt->set('actorIds', implode(',', $actorIds));
+    	}
+    	if (isset($info['dubType'])) {
+    		$editingEtt->set('dubType', $info['dubType']);
+    	}
+    	$dubCaptionIds = empty($editingEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingEtt->dubCaptionIds));
+    	if (isset($info['addDubCaptionIds'])) {
+    		$dubCaptionIds = array_merge($info['addDubCaptionIds'], $dubCaptionIds);
+    		$dubCaptionIds = array_unique($dubCaptionIds);
+    		$editingEtt->set('dubCaptionIds', implode(',', $dubCaptionIds));
+    	}
+    	if (isset($info['deleteDubCaptionIds'])) {
+    		$dubCaptionIds = array_diff($dubCaptionIds, $info['deleteDubCaptionIds']);
+    		$editingEtt->set('dubCaptionIds', implode(',', $dubCaptionIds));
+    	}
+    	$dubMediaIds = empty($editingEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingEtt->dubMediaIds));
+    	if (isset($info['addDubMediaIds'])) {
+    		$dubMediaIds = array_merge($info['addDubMediaIds'], $dubCaptionIds);
+    		$dubMediaIds = array_unique($dubMediaIds);
+    		$editingEtt->set('dubMediaIds', implode(',', $dubMediaIds));
+    	}
+    	if (isset($info['deleteDubMediaIds'])) {
+    		$dubMediaIds = array_diff($dubMediaIds, $info['deleteDubMediaIds']);
+    		$editingEtt->set('dubMediaIds', implode(',', $dubMediaIds));
+    	}
+    	// 剪辑设置
+    	if (!empty($info['ratio'])) { // 视频比例
+    		$editingEtt->set('ratio', $info['ratio']);
+    	}
+    	if (!empty($info['durationType'])) { // 视频时长 1 按视频时长 2  按配音时长
+    		$editingEtt->set('durationType', intval($info['durationType']));
+    	}
+    	if (!empty($info['fps'])) { // 视频帧率
+    		$editingEtt->set('fps', intval($info['fps']));
+    	}
+    	// 音量调节
+    	$volumeArr = empty($editingEtt->volume) ? array() : json_decode($editingEtt->volume, true);
+    	if (!empty($info['voiceover'])) {
+    		$volumeArr['voiceover'] = $info['voiceoverVolume'];
+    	}
+    	if (!empty($info['backgroundVolume'])) {
+    		$volumeArr['background'] = $info['backgroundVolume'];
+    	}
+    	if (!empty($info['voiceoverSpeed'])) {
+    		$volumeArr['speed'] = $info['voiceoverSpeed'];
+    	}
+    	$editingEtt->set('volume', json_encode($volumeArr));
+    	
+    	if (isset($info['filterIds'])) { // 滤镜
+    		$editingEtt->set('filterIds', implode(',', $info['filterIds']));
+    	}
+    	if (isset($info['transitionIds'])) { // 转场
+    		$editingEtt->set('transitionIds', implode(',', $info['transitionIds']));
+    	}
+    	// 颜色调整
+    	$colorArr = empty($editingEtt->color) ? array() : json_decode($editingEtt->color, true);
+    	if (!empty($info['contrast'])) {
+    		$colorArr['contrast'] = intval($info['contrast']);
+    	}
+    	if (!empty($info['saturability'])) {
+    		$colorArr['saturability'] = intval($info['saturability']);
+    	}
+    	if (!empty($info['luminance'])) {
+    		$colorArr['luminance'] = intval($info['luminance']);
+    	}
+    	if (!empty($info['chroma'])) {
+    		$colorArr['chroma'] = intval($info['chroma']);
+    	}
+    	$editingEtt->set('color', json_encode($colorArr));
+    	if (!empty($info['deleteTitleIds'])) { // 移除标题组
+    		$editingTitleDao = \dao\EditingTitle::singleton();
+    		$editingTitleEttList = $editingTitleDao->readListByPrimary($info['deleteTitleIds']);
+    		foreach ($editingTitleEttList as $editingTitleEtt) {
+    			$editingTitleEtt->set('status', \constant\Common::DATA_DELETE);
+    			$editingTitleEtt->set('updateTime', $now);
+    			$editingTitleDao->update($editingTitleEtt);
+    		}
+    	}
+    	if (!empty($info['deleteMusicIds'])) { // 移除音乐
+    		$editingMusicDao = \dao\EditingMusic::singleton();
+    		$editingMusicEttList = $editingMusicDao->readListByPrimary($info['deleteMusicIds']);
+    		foreach ($editingMusicEttList as $editingMusicEtt) {
+    			$editingMusicEtt->set('status', \constant\Common::DATA_DELETE);
+    			$editingMusicEtt->set('updateTime', $now);
+    			$editingMusicDao->update($editingMusicEtt);
+    		}
+    	}
+    	$editingEtt->set('updateTime', $now);
+    	$editingDao->update($editingEtt);
+    	return $this->editingInfo($userEtt, $editingEtt);
+    }
+    
+    /**
+     * 创建标题组
+     *
+     * @return array
+     */
+    public function createTitle($userId, $editingId, $titleId, $info)
+    {
+    	$editingTitleDao = \dao\EditingTitle::singleton();
+    	$now = $this->frame->now;
+    	if (!empty($titleId)) {
+    		$editingTitleEtt = $editingTitleDao->readByPrimary($titleId);
+    	} else {
+    		$editingTitleEtt = $editingTitleDao->getNewEntity();
+    		$editingTitleEtt->editingId = $editingId;
+    		$editingTitleEtt->createTime = $now;
+    		$editingTitleEtt->updateTime = $now;
+    		$titleId = $editingTitleDao->create($editingTitleEtt);
+    	}
+    	if (isset($info['start'])) {
+    		$editingTitleEtt->start = $info['start'];
+    	}
+    	if (isset($info['end'])) {
+    		$editingTitleEtt->end = $info['end'];
+    	}
+    	$editingCaptionDao = \dao\EditingCaption::singleton();
+    	if (!empty($info['captionIds'])) { // 添加文案
+    		$editingCaptionDaoEttList = $editingCaptionDao->readListByPrimary($info['captionIds']);
+    		$editingCaptionDaoEttList = $editingCaptionDao->refactorListByKey($editingCaptionDaoEttList);
+    		if (!empty($editingCaptionEttList)) foreach ($editingCaptionEttList as $captionId => $editingCaptionEtt) {
+    			if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
+    				unset($editingCaptionEttList[$captionId]);
+    				continue;
+    			}
+    		}
+    		$editingTitleEtt->set('captionIds', empty($editingCaptionEttList) ? '' : implode(',', $editingCaptionEttList));
+    	}
+    	$editingLensEtt->set('updateTime', $now);
+    	$editingLensDao->update($editingLensEtt);
+    	$titleModels = $this->getTitleModels(array($editingTitleEtt));
+    	return $titleModels[$titleId];
+    }
+    
+    /**
+     * 获取标题组模型
+     *
+     * @return array
+     */
+    private function getTitleModels($editingTitleEttList)
+    {
+    	$editingTitleModels = array();
+    	$allCaptionIds = array();
+    	if (!empty($editingTitleEttList)) foreach ($editingTitleEttList as $key => $editingTitleEtt) {
+    		if ($editingTitleEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$captionIds = empty($editingTitleEtt->captionIds) ? array() : array_map('intval', explode(',', $editingTitleEtt->captionIds));
+    		$editingTitleModels[$editingTitleEtt->id] = array(
+    			'id' 			=> intval($editingTitleEtt->id),
+    			'updateTime' 	=> intval($editingTitleEtt->updateTime),
+    			'captionIds'	=> $captionIds,
+    		);
+    		$allCaptionIds = array_merge($allCaptionIds, $captionIds);
+    	}
+    	$editingCaptionDao = \dao\EditingCaption::singleton();
+    	$editingCaptionEttList = empty($allCaptionIds) ? array() : $editingCaptionDao->readListByPrimary($allCaptionIds);
+    	$editingCaptionModels = $this->getCaptionModels($editingCaptionEttList);
+    	$commonSv = \service\Common::singleton();
+    	foreach ($editingTitleModels as $key => $editingTitleModel) {
+    		$captionList = array();
+    		foreach ($editingTitleModel['captionIds'] as $captionId) {
+    			if (empty($editingCaptionModels[$captionId])) {
+    				continue;
+    			}
+    			$captionList[] = $editingCaptionModels[$captionId];
+    		}
+    		uasort($captionList, array($commonSv, 'sortByCreateTime'));
+    		$editingTitleModel['title'] = empty($captionList) ? 0 : reset($captionList)['text'];
+    		$editingTitleModel['captionList'] = $captionList;
+    		$editingTitleModels[$key] = $editingTitleModel;
+    	}
+    	return $editingTitleModels;
+    }
+    
+    /**
+     * 获取素材模型
+     *
+     * @return array
+     */
+    private function getMediaModels($mediaEttList)
+    {
+    	$mediaModels = array();
+    	if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaEtt) {
+    		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$mediaModels[$mediaEtt->id] = array(
+    			'id' 			=> intval($mediaEtt->id),
+    			'name'			=> $mediaEtt->name,
+    			'type'			=> $mediaEtt->type,
+    			'url'			=> $mediaEtt->url,
+    			'size'			=> intval($mediaEtt->size), // 大小
+    			'duration'		=> 100, // 播放时长
+    			'updateTime'	=> intval($mediaEtt->updateTime),
+    			'createTime'	=> intval($mediaEtt->createTime),
+    		);
+    	}
+    	return $mediaModels;
+    }
+    
+    /**
+     * 获取贴纸模型
+     *
+     * @return array
+     */
+    private function getDecalModels($editingDecalEttList)
+    {
+    	$editingDecalModels = array();
+    	$allLensIds = array();
+    	$allMediaIdIds = array();
+    	if (!empty($editingDecalEttList)) foreach ($editingDecalEttList as $key => $editingDecalEtt) {
+    		if ($editingTitleEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$useLensIds = empty($editingDecalEtt->useLensIds) ? array() : array_map('intval', explode(',', $editingDecalEtt->useLensIds));
+    		$editingDecalModels[$editingDecalEtt->id] = array(
+    			'id' 			=> intval($editingDecalEtt->id),
+    			'updateTime' 	=> intval($editingDecalEtt->updateTime),
+    			'useLensIds'	=> $useLensIds,
+    			'mediaId1' 		=> intval($editingDecalEtt->mediaId1),
+    			'mediaSize1' 	=> intval($editingDecalEtt->mediaSize1),
+    			'mediaId2' 		=> intval($editingDecalEtt->mediaId2),
+    			'mediaSize2' 	=> intval($editingDecalEtt->mediaSize2),
+    			'media1'		=> array(),
+    			'media2'		=> array(),
+    			'useLensList'	=> array(),
+    		);
+    		if (!empty($editingDecalEtt->mediaId1)) {
+    			$allMediaIdIds[] = $editingDecalEtt->mediaId1;
+    		}
+    		if (!empty($editingDecalEtt->mediaId2)) {
+    			$allMediaIdIds[] = $editingDecalEtt->mediaId2;
+    		}
+    		$allLensIds = array_merge($allLensIds, $useLensIds);
+    	}
+    	// 镜头
+    	$editingLensDao = \dao\EditingLens::singleton();
+    	$editingLensEttList = $editingLensDao->readListByPrimary($allLensIds);
+    	$editingLensEttList = $editingLensDao->refactorListByKey($editingLensEttList);
+    	$mediaDao = \dao\Media::singleton();
+    	$mediaEttList = empty($allMediaIdIds) ? array() : $mediaDao->readListByPrimary($allMediaIdIds);
+    	$mediaModels = $this->getMediaModels($mediaEttList);
+    	foreach ($editingDecalModels as $key => $editingDecalModel) {
+    		if (!empty($mediaModels[$editingDecalModel['mediaId1']])) {
+    			$editingDecalModel['media1'] = $mediaModels[$editingDecalModel['mediaId1']];
+    		}
+    		if (!empty($mediaModels[$editingDecalModel['mediaId2']])) {
+    			$editingDecalModel['media2'] = $mediaModels[$editingDecalModel['mediaId2']];
+    		}
+    		$useLensList = array();
+    		foreach ($editingDecalModel['useLensIds'] as $useLensId) {
+    			if ($useLensId == -1) {
+    				$useLensList[] = array(
+    					'id' => intval($useLensId),
+    					'name' => '全部场景',
+    				);
+    			} elseif (empty($editingLensEttList[$useLensId])) {
+    				continue;
+    			}
+    			$editingLensEtt = $editingLensEttList[$useLensId];
+    			$useLensList[] = array(
+    				'id' => intval($editingLensEtt->id),
+    				'name' => $editingLensEtt->name,
+    			);
+    			$editingDecalModel['useLensList'] = $useLensList;
+    		}
+    		$editingDecalModels[$key] = $editingDecalModel;
+    	}
+    	return $editingDecalModels;
+    }
+
+    /**
+     * 创建贴纸
+     *
+     * @return array
+     */
+    public function createDecal($userId, $editingId, $decalId, $info)
+    {
+    	$editingDecalDao = \dao\EditingDecal::singleton();
+    	$now = $this->frame->now;
+    	if (!empty($titleId)) {
+    		$editingDecalEtt = $editingDecalDao->readByPrimary($decalId);
+    	} else {
+    		$editingDecalEtt = $editingDecalDao->getNewEntity();
+    		$editingDecalEtt->editingId = $editingId;
+    		$editingDecalEtt->createTime = $now;
+    		$editingDecalEtt->updateTime = $now;
+    		$decalId = $editingDecalDao->create($editingDecalEtt);
+    	}
+    	if (isset($info['useLensIds'])) {
+    		$editingDecalEtt->set('useLensIds', $info['useLensIds']);
+    	}
+    	if (isset($info['mediaId1'])) {
+    		$editingDecalEtt->set('mediaId1', $info['mediaId1']);
+    	}
+    	if (isset($info['mediaSize1'])) {
+    		$editingDecalEtt->set('mediaSize1', $info['mediaSize1']);
+    	}
+    	if (isset($info['mediaId2'])) {
+    		$editingDecalEtt->set('mediaId2', $info['mediaId2']);
+    	}
+    	if (isset($info['mediaSize2'])) {
+    		$editingDecalEtt->set('mediaSize2', $info['mediaSize2']);
+    	}
+    	$editingDecalEtt->set('updateTime', $now);
+    	$editingDecalDao->update($editingDecalEtt);
+    	$decalModels = $this->getDecalModels(array($editingDecalEtt));
+    	return $decalModels[$editingDecalEtt->id];
     }
 }

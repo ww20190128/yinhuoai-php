@@ -59,11 +59,60 @@ class Editing extends EntityBase
     public $status = 0;
 
     /**
-     * 全局配音Id列表
+     * 视频比例 可选 9:16/16:9/1:1
+     *
+     * @var char
+     */
+    public $ratio = '9:16';
+
+    /**
+     * 视频时长类型 1  按视频时长  2  按配音时长
      *
      * @var varchar
      */
-    public $voiceIds = '';
+    public $durationType = 1;
+
+    /**
+     * 视频帧率 取值：25/30/60
+     *
+     * @var tinyint
+     */
+    public $fps = 25;
+
+    /**
+     * 音量调节
+     *
+     * @var varchar
+     */
+    public $volume = '';
+
+    /**
+     * 选中的转场ID
+     *
+     * @var varchar
+     */
+    public $transitionIds = '';
+
+    /**
+     * 选中的滤镜ID
+     *
+     * @var varchar
+     */
+    public $filterIds = '';
+
+    /**
+     * 颜色调整
+     *
+     * @var varchar
+     */
+    public $color = '';
+
+    /**
+     * 背景填充
+     *
+     * @var varchar
+     */
+    public $background = '';
 
     /**
      * 是否显示字幕
@@ -71,6 +120,34 @@ class Editing extends EntityBase
      * @var tinyint
      */
     public $showCaption = 0;
+    
+    /**
+     * 演员列表
+     *
+     * @var varchar
+     */
+    public $actorIds = '';
+
+    /**
+     * 配音类型  1 手动设置  2  配音文件
+     *
+     * @var tinyint
+     */
+    public $dubType = 1;
+
+    /**
+     * 手动设置-字幕列表
+     *
+     * @var varchar
+     */
+    public $dubCaptionIds = '';
+
+    /**
+     * 配音文件
+     *
+     * @var varchar
+     */
+    public $dubMediaIds = '';
 
     /**
      * 创建时间
