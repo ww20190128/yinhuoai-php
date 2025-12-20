@@ -228,6 +228,7 @@ class Editing extends ServiceBase
     		$editingLensModel['mediaList'] = $mediaList;
     		$editingLensModel['dubCaptionList'] = $dubCaptionList;
     		$editingLensModel['dubMediaList'] = $dubMediaList;
+    		$editingLensModels[$key] = $editingLensModel;
     	}
     	uasort($editingLensModels, array($commonSv, 'sortByIndex'));
     	return $editingLensModels;
