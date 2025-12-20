@@ -520,6 +520,7 @@ class Editing extends ServiceBase
     	if ($editingEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
+    	$now = $this->frame->now;
     	$mediaDao = \dao\Media::singleton();
     	$editingCaptionDao = \dao\EditingCaption::singleton();
     	$haveMediaIds = empty($editingLensEtt->mediaIds) ? array() : explode(',', $editingLensEtt->mediaIds);
