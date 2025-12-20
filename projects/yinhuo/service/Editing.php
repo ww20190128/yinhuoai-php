@@ -342,6 +342,10 @@ class Editing extends ServiceBase
     		} else {
     			$editingEtt = $lastEditingEtt;
     		}
+    	} else {
+    		if (is_numeric($editingEtt)) {
+    			$editingEtt = $editingDao->readByPrimary($editingEtt);
+    		}
     	}
     	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE 
     		|| $editingEtt->userId != $userEtt->userId) {
