@@ -962,7 +962,7 @@ class Editing extends ServiceBase
     {
     	$editingDecalDao = \dao\EditingDecal::singleton();
     	$now = $this->frame->now;
-    	if (!empty($titleId)) {
+    	if (!empty($decalId)) {
     		$editingDecalEtt = $editingDecalDao->readByPrimary($decalId);
     	} else {
     		$editingDecalEtt = $editingDecalDao->getNewEntity();
