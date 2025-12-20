@@ -50,7 +50,7 @@ class Editing extends ServiceBase
     	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
-    	if ($editingEtt->userId == $userEtt->userId) {
+    	if ($editingEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$getEditingLensModels = $this->getEditingLensModels(array($editingLensEtt));
@@ -124,7 +124,7 @@ class Editing extends ServiceBase
     	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
-    	if ($editingEtt->userId == $userEtt->userId) {
+    	if ($editingEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
 
@@ -507,8 +507,13 @@ class Editing extends ServiceBase
     	if (empty($editingLensEtt) || $editingLensEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('镜头已删除');
     	}
-    	if ($editingLensEtt->userId == $userId) {
-    		throw new $this->exception('镜头已删除');
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingLensEtt->editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	if ($editingEtt->userId != $userEtt->userId) {
+    		throw new $this->exception('剪辑已删除');
     	}
     	$mediaDao = \dao\Media::singleton();
     	$editingCaptionDao = \dao\EditingCaption::singleton();
