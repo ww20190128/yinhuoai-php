@@ -502,6 +502,11 @@ class Editing extends ServiceBase
      */
     public function reviseLens($userId, $lensId, $info)
     {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
     	$editingLensDao = \dao\EditingLens::singleton();
     	$editingLensEtt = $editingLensDao->readByPrimary($lensId);
     	if (empty($editingLensEtt) || $editingLensEtt->status == \constant\Common::DATA_DELETE) {
