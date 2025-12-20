@@ -87,12 +87,13 @@ class Editing extends ServiceBase
     		$editingLensEtt->name = '片头';
     	} elseif ($type == 2) { // 片中
     		$editingLensEtt->index = 1;
-    		$editingLensEtt->name = '片中' . 1;
+    		$editingLensEtt->name = '片中' . $editingLensEtt->index;
     	} elseif($type == 3) {
     		$editingLensEtt->index = 100;
     		$editingLensEtt->name = '片尾';
     	} else {
-    		$editingLensEtt->name = '镜头' . (count($lensList) -1);
+    		$editingLensEtt->index = count($lensList) - 1;
+    		$editingLensEtt->name = '片中' . $editingLensEtt->index;
     	}
     	$editingLensEtt->createTime = $now;
     	$editingLensEtt->updateTime = $now;
@@ -126,6 +127,16 @@ class Editing extends ServiceBase
     	if ($editingEtt->userId == $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
+
+    	if ($editingLensEtt->index < 0) {
+    		throw new $this->exception('片头无法删除');
+    	}
+    	if ($editingLensEtt->index == 1) {
+    		throw new $this->exception('第一个片中无法删除');
+    	}
+    	if ($editingLensEtt->index >= 100) {
+    		throw new $this->exception('片尾无法删除');
+    	}
     	$editingLensDao->remove($editingLensEtt);
     	// 删除字幕 dubCaptionIds
     	return array(
@@ -151,12 +162,12 @@ class Editing extends ServiceBase
  			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
  			$dubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubCaptionIds)); // 配音-手动设置-字幕
  			$dubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubMediaIds)); // 配音-文件-素材(旁白配音)
- 			$type = 2;
+ 			$type = 2; // 片中
  			if ($editingLensEtt->index < 0) {
- 				$type = 1;
+ 				$type = 1; // 片头
  			}
  			if ($editingLensEtt->index >= 100) {
- 				$type = 3;
+ 				$type = 3; // 片尾
  			}
  			$editingLensModels[$editingLensEtt->id] = array(
  				'id' => intval($editingLensEtt->id),
@@ -218,6 +229,7 @@ class Editing extends ServiceBase
     		$editingLensModel['dubCaptionList'] = $dubCaptionList;
     		$editingLensModel['dubMediaList'] = $dubMediaList;
     	}
+    	uasort($editingLensModels, array($commonSv, 'sortByIndex'));
     	return $editingLensModels;
     }
     
