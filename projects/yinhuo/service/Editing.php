@@ -642,7 +642,7 @@ class Editing extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$editingDao = \dao\Editing::singleton();
-    	$editingEtt = $editingDao->readByPrimary($editingEtt);
+    	$editingEtt = $editingDao->readByPrimary($editingId);
     	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
