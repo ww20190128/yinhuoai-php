@@ -127,7 +127,6 @@ class Editing extends ServiceBase
     	if ($editingEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
-
     	if ($editingLensEtt->index < 0) {
     		throw new $this->exception('片头无法删除');
     	}
@@ -955,7 +954,7 @@ class Editing extends ServiceBase
     	$allLensIds = array();
     	$allMediaIdIds = array();
     	if (!empty($editingDecalEttList)) foreach ($editingDecalEttList as $key => $editingDecalEtt) {
-    		if ($editingTitleEtt->status == \constant\Common::DATA_DELETE) {
+    		if ($editingDecalEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
     		$useLensIds = empty($editingDecalEtt->useLensIds) ? array() : array_map('intval', explode(',', $editingDecalEtt->useLensIds));

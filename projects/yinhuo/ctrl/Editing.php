@@ -191,6 +191,9 @@ class Editing extends CtrlBase
 	public function lensInfo()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$lensId = $this->paramFilter('lensId', 'intval', 0); // 镜头Id
 		if (empty($lensId)) {
 			throw new $this->exception('请求参数错误');
@@ -207,6 +210,9 @@ class Editing extends CtrlBase
 	public function createLens()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
@@ -223,6 +229,9 @@ class Editing extends CtrlBase
 	public function deleteLens()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$lensId = $this->paramFilter('lensId', 'intval', 0); // 镜头Id
 		if (empty($lensId)) {
 			throw new $this->exception('请求参数错误');
@@ -239,6 +248,9 @@ class Editing extends CtrlBase
 	public function reviseLens()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$params = (array)$params;
 		$lensId = $this->paramFilter('lensId', 'intval', 0); // 镜头Id
 		if (empty($lensId)) {
@@ -302,6 +314,9 @@ class Editing extends CtrlBase
 	public function reviseEditing()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$params = (array)$params;
 		$editingId = $this->paramFilter('editingId', 'intval'); // 剪辑Id
 		if (empty($editingId)) {
