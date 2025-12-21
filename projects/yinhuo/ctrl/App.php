@@ -78,18 +78,5 @@ class App extends CtrlBase
         $appSv = \service\App::singleton();
         return $appSv->getStaticConfig();
     }
-    
-    /**
-     * 获取音乐分类
-     *
-     * @return array
-     */
-    public function getMuConfig()
-    {
-    	$params = $this->params;
-    	$appSv = \service\App::singleton();
-    	return $appSv->getStaticConfig();
-    }
-    
-    
+
 }

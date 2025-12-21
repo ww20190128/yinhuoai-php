@@ -354,7 +354,7 @@ class Editing extends ServiceBase
     	$editingCaptionEtt->set('updateTime', $now);
     	$editingCaptionDao->update($editingCaptionEtt);
     	$editingCaptionModels = $this->getCaptionModels(array($editingCaptionEtt));
-    	$editingCaptionModel = empty($editingCaptionModels[$captionId]) ? array() : $editingCaptionModels[$captionId];
+    	$editingCaptionModel = empty($editingCaptionModels[$editingCaptionEtt->id]) ? array() : $editingCaptionModels[$editingCaptionEtt->id];
     	return $editingCaptionModel;
     }
 
