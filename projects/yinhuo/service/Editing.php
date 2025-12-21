@@ -282,10 +282,27 @@ class Editing extends ServiceBase
      */
     public function createCaption($userId, $editingId, $captionId, $info)
     {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	if ($editingtt->userId != $userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
     	$editingCaptionDao = \dao\EditingCaption::singleton();
     	$now = $this->frame->now;
     	if (!empty($captionId)) {
     		$editingCaptionEtt = $editingCaptionDao->readByPrimary($captionId);
+    		if (empty($editingCaptionEtt) || $editingCaptionEtt->editingId != $editingId
+    			|| $editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
+    			throw new $this->exception('字幕已删除');
+    		}
     	} else {
     		$editingCaptionEtt = $editingCaptionDao->getNewEntity();
     		$editingCaptionEtt->editingId = $editingId;
@@ -338,7 +355,7 @@ class Editing extends ServiceBase
     	$editingCaptionEtt->set('updateTime', $now);
     	$editingCaptionDao->update($editingCaptionEtt);
     	$editingCaptionModels = $this->getCaptionModels(array($editingCaptionEtt));
-    	$editingCaptionModel = $editingCaptionModels[$captionId];
+    	$editingCaptionModel = empty($editingCaptionModels[$captionId]) ? array() : $editingCaptionModels[$captionId];
     	return $editingCaptionModel;
     }
 
@@ -782,10 +799,27 @@ class Editing extends ServiceBase
      */
     public function createTitle($userId, $editingId, $titleId, $info)
     {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	if ($editingtt->userId != $userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
     	$editingTitleDao = \dao\EditingTitle::singleton();
     	$now = $this->frame->now;
     	if (!empty($titleId)) {
     		$editingTitleEtt = $editingTitleDao->readByPrimary($titleId);
+    		if (empty($editingTitleEtt) || $editingTitleEtt->editingId != $editingId 
+    			|| $editingTitleEtt->status == \constant\Common::DATA_DELETE) {
+    			throw new $this->exception('标题组已删除');
+    		}
     	} else {
     		$editingTitleEtt = $editingTitleDao->getNewEntity();
     		$editingTitleEtt->editingId = $editingId;
@@ -794,10 +828,10 @@ class Editing extends ServiceBase
     		$titleId = $editingTitleDao->create($editingTitleEtt);
     	}
     	if (isset($info['start'])) {
-    		$editingTitleEtt->start = $info['start'];
+    		$editingTitleEtt->set('start', intval($info['start']));
     	}
     	if (isset($info['end'])) {
-    		$editingTitleEtt->end = $info['end'];
+    		$editingTitleEtt->set('end', intval($info['end']));
     	}
     	$editingCaptionDao = \dao\EditingCaption::singleton();
     	if (!empty($info['captionIds'])) { // 添加文案
@@ -809,12 +843,12 @@ class Editing extends ServiceBase
     				continue;
     			}
     		}
-    		$editingTitleEtt->set('captionIds', empty($editingCaptionEttList) ? '' : implode(',', $editingCaptionEttList));
+    		$editingTitleEtt->set('captionIds', empty($editingCaptionEttList) ? '' : implode(',', array_keys($editingCaptionEttList)));
     	}
-    	$editingLensEtt->set('updateTime', $now);
-    	$editingLensDao->update($editingLensEtt);
+    	$editingTitleEtt->set('updateTime', $now);
+    	$editingTitleDao->update($editingTitleEtt);
     	$titleModels = $this->getTitleModels(array($editingTitleEtt));
-    	return $titleModels[$titleId];
+    	return empty($titleModels[$titleId]) ? array() : $titleModels[$titleId];
     }
     
     /**
@@ -882,6 +916,32 @@ class Editing extends ServiceBase
     		);
     	}
     	return $mediaModels;
+    }
+    
+    /**
+     * 获取音乐模型
+     *
+     * @return array
+     */
+    private function getMusicModels($editingMusicEttList)
+    {
+    	$editingMusicModels = array();
+    	if (!empty($editingMusicEttList)) foreach ($editingMusicEttList as $editingMusicEtt) {
+    		if ($editingMusicEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$editingMusicModels[$editingMusicEtt->id] = array(
+    			'id' 			=> intval($editingMusicEtt->id),
+    			'conId'			=> intval($editingMusicEtt->musicId),
+    			'type'			=> intval($editingMusicEtt->type),
+    			'url'			=> 'xxxxx',
+    			'name'			=> 'xxxx',
+    			'duration'		=> 100, // 播放时长
+    			'updateTime'	=> intval($editingMusicEtt->updateTime),
+    			'createTime'	=> intval($editingMusicEtt->createTime),
+    		);
+    	}
+    	return $editingMusicModels;
     }
     
     /**
@@ -962,10 +1022,27 @@ class Editing extends ServiceBase
      */
     public function createDecal($userId, $editingId, $decalId, $info)
     {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	if ($editingtt->userId != $userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
     	$editingDecalDao = \dao\EditingDecal::singleton();
     	$now = $this->frame->now;
     	if (!empty($decalId)) {
     		$editingDecalEtt = $editingDecalDao->readByPrimary($decalId);
+    		if (empty($editingDecalEtt) || $editingDecalEtt->editingId != $editingId
+    			|| $editingDecalEtt->status == \constant\Common::DATA_DELETE) {
+    			throw new $this->exception('贴纸已删除');
+    		}
     	} else {
     		$editingDecalEtt = $editingDecalDao->getNewEntity();
     		$editingDecalEtt->editingId = $editingId;
@@ -991,6 +1068,53 @@ class Editing extends ServiceBase
     	$editingDecalEtt->set('updateTime', $now);
     	$editingDecalDao->update($editingDecalEtt);
     	$decalModels = $this->getDecalModels(array($editingDecalEtt));
-    	return $decalModels[$editingDecalEtt->id];
+    	return empty($decalModels[$editingDecalEtt->id]) ? array() : $decalModels[$editingDecalEtt->id];
+    }
+    
+    /**
+     * 创建音乐
+     *
+     * @return array
+     */
+    public function createMusic($userId, $editingId, $musicId, $info)
+    {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	if ($editingtt->userId != $userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$editingMusicDao = \dao\EditingMusic::singleton();
+    	$now = $this->frame->now;
+    	if (!empty($musicId)) {
+    		$editingMusicEtt = $editingMusicDao->readByPrimary($musicId);
+    		if (empty($editingMusicEtt) || $editingMusicEtt->editingId != $editingId
+    			|| $editingMusicEtt->status == \constant\Common::DATA_DELETE) {
+    			throw new $this->exception('音乐已删除');
+    		}
+    	} else {
+    		$editingMusicEtt = $editingMusicDao->getNewEntity();
+    		$editingMusicEtt->editingId = $editingId;
+    		$editingMusicEtt->createTime = $now;
+    		$editingMusicEtt->updateTime = $now;
+    		$musicId = $editingMusicDao->create($editingMusicEtt);
+    	}
+    	if (isset($info['conId'])) {
+    		$editingMusicEtt->set('musicId', $info['conId']);
+    	}
+    	if (isset($info['type'])) {
+    		$editingMusicEtt->set('type', $info['type']);
+    	}
+    	$editingMusicEtt->set('updateTime', $now);
+    	$editingMusicDao->update($editingMusicEtt);
+    	$musicModels = $this->getMusicModels(array($editingMusicEtt));
+    	return empty($musicModels[$editingDecalEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
 }

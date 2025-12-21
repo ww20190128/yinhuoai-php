@@ -32,6 +32,13 @@ class Editing extends CtrlBase
 	public function createCaption()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
+		if (empty($editingId)) {
+			throw new $this->exception('请求参数错误');
+		}
 		$params = (array)$params;
 		$info = array();
 		// 文本内容
@@ -39,7 +46,7 @@ class Editing extends CtrlBase
 			$info['text'] = $this->paramFilter('text', 'string');
 		}
 		// 排版
-		if (isset($params['text-align'])) {
+		if (!empty($params['text-align'])) {
 			$info['text-align'] = $this->paramFilter('text-align', 'string');
 		}
 		// 位置，取值范围0~100
@@ -68,21 +75,16 @@ class Editing extends CtrlBase
 		}
 		// 字体样式  1  暂时不设置   2 字幕背景  3 字幕边框
 		if (!empty($params['fontType'])) {
-			$info['fontType'] = $this->paramFilter('fontType', 'string');
+			$info['fontType'] = $this->paramFilter('fontType', 'intval');
 		}
 		if (isset($params['background'])) { // 背景颜色    fontType == 2
 			$info['background'] = $this->paramFilter('background', 'string');
 		}
-		if (isset($params['border-color'])) { // 边框颜色    fontType == 3
+		if (!empty($params['border-color'])) { // 边框颜色    fontType == 3
 			$info['border-color'] = $this->paramFilter('border-color', 'string');
 		}
-		if (isset($params['border-size'])) { // 边框颜色    fontType == 3  1~4
+		if (!empty($params['border-size'])) { // 边框颜色    fontType == 3  1~4
 			$info['border-size'] = $this->paramFilter('border-size', 'intval');
-		}
-		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
-
-		if (empty($editingId)) {
-			throw new $this->exception('请求参数错误');
 		}
 		$captionId = $this->paramFilter('captionId', 'intval', 0); // 字幕Id
 		$editingSv = \service\Editing::singleton();
@@ -97,6 +99,9 @@ class Editing extends CtrlBase
 	public function createTitle()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$params = (array)$params;
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		if (empty($editingId)) {
@@ -126,6 +131,9 @@ class Editing extends CtrlBase
 	public function createDecal()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$params = (array)$params;
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		if (empty($editingId)) {
@@ -155,30 +163,26 @@ class Editing extends CtrlBase
 	public function createMusic()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$params = (array)$params;
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
-		$editingId = 1;
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
 		$info = array();
-		$decalId = $this->paramFilter('decalId', 'intval', 0); // 贴纸ID
-	
-		$useLensIds = $this->paramFilter('useLensIds', 'array'); // 适应的镜头ID
-		if (!empty($useLensIds)) {
-			$info['useLensIds'] = $useLensIds;
+		$musicId = $this->paramFilter('musicId', 'intval', 0); // 音乐ID
+		if (!empty($params['type'])) {
+			$info['type'] = $this->paramFilter('type', 'intval');
 		}
-		$addMediaIds = $this->paramFilter('addMediaIds', 'array'); // 添加视频/图片
-		if (!empty($addMediaIds)) {
-			$info['addMediaIds'] = $addMediaIds;
-		}
-		$deleteMediaIds = $this->paramFilter('deleteMediaIds', 'array'); // 移除视频/图片
-		if (!empty($deleteMediaIds)) {
-			$info['deleteMediaIds'] = $deleteMediaIds;
+		if (!empty($params['conId'])) {
+			$info['conId'] = $this->paramFilter('conId', 'intval');
 		}
 		$editingSv = \service\Editing::singleton();
-		return $editingSv->createDecal($this->userId, $editingId, $decalId, $info);
+		return $editingSv->createMusic($this->userId, $editingId, $musicId, $info);
 	}
+	
 	/**
 	 * 镜头详情
 	 *
