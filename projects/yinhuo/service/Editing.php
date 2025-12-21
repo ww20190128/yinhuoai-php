@@ -99,7 +99,7 @@ class Editing extends ServiceBase
     	$editingLensEtt->updateTime = $now;
     	$editingLensId = $editingLensDao->create($editingLensEtt);
     	$getEditingLensModels = $this->getEditingLensModels(array($editingLensEtt));
-    	return $getEditingLensModels[$editingLensId];
+    	return empty($getEditingLensModels[$editingLensId]) ? array() : $getEditingLensModels[$editingLensId];
     }
     
     /**
@@ -916,7 +916,7 @@ class Editing extends ServiceBase
     		}
     		$editingMusicModels[$editingMusicEtt->id] = array(
     			'id' 			=> intval($editingMusicEtt->id),
-    			'conId'			=> intval($editingMusicEtt->musicId),
+    			'conId'			=> intval($editingMusicEtt->conId),
     			'type'			=> intval($editingMusicEtt->type),
     			'url'			=> 'xxxxx',
     			'name'			=> 'xxxx',
@@ -1091,7 +1091,7 @@ class Editing extends ServiceBase
     		$musicId = $editingMusicDao->create($editingMusicEtt);
     	}
     	if (isset($info['conId'])) {
-    		$editingMusicEtt->set('musicId', $info['conId']);
+    		$editingMusicEtt->set('conId', $info['conId']);
     	}
     	if (isset($info['type'])) {
     		$editingMusicEtt->set('type', $info['type']);
@@ -1101,4 +1101,5 @@ class Editing extends ServiceBase
     	$musicModels = $this->getMusicModels(array($editingMusicEtt));
     	return empty($musicModels[$editingDecalEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
+    
 }

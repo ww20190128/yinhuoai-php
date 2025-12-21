@@ -45,11 +45,11 @@ class EditingMusic extends EntityBase
     public $type = 0;
 
     /**
-     * 音乐id
+     * 音乐id 或素材Id
      *
      * @var int
      */
-    public $musicId = 0;
+    public $conId = 0;
 
     /**
      * 状态
