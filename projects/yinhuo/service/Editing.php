@@ -225,6 +225,7 @@ class Editing extends ServiceBase
     		uasort($mediaList, array($commonSv, 'sortByCreateTime'));
     		uasort($dubCaptionList, array($commonSv, 'sortByCreateTime'));
     		uasort($dubMediaList, array($commonSv, 'sortByCreateTime'));
+    		$mediaList = array_reverse($mediaList);
     		$editingLensModel['mediaList'] = array_values($mediaList);
     		$editingLensModel['dubCaptionList'] = array_values($dubCaptionList);
     		$editingLensModel['dubMediaList'] = array_values($dubMediaList);
