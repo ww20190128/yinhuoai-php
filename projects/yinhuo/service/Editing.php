@@ -653,6 +653,7 @@ class Editing extends ServiceBase
     	if (!empty($info['name'])) { // 名称
     		$editingEtt->set('name', $info['name']);
     	}
+    	$now = $this->frame->now;
     	// 视频配置-背景填充
     	$backgroundArr = empty($editingEtt->background) ? array(
  			'type' => 1, 
