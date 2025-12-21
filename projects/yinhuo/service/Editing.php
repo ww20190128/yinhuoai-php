@@ -423,22 +423,7 @@ class Editing extends ServiceBase
  		$editingMusicEttList = $editingMusicDao->readListByIndex(array(
  			'editingId' => $editingEtt->id,
  		));
- 		$editingMusicModels = array();
- 		if (!empty($editingMusicEttList)) foreach ($editingMusicEttList as $key => $editingMusicEtt) {
- 			if ($editingMusicEtt->status == \constant\Common::DATA_DELETE) {
- 				continue;
- 			}
- 			$editingMusicModels[$editingMusicEtt->id] = array(
- 				'id' 			=> intval($editingMusicEtt->id),
- 				'updateTime' 	=> intval($editingMusicEtt->updateTime),
- 				'type' 			=> intval($editingMusicEtt->type),
- 				'musicId' 		=> intval($editingMusicEtt->musicId),
- 				'name'			=> 'xx',
- 				'url'			=> 'xxx',
- 				'size'			=> 111, // 大小
-    			'duration'		=> 100, // 播放时长
- 			);
- 		}
+ 		$editingMusicModels = $this->getMusicModels($editingMusicEttList);
  		// 获取贴纸
  		$editingDecalDao = \dao\EditingDecal::singleton();
  		$editingDecalEttList = $editingDecalDao->readListByIndex(array(
