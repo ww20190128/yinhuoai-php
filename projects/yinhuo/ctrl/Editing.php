@@ -16,6 +16,9 @@ class Editing extends CtrlBase
 	public function editingInfo()
 	{
 		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		$editingSv = \service\Editing::singleton();
 		return $editingSv->editingInfo($this->userId, $editingId);

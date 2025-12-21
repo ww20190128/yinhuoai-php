@@ -57,22 +57,71 @@ class App extends ServiceBase
     
     /**
      * 获取热门音乐分类
+     *
+     * @return array
+     */
+    public function getActorClassifys()
+    {
+    	$list = array();
+    	$list[] = array(
+    			'id' => 1,
+    			'name' => '豆包大模型2.0',
+    	);
+    	$list[] = array(
+    			'id' => 2,
+    			'name' => '通用模型',
+    	);
+    	$list[] = array(
+    			'id' => 3,
+    			'name' => 'IP仿音',
+    	);
+  
+    	return $list;
+    }
+    
+    /**
+     * 获取热门音乐分类
      *duration:100, // 播放时长
 
+     * @return array
+     */
+    public function getActorList()
+    {
+    	$list = array();
+    	$list[] = array(
+    		'id' => 1,
+    		'name' => '四郎',
+    		'url' => 'https:xxxx',
+    		
+    	);
+    	$list[] = array(
+    			'id' => 2,
+    			'name' => '熊二',
+    			'url' => 'https:xxxx',
+    	
+    	);
+    	return $list;
+    }
+    
+    /**
+     * 获取热门音乐分类
+     *duration:100, // 播放时长
+    
      * @return array
      */
     public function getMusicList()
     {
     	$list = array();
     	$list[] = array(
-    		'id' => 1,
-    		'name' => '音乐名称',
-    		'url' => 'https:xxxx',
-    		'duration' => 119,
+    			'id' => 1,
+    			'name' => '音乐名称',
+    			'url' => 'https:xxxx',
+    			'duration' => 119,
     	);
-
+    
     	return $list;
     }
+    
     
     /**
      * 获取静态配置
