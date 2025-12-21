@@ -159,7 +159,7 @@ class Editing extends ServiceBase
 	    		continue;
 	    	}
  			$mediaIds = empty($editingLensEtt->mediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->mediaIds)); // 素材
- 			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
+ 			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('string', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
  			$dubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubCaptionIds)); // 配音-手动设置-字幕
  			$dubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubMediaIds)); // 配音-文件-素材(旁白配音)
  			$type = 2; // 片中
@@ -477,8 +477,8 @@ class Editing extends ServiceBase
     		'durationType' 	=> intval($editingEtt->durationType), // 视频时长类型 1  按视频时长  2  按配音时长
     		'fps' 			=> intval($editingEtt->fps), //  视频帧率  取值：25/30/60
     		'volume' 		=> $volumeArr,
-    		'transitionIds' => empty($editingEtt->transitionIds) ? array() : array_map('intval', explode(',', $editingEtt->transitionIds)),
-    		'filterIds' 	=> empty($editingEtt->filterIds) ? array() : array_map('intval', explode(',', $editingEtt->filterIds)),
+    		'transitionIds' => empty($editingEtt->transitionIds) ? array() : array_map('string', explode(',', $editingEtt->transitionIds)),
+    		'filterIds' 	=> empty($editingEtt->filterIds) ? array() : array_map('string', explode(',', $editingEtt->filterIds)),
     		'color' 		=> $colorArr,
     		'background' 	=> $backgroundArr,
     		'showCaption' 	=> intval($editingEtt->showCaption),
