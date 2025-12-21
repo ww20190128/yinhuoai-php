@@ -27,6 +27,81 @@ class App extends ServiceBase
         }
         return self::$instance;
     }
+    
+    /**
+     * 获取热门音乐分类
+     *
+     * @return array
+     */
+    public function getMusicClassifys()
+    {
+    	$list = array();
+    	$list[] = array(
+    		'id' => 1,
+    		'name' => '推荐',
+    	);
+    	$list[] = array(
+    		'id' => 2,
+    		'name' => '热门榜',
+    	);
+    	$list[] = array(
+    		'id' => 3,
+    		'name' => '飙升榜(新)',
+    	);
+    	$list[] = array(
+    		'id' => 4,
+    		'name' => '原创榜',
+    	);
+    	return $list;
+    }
+    
+    /**
+     * 获取热门音乐分类
+     *duration:100, // 播放时长
+
+     * @return array
+     */
+    public function getMusicList()
+    {
+    	$list = array();
+    	$list[] = array(
+    		'id' => 1,
+    		'name' => '音乐名称',
+    		'url' => 'https:xxxx',
+    		'duration' => 119,
+    	);
+
+    	return $list;
+    }
+    
+    /**
+     * 获取静态配置
+     *
+     * @return array
+     */
+    public function getStaticConfig()
+    {
+    	$filterList = array();
+    	$transitionList = array();
+    	$filterArr = cfg('filter');
+    	$transitionArr = cfg('transition');
+    	foreach ($filterArr as $name => $id) {
+    		$filterList[] = array(
+    			'id' 	=> $id,
+    			'name' 	=> $name,
+    		);
+    	}
+    	foreach ($transitionArr as $name => $id) {
+    		$transitionList[] = array(
+    			'id' 	=> $id,
+    			'name' 	=> $name,
+    		);
+    	}
+    	return array(
+    		'filterList' => $filterList,
+    		'transitionList' => $transitionList,
+    	);
+    }
 
     /**
      * 获取微信配置
