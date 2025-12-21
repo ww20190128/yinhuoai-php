@@ -1099,7 +1099,7 @@ class Editing extends ServiceBase
     	$editingMusicEtt->set('updateTime', $now);
     	$editingMusicDao->update($editingMusicEtt);
     	$musicModels = $this->getMusicModels(array($editingMusicEtt));
-    	return empty($musicModels[$editingDecalEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
+    	return empty($musicModels[$editingMusicEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
     
 }
