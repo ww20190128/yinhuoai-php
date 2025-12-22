@@ -636,7 +636,7 @@ class Editing extends ServiceBase
      *
      * @return array
      */
-    public function reviseEditing($userId, $editingId)
+    public function reviseEditing($userId, $editingId, $info)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
