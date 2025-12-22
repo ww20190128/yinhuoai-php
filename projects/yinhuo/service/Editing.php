@@ -675,8 +675,7 @@ class Editing extends ServiceBase
     	if (isset($info['showCaption'])) {
     		$editingEtt->set('showCaption', $info['showCaption']);
     	}
-  
-    	$actorIds = empty($editingEtt->actorIds) ? array() : array_map('intval', explode(',', $editingEtt->actorIds));
+    	$actorIds = empty($editingEtt->actorIds) ? array() : array_map('trim', explode(',', $editingEtt->actorIds));
     	if (isset($info['addActorIds'])) {
     		$actorIds = array_merge($info['addActorIds'], $actorIds);
     		$actorIds = array_unique($actorIds);

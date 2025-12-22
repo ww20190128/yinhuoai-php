@@ -10,6 +10,7 @@
 		"alipaysdk/openapi": "*@dev",
 		"chillerlan/php-qrcode": "^5.0",
 		"endroid/qr-code": "^4.6",
-		"volcengine/volc-sdk-php": "^1.0"
+		"volcengine/volc-sdk-php": "^1.0",
+		"alibabacloud/ice-20201109": "^6.8"
 	}
 }

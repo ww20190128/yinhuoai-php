@@ -105,6 +105,12 @@ $conf = array(
 		// 应用私钥
 		'private_key' => 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCW4xkkN3ZJHalZt3Q39E4Jm5E+B4x5md5YQTEsLNwv00EM9b22BhgNUJLRznta4lQ3ajJtrH847wtro3mMBN67xXOm37rz31eCvbmda/IV4iIw0sMv+eBqwcq0VgU8LP2sFM67npOY9OYE8HcIhGqZlN33qzORrRvygLmiCp/JFSmuZYESnRPKQDLPeuIxrxJGGje0qhpMGjyU9C6h6GpmHS9cR11mQMQbAmDSkLZCqV+azpRHMwsiY7nMvpoAsUlL7D8mHlPZoSsq5/fouYK6aVMq/Uj0bzDZjXk3mGqSDlOxqTQtC4u9gewxgnRFBfriDQEQYdIFmuQULaFtXB1hAgMBAAECggEAEPO0yGfexzoo46aDzSGKfvPWbpSkiKjr3Rh98MuddVYTseQOC1xF6YEK7b14CG7zLUKmJcJCjN/2dYJpTnzhlVEKvE3YkDugdlTgfLo6+ZBtbPTQ7xvwxa2+G2KqtecMHQA9dcDMLlwdV6K4jOFrpJOgGIpIge5j/GvP70+oQgwNEieDUI2HuNEBBmvV5NhQd8fd/Bjihdj587i5v8I2H8KHu/z+ZBpTl1dIDoQ7ytXVwZWpcfjVVB2Aue9/nhqdB/yyLN0FFEVsrUa3eL8KtXJN9Q7I4ULl4NwX/w/yIJjkXP7n9+fVZKhn8boC1ANwEi9I8gyOXcy8tc1FicPnkQKBgQDgyNHU3enmG35JP6Mh42DDUGUH4ubzr5l8jQ8hkgAl30mBd0slND2a9UHstX5TNQdjPBWGLPahgyZI97ZFFTAWyXgBHWKKa+hK97kLuoxw3JqbHmoPkiFV8HZ8tCirp9qq6ggfVeyqoLYit5fl9Sp/J+cFrX8Lzugo52tLAArmdQKBgQCr1zJ6hPxSWe6YZcce9Oi0RY8ohO24eWd6/cDpBnOfp95wuAEb0ipj4gb8InxQzCRYzgCJt42w1F89vfknSGXdVz8TY3jt2xYOl2gx6OZD82XylimrWnRE9nEcdc8ts/ZdKZAC6AZkWKO2fPFRA6ujlbvChzx2X3pakcMXN3r1vQKBgCU7Pf4bD43MiftJ7hRD3Bgdrc5Dl+tO74ZAuvvdeebL+BnYj3rHD1kmPFgfq5/Ojb2zCwGhWuxfk6zMUsVYgBGWJylQG60/uEcKhvzZVj+vWnBM9lZD5v+cB5QaJw5fjAl5IAVIrx2H5wMTE7bEB9jt3AcFuKBVEgEMa6oNhMCtAoGAXgQPChlYM3YgpCCLINS9vGOSP4j6xsMlapUKxnNRLziY6vLBKIeDycIQMEJt4YbPHAcZJD/YtbZ7pTwa5PMnSEJDsEfsEbacCr+rsiLKWMMCNAcUJTwIAPMUT43lHAwp7i6fK/fmB2C3sVAKd1iav5VcdMGowtraBlNZeYpRK8ECgYEAr3Pag4gnHQ0lT6sw/Zl1Irm4fDNozPER/Uhxl12QwBA4B7GUROG4DeA/WL2uxPhYXILDCHha/3DMKhDceUAlvk9vVDEZFqOJpWWeDhJ+JRNTKIKSzmdP6YZClDihU6m5tqBAMN35x+kGhA5ZCF1kfib3Kbv+k+coyz2d9BJm7aE=',
 	),
+	'aliEditing' => array( // 阿里云剪辑
+		'accessKeyId' => '',
+		'accessKeySecret' => '',
+		'StorageType' => 'oss', // 仅支持 oss
+		'StorageLocation' => 'outin-***.oss-cn-shanghai.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+	),
 	'appConfig' => array(
 		'name' => '心测MBTI',
 		'logo' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/xince-logo.png',
