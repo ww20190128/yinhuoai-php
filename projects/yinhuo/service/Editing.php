@@ -456,9 +456,26 @@ class Editing extends ServiceBase
 			$mediaModels = $this->getMediaModels($mediaEttList);
 			$backgroundArr['mediaList'] = array_values($mediaModels);
 		}
+
 		// 演员列表
-		$actorIds = empty($editingEtt->actorIds) ? array() : array_map('intval', explode(',', $editingEtt->actorIds));
+		$actorIds = empty($editingEtt->actorIds) ? array() : array_map('trim', explode(',', $editingEtt->actorIds));
+		$appSv = \service\App::singleton();
+		$actorClassifys = $appSv->getActorClassifys();
+		$actorMap = array();
+		foreach ($actorClassifys as $row) {
+			if (empty($row['list'])) {
+				continue;
+			}
+			$actorMap = array_merge($actorMap, $row['list']);
+		}
+		$actorMap = array_column($actorMap, null, 'id');
 		$actorList = array();
+		foreach ($actorIds as $actorId) {
+			if (empty($actorMap[$actorId])) {
+				continue;
+			}
+			$actorList[$actorId] = $actorMap[$actorId];
+		}
     	
 		$dubCaptionIds = empty($editingEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingEtt->dubCaptionIds));
 		$dubMediaIds = empty($editingEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingEtt->dubMediaIds));
@@ -483,7 +500,7 @@ class Editing extends ServiceBase
     		'color' 		=> $colorArr,
     		'background' 	=> $backgroundArr,
     		'showCaption' 	=> intval($editingEtt->showCaption),
-    		'actorList' 	=> $actorList, // TODO
+    		'actorList' 	=> array_values($actorList),
     		'dubType' 		=> intval($editingEtt->dubType),
     		'dubCaptionList' => $dubCaptionList,
     		'dubMediaList' 	=> $dubMediaList,
