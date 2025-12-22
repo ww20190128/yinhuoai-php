@@ -334,13 +334,13 @@ class Editing extends CtrlBase
 		if (isset($params['showCaption'])) { // 字幕/配音-字幕显示
 			$info['showCaption'] = $this->paramFilter('showCaption', 'intval');
 		}
-		$addActorIds = $this->paramFilter('addActorIds', 'array'); // 添加配音演员ID列表
-		if (!empty($addActorIds)) {
-			$info['addActorIds'] = $addActorIds;
+		// 添加配音演员ID列表
+		if (!empty($params['addActorIds'])) {
+			$info['addActorIds'] = array_map('trim', explode(',', str_replace('，', ',', $params['addActorIds'])));
 		}
-		$deleteActorIds = $this->paramFilter('deleteActorIds', 'array'); // 删除配音演员ID列表
-		if (!empty($deleteActorIds)) {
-			$info['deleteActorIds'] = $deleteActorIds;
+		// 删除配音演员ID列表
+		if (!empty($params['deleteActorIds'])) {
+			$info['deleteActorIds'] = array_map('trim', explode(',', str_replace('，', ',', $params['deleteActorIds'])));
 		}
 		// 配音
 		if (isset($params['dubType'])) { // 配音设置-类型 1  手动设置 2 配音文件
