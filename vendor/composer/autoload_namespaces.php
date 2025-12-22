@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Kafka\\' => array($vendorDir . '/nmred/kafka-php/src'),
+    'DrSlump' => array($vendorDir . '/stanley-cheung/protobuf-php/library'),
 );

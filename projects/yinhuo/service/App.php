@@ -62,44 +62,43 @@ class App extends ServiceBase
      */
     public function getActorClassifys()
     {
-    	$list = array();
-    	$list[] = array(
-    		'id' => 1,
-    		'name' => '豆包大模型2.0',
-    	);
-    	$list[] = array(
-    		'id' => 2,
-    		'name' => '通用模型',
-    	);
-    	$list[] = array(
-    		'id' => 3,
-    		'name' => 'IP仿音',
-    	);
-    	return $list;
+    	$actorArr = cfg('actor');
+    	$map = array();
+    	if (!empty($actorArr)) foreach ($actorArr as $key => $value) {
+    		$listArr = explode("\n", $value);
+    		foreach ($listArr as $row) {
+    			$rowArr = explode("|", $row);
+    			if ($rowArr['2'] != '中文') {
+    				continue;
+    			}
+    			$one = array(
+    				'name' => $rowArr['0'],
+    				'id' => $rowArr['1'],
+    				'max' => end($rowArr), // 是否支持MIX
+    			);
+    			$map[$key][$one['id']] = $one;
+    		}
+    	}
+    	$classifyList = array();
+    	foreach ($map as $key => $list) {
+    		$classifyList[md5($key)] = array(
+    			'id' 	=> md5($key),
+    			'name'	=> $key,
+    			'list'	=> array_values($list),
+    		);
+    	}
+    	return $classifyList;
     }
     
     /**
-     * 获取热门音乐分类
-     *duration:100, // 播放时长
-
+     * 获取配音演员列表
+     * 
      * @return array
      */
-    public function getActorList()
+    public function getActorList($id)
     {
-    	$list = array();
-    	$list[] = array(
-    		'id' => 1,
-    		'name' => '四郎',
-    		'url' => 'https:xxxx',
-    		
-    	);
-    	$list[] = array(
-    			'id' => 2,
-    			'name' => '熊二',
-    			'url' => 'https:xxxx',
-    	
-    	);
-    	return $list;
+    	$classifyList = $this->getActorClassifys();
+    	return empty($classifyList[$id]) ? array() : $classifyList[$id]['list'];
     }
     
     /**
@@ -144,6 +143,7 @@ class App extends ServiceBase
     			'name' 	=> $name,
     		);
     	}
+    	
     	return array(
     		'filterList' => $filterList,
     		'transitionList' => $transitionList,

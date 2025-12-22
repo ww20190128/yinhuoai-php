@@ -34,7 +34,7 @@ class App extends CtrlBase
 		$appSv = \service\App::singleton();
 		$list = $appSv->getActorClassifys();
 		return array(
-				'list' => array_values($list),
+			'list' => array_values($list),
 		);
 	}
 	/**
@@ -45,8 +45,12 @@ class App extends CtrlBase
 	public function getActorList()
 	{
 		$params = $this->params;
+		$id = $this->paramFilter('id', 'string'); // 分类Id
+		if (empty($id)) {
+			throw new $this->exception('请求参数错误');
+		}
 		$appSv = \service\App::singleton();
-		$list = $appSv->getActorList();
+		$list = $appSv->getActorList($id);
 		return array(
 			'list' => array_values($list),
 		);
