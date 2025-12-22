@@ -111,12 +111,11 @@ class App extends ServiceBase
     {
     	$list = array();
     	$list[] = array(
-    			'id' => 1,
-    			'name' => '音乐名称',
-    			'url' => 'https:xxxx',
-    			'duration' => 119,
+    		'id' => 1,
+    		'name' => '音乐名称',
+    		'url' => 'https:xxxx',
+    		'duration' => 119,
     	);
-    
     	return $list;
     }
 
@@ -143,10 +142,19 @@ class App extends ServiceBase
     			'name' 	=> $name,
     		);
     	}
-    	
+    	$effectColorStyleArr = cfg('effectColorStyle');
+    	$base = "https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/effect/";
+    	foreach ($effectColorStyleArr as $name => $id) {
+    		$effectColorStyleList[] = array(
+    			'id' 	=> $id,
+    			'name' 	=> $name,
+    			'url'	=> $base . $name,
+    		);
+    	}
     	return array(
     		'filterList' => $filterList,
     		'transitionList' => $transitionList,
+    		'effectColorStyleList' => $effectColorStyleList,
     	);
     }
 
