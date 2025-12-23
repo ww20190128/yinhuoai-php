@@ -328,6 +328,7 @@ class Editing extends CtrlBase
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
+		$info = array();
 		if (isset($params['backgroundType'])) { // 背景填充-类型 1 纯色 2  视频/图片 3 视频拉伸模糊
 			$info['backgroundType'] = $this->paramFilter('backgroundType', 'intval');
 		}
