@@ -423,6 +423,7 @@ class Editing extends CtrlBase
 		if (isset($params['numList'])) {
 			$info['numList'] = $this->paramFilter('numList', 'intval');
 		}
+		
 		$editingSv = \service\Editing::singleton();
 		return $editingSv->reviseEditing($this->userId, $editingId, $info);
 	}

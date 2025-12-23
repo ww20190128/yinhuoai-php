@@ -273,7 +273,38 @@ Ext（必填）：文件扩展名。
 		$subtitleTracks = array(); // 字幕轨列表， 标题组
 		$titleList = empty($editingInfo['titleList']) ? array() : $editingInfo['titleList'];
 		foreach ($titleList as $titleRow) {
-			
+			$start = $titleRow['start'];
+			$end = $titleRow['end'];
+			foreach ($titleRow['captionList'] as $captionRow) {
+				
+				$subtitleTrackClip = array( // 文案1
+					'TimelineIn' => 0, // 显示时长-开始
+					'TimelineOut' => 0, // 显示时长-结束
+					'Type' => 'Text', // 类型
+					'X' => '0',
+					'Y' => '200', // 位置
+					'Font' => "KaiTi", // 字体
+					'Content' => '这里是标题', // 文案内容
+					'AdaptMode' => 'AutoWrap', // 自动换行
+					'Alignment' => 'TopCenter', // 排版
+					'FontSize' => '80', // 字号
+					'FontColorOpacity' => '1', // 
+					'EffectColorStyle' => 'CS0003-000011', // 花字
+					'FontColor' => "#ffffff", // 样式-颜色
+							
+					"Outline" => 2, // 字体样式- 字幕边框- 边框大小
+					"OutlineColour" => "#0e0100",  // 字体样式- 字幕边框- 边框颜色		
+					'BorderStyle' => 3 , // BorderStyle 不透明背景必须设置 BoderStyle = 3 
+					"BackColour" => "#000000", // 背景颜色
+				);
+				if (!empty($start)) {
+					$subtitleTrackClip['TimelineIn'] = $start; // 显示时长-开始
+				}
+				if (!empty($end)) {
+					$subtitleTrackClip['TimelineOut'] = $end; // 显示时长-结束
+				}
+				$audioTrackClips[] = $audioTrackClip;
+			}
 		}
 		
 		return array(
@@ -291,40 +322,7 @@ Ext（必填）：文件扩展名。
 	public function createEditingProject($editingEtt)
 	{
 		$timeline = array(
-				
-			'VideoTracks' => array( // 视频轨列表 (第一步)
-				array( // 镜头1 
-				// 是否关闭原声
-				// 选择时长
-				// 转场设置
-					'Type' => '', // 默认为普通视频轨
-					"MainTrack" => false, // 是否为主轨道
-					'VideoTrackClips' => array( // 视频轨素材片段列表
-						array(
-							'MediaId' => 'xx' , // 素材1
-							"Duration" => 4, // 设置时长
-							'Effects' => array(
-								array( // 转场时长	
-									'Type' => 'Transition',
-									'SubType' => 'wiperight,perlin', // random 随机转场
-									'Duration' => 2,
-								),
-								array( // 滤镜
-									'Type' => 'Filter',
-									'SubType' => 'wiperight,perlin', // random 随机转场
-									'Duration' => 2, // 转场时长
-								),
-							) 
-						),
-						array(
-							'MediaId' => 'xx' , // 素材2
-						),
-					),
-				),
-				array( // 镜头2
-						
-				),
-			),
+			
 			'AudioTracks' => array( // 	音频轨列表 （第二步）
 				array(
 					'AudioTrackClips' => array(

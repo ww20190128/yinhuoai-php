@@ -706,10 +706,12 @@ class Editing extends ServiceBase
     		$editingEtt->set('dubType', $info['dubType']);
     	}
     	$dubCaptionIds = empty($editingEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingEtt->dubCaptionIds));
-    	if (isset($info['addDubCaptionIds'])) {
-    		$dubCaptionIds = array_merge($info['addDubCaptionIds'], $dubCaptionIds);
+
+    	if (isset($info['addDubCaptionIds'])) { // 添加字幕
+    		$dubCaptionIds = array_merge($dubCaptionIds, $info['addDubCaptionIds']);
     		$dubCaptionIds = array_unique($dubCaptionIds);
     		$editingEtt->set('dubCaptionIds', implode(',', $dubCaptionIds));
+
     	}
     	if (isset($info['deleteDubCaptionIds'])) {
     		$dubCaptionIds = array_diff($dubCaptionIds, $info['deleteDubCaptionIds']);
