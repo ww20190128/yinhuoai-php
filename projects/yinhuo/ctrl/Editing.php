@@ -151,6 +151,12 @@ class Editing extends CtrlBase
 		if (isset($params['mediaId2'])) {
 			$info['mediaId2'] = $this->paramFilter('mediaId2', 'intval');
 		}
+		if (isset($params['mediaPostion1'])) {
+			$info['mediaPostion1'] = $this->paramFilter('mediaPostion1', 'string');
+		}
+		if (isset($params['mediaPostion2'])) {
+			$info['mediaPostion2'] = $this->paramFilter('mediaPostion2', 'string');
+		}
 		$editingSv = \service\Editing::singleton();
 		return $editingSv->createDecal($this->userId, $editingId, $decalId, $info);
 	}

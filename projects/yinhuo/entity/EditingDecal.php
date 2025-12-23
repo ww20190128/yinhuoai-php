@@ -73,6 +73,20 @@ class EditingDecal extends EntityBase
     public $mediaSize2 = 0;
 
     /**
+     * 素材1位置
+     *
+     * @var int
+     */
+    public $mediaPostion1 = '';
+    
+    /**
+     * 素材2位置
+     *
+     * @var int
+     */
+    public $mediaPostion2 = '';
+    
+    /**
      * 状态
      *
      * @var int

@@ -967,6 +967,8 @@ class Editing extends ServiceBase
     			'mediaSize1' 	=> intval($editingDecalEtt->mediaSize1),
     			'mediaId2' 		=> intval($editingDecalEtt->mediaId2),
     			'mediaSize2' 	=> intval($editingDecalEtt->mediaSize2),
+    			'mediaPostion1' => empty($editingDecalEtt->mediaPostion1) ? '0_0' : $editingDecalEtt->mediaPostion1,
+    			'mediaPostion2' => empty($editingDecalEtt->mediaPostion2) ? '0_0' : $editingDecalEtt->mediaPostion2,
     			'media1'		=> array(),
     			'media2'		=> array(),
     			'useLensList'	=> array(),
@@ -1064,6 +1066,12 @@ class Editing extends ServiceBase
     	}
     	if (isset($info['mediaSize2'])) {
     		$editingDecalEtt->set('mediaSize2', $info['mediaSize2']);
+    	}
+    	if (isset($info['mediaPostion1'])) {
+    		$editingDecalEtt->set('mediaPostion1', $info['mediaPostion1']);
+    	}
+    	if (isset($info['mediaPostion2'])) {
+    		$editingDecalEtt->set('mediaPostion2', $info['mediaPostion2']);
     	}
     	$editingDecalEtt->set('updateTime', $now);
     	$editingDecalDao->update($editingDecalEtt);
