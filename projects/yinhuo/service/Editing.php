@@ -271,6 +271,8 @@ class Editing extends ServiceBase
  				'updateTime' => intval($editingCaptionEtt->updateTime),
     		);
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($editingCaptionModels, array($commonSv, 'sortByCreateTime'));
     	return $editingCaptionModels;
     }
     
@@ -711,7 +713,6 @@ class Editing extends ServiceBase
     		$dubCaptionIds = array_merge($dubCaptionIds, $info['addDubCaptionIds']);
     		$dubCaptionIds = array_unique($dubCaptionIds);
     		$editingEtt->set('dubCaptionIds', implode(',', $dubCaptionIds));
-
     	}
     	if (isset($info['deleteDubCaptionIds'])) {
     		$dubCaptionIds = array_diff($dubCaptionIds, $info['deleteDubCaptionIds']);
@@ -891,6 +892,8 @@ class Editing extends ServiceBase
     		$editingTitleModel['captionList'] = $captionList;
     		$editingTitleModels[$key] = $editingTitleModel;
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($editingTitleModels, array($commonSv, 'sortByCreateTime'));
     	return $editingTitleModels;
     }
     
@@ -943,6 +946,8 @@ class Editing extends ServiceBase
     			'createTime'	=> intval($editingMusicEtt->createTime),
     		);
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($editingMusicModels, array($commonSv, 'sortByCreateTime'));
     	return $editingMusicModels;
     }
     
@@ -1016,6 +1021,8 @@ class Editing extends ServiceBase
     		}
     		$editingDecalModels[$key] = $editingDecalModel;
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($editingDecalModels, array($commonSv, 'sortByCreateTime'));
     	return $editingDecalModels;
     }
 
