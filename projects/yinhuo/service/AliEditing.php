@@ -171,6 +171,65 @@ Ext（必填）：文件扩展名。
 	}
 	
 // 云剪辑工程管理================
+
+	/**
+	 * 获取标题
+	 *
+	 * @return array
+	 */
+	private function getSubtitleTrack($captionRow, $titleRow = array())
+	{
+		$subtitleTrackClip = array( // 文案1
+			'Type' => 'Text', // 类型
+			'Content' => $captionRow['text'], // 文案内容
+			'AdaptMode' => 'AutoWrap', // 自动换行
+		);
+		if (!empty($titleRow['start'])) {
+			$subtitleTrackClip['TimelineIn'] = $titleRow['start']; // 显示时长-开始
+		}
+		if (!empty($titleRow['end'])) {
+			$subtitleTrackClip['TimelineOut'] = $titleRow['end']; // 显示时长-结束
+		}
+		if (!empty($captionRow['font'])) { // 字体
+			if (!empty($captionRow['text-align'])) { // 排版
+				$subtitleTrackClip['Alignment'] = $captionRow['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+			}
+			if (!empty($captionRow['position'])) { // 位置
+				$subtitleTrackClip['Y'] = $captionRow['position'];
+			}
+			if (!empty($captionRow['font-size'])) { // 字号
+				$subtitleTrackClip['FontSize'] = $captionRow['font-size'];
+			}
+			if (!empty($captionRow['font-family'])) { // 字体
+				$subtitleTrackClip['Font'] = $captionRow['font-size'];
+			}
+		}
+		if (!empty($captionRow['style'])) { // 样式
+			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 2 && !empty($captionRow['EffectColorStyle'])) { // 花字
+				$subtitleTrackClip['EffectColorStyle'] = $captionRow['EffectColorStyle'];
+			}
+			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['color'])) { // 颜色
+					$subtitleTrackClip['FontColor'] = $captionRow['color'];
+				}
+				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 2 && !empty($captionRow['background'])) { // 字幕背景
+					$subtitleTrackClip['BackColour'] = $captionRow['background'];
+					$subtitleTrackClip['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
+				}
+				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 3) { // 字幕边框
+					$subtitleTrackClip['BackColour'] = $captionRow['color'];
+					if (!empty($captionRow['border-size'])) { // 边框大小
+						$subtitleTrackClip['Outline'] = $captionRow['border-size'];
+					}
+					if (!empty($captionRow['border-color'])) { // 边框颜色
+						$subtitleTrackClip['OutlineColour'] = $captionRow['border-color'];
+					}
+				}
+			}
+		}
+		return $subtitleTrackClip;
+	}
+	
 	/**
 	 * 获取任务时间线
 	 *
@@ -264,48 +323,40 @@ Ext（必填）：文件扩展名。
 				'AudioTrackClips' => $audioTrackClips,
 			);
 		}
-		
-		/**
-		 * 1. 如果有剪辑全局配音 ，镜头配音就不生效
-		 * 2. 只有文本配音时 ，才需要选配音演员
-		 */
-		
+		// 标题
 		$subtitleTracks = array(); // 字幕轨列表， 标题组
 		$titleList = empty($editingInfo['titleList']) ? array() : $editingInfo['titleList'];
 		foreach ($titleList as $titleRow) {
-			$start = $titleRow['start'];
-			$end = $titleRow['end'];
 			foreach ($titleRow['captionList'] as $captionRow) {
-				
-				$subtitleTrackClip = array( // 文案1
-					'TimelineIn' => 0, // 显示时长-开始
-					'TimelineOut' => 0, // 显示时长-结束
-					'Type' => 'Text', // 类型
-					'X' => '0',
-					'Y' => '200', // 位置
-					'Font' => "KaiTi", // 字体
-					'Content' => '这里是标题', // 文案内容
-					'AdaptMode' => 'AutoWrap', // 自动换行
-					'Alignment' => 'TopCenter', // 排版
-					'FontSize' => '80', // 字号
-					'FontColorOpacity' => '1', // 
-					'EffectColorStyle' => 'CS0003-000011', // 花字
-					'FontColor' => "#ffffff", // 样式-颜色
-							
-					"Outline" => 2, // 字体样式- 字幕边框- 边框大小
-					"OutlineColour" => "#0e0100",  // 字体样式- 字幕边框- 边框颜色		
-					'BorderStyle' => 3 , // BorderStyle 不透明背景必须设置 BoderStyle = 3 
-					"BackColour" => "#000000", // 背景颜色
+				$subtitleTrackClip = $this->getSubtitleTrack($captionRow, $titleRow);
+				$subtitleTrackClips[] = $subtitleTrackClip;
+			}
+			$subtitleTracks[] = array(
+				'subtitleTrackClips' => $subtitleTrackClips,	
+			);
+		}
+		
+		// 贴纸
+		$videoTracks = array();
+		$decalList = empty($editingInfo['decalList']) ? array() : $editingInfo['decalList'];
+		foreach ($decalList as $decalRow) {
+			if (!empty($decalRow['media1'])) {
+				$videoTrackClip = array( // 文案1
+					'Type' => $decalRow['media1']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $decalRow['media1']['url'],
 				);
-				if (!empty($start)) {
-					$subtitleTrackClip['TimelineIn'] = $start; // 显示时长-开始
+				if (!empty($decalRow['mediaSize1'])) { // 大小
+					$subtitleTrackClip['Width'] = 1;
+					$subtitleTrackClip['Height'] = $decalRow['mediaSize1'] * 0.01;
 				}
-				if (!empty($end)) {
-					$subtitleTrackClip['TimelineOut'] = $end; // 显示时长-结束
+				if (!empty($decalRow['mediaPostion1'])) { // 位置
+					$subtitleTrackClip['X'] = $decalRow['mediaPostion1'];
+					$subtitleTrackClip['Y'] = $decalRow['mediaPostion1'];
 				}
-				$audioTrackClips[] = $audioTrackClip;
 			}
 		}
+		
+		// 音乐
 		
 		return array(
 			'VideoTracks' => $videoTracks,
