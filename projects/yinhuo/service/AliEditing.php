@@ -40,15 +40,17 @@ class AliEditing extends ServiceBase
 		if (!isset(self::$instance)) {
 			self::$instance = new AliEditing();
 			$aliEditingConf = self::$instance->frame->conf['aliEditing'];
-			$credential = new Credential([]);
-			$config = new Config([
-				'credential' => $credential,
-				'endpoint' => 'ice.cn-shanghai.aliyuncs.com'
-			]);
-			$config->accessKeyId = $aliEditingConf['accessKeyId'];
-			$config->accessKeySecret = $aliEditingConf['accessKeySecret'];
-			$client = new ICE($config);
-			self::$client = $client;
+			if (!empty($aliEditingConf['accessKeyId'])) {
+				$credential = new Credential([]);
+				$config = new Config([
+					'credential' => $credential,
+					'endpoint' => 'ice.cn-shanghai.aliyuncs.com'
+				]);
+				$config->accessKeyId = $aliEditingConf['accessKeyId'];
+				$config->accessKeySecret = $aliEditingConf['accessKeySecret'];
+				$client = new ICE($config);
+				self::$client = $client;
+			}
 		}
 		return self::$instance;
 	}
@@ -363,9 +365,12 @@ Ext（必填）：文件扩展名。
 				$subtitleTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
 				$subtitleTrackClips[] = $subtitleTrackClip;
 			}
-			$subtitleTracks[] = array(
-				'subtitleTrackClips' => $subtitleTrackClips,
-			);
+			if (!empty($subtitleTrackClips)) {
+				$subtitleTracks[] = array(
+					'subtitleTrackClips' => $subtitleTrackClips,
+				);
+			}
+			
 		}
 		
 		// 背景音乐
@@ -452,9 +457,11 @@ Ext（必填）：文件扩展名。
 				}
 				$decalVideoTrackClips[] = $videoTrackClip;
 			}
-			$decalVideoTracks[] = array(
-				'VideoTrackClips' => $decalVideoTrackClips,
-			);
+			if (!empty($decalVideoTrackClips)) {
+				$decalVideoTracks[] = array(
+					'VideoTrackClips' => $decalVideoTrackClips,
+				);
+			}
 		}
 		
 		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
@@ -617,16 +624,27 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
-		return array(
-			'VideoTracks' => array_merge($lensVideoTracks, $decalVideoTracks), // 视频轨道
-			'AudioTracks' => array_merge($lensAudioTracks, $musicAudioTracks), // 音频轨道
-			'EffectTracks' => array( // 针对全局画面添加滤镜，只加1个滤镜
+		$effectTracks = array();
+		$result = array();
+		$videoTracks = array_merge($lensVideoTracks, $decalVideoTracks);// 视频轨道
+		$audioTracks = array_merge($lensAudioTracks, $musicAudioTracks); // 音频轨道
+		if (!empty($videoTracks)) {
+			$result['VideoTracks'] = $videoTracks;
+		}
+		if (!empty($audioTracks)) {
+			$result['AudioTracks'] = $audioTracks;
+		}
+		if (!empty($editingFilterEffectTrackItem)) { // 针对全局画面添加滤镜，只加1个滤镜
+			$result['EffectTracks'] = array(
 				array(
 					'EffectTrackItems' => array($editingFilterEffectTrackItem),
 				)
-			),
-			'SubtitleTracks' => $subtitleTracks, // 标题
-		);
+			);
+		}
+		if (!empty($subtitleTracks)) { // 标题
+			$result['SubtitleTracks'] = $subtitleTracks;
+		}
+		return $result;
 	}
 	
 	/**
@@ -634,9 +652,12 @@ Ext（必填）：文件扩展名。
 	 * 
 	 * @return array
 	 */
-	public function createEditingProject($editingEtt)
+	public function createEditingProject($editingInfo)
 	{
-		$OutputMediaConfig = array(
+		$timeline = $this->getTimeline($editingInfo);
+		
+print_r($timeline);exit;
+		$outputMediaConfig = array(
 			// 
 			'MaxDuration' =>1, // 最大时长
 			'Video' => array(
@@ -647,12 +668,7 @@ Ext（必填）：文件扩展名。
 		
 		
 		/**
-		 * 
-		 * 音量调整Effect Type:Volume 调音
-		 * 		配音音量
-		 * 		背景音量
-		 * 		配音语速
-		 * 
+
 		 * https://help.aliyun.com/zh/ims/developer-reference/access-the-video-clip-web-sdk?scm=20140722.S_help%40%40%E6%96%87%E6%A1%A3%40%40453478._.ID_help%40%40%E6%96%87%E6%A1%A3%40%40453478-RL_%E8%AF%AD%E9%80%9F-LOC_doc%7EUND%7Eab-OR_ser-PAR1_212a5d3d17665522380104558d0553-V_4-PAR3_r-RE_new5-P0_1-P1_0&spm=a2c4g.11186623.help-search.i75
 		 * interface VoiceConfig {
   volume: number; // 音量，取值0~100，默认值50
@@ -662,22 +678,22 @@ Ext（必填）：文件扩展名。
 }
 
 
- 1.  视频比例
+
  2.  视频时长
- 3. 视频帧率
+
 		 */
 
 		$MaterialMaps = array(); // 工程关联素材
 		
 		try {
 			// 创建云剪辑工程
-    	$request = new CreateEditingProjectRequest();
-   	 	$request->title = $editingEtt->name;
-    	$request->description = "测试工程描述";
-    	$request->timeline = "{\"VideoTracks\":[{\"VideoTrackClips\":[{\"MediaId\":\"****9b4d7cf14dc7b83b0e801cbe****\"},{\"MediaId\":\"****9b4d7cf14dc7b83b0e801cbe****\"}]}]}";
-    	$request->coverURL = "http://xxxx/coverUrl.jpg";
-    	$response = $client->createEditingProject($request);
-    	$projectId = $response->body->project->projectId;
+	    	$request = new CreateEditingProjectRequest();
+	   	 	$request->title = $editingEtt->name;
+	    	$request->description = "测试工程描述";
+	    	$request->timeline = json_encode($timeline);
+	    	$request->coverURL = "http://xxxx/coverUrl.jpg";
+	    	$response = $client->createEditingProject($request);
+	    	$projectId = $response->body->project->projectId;
     var_dump($response);
 		} catch (TeaUnableRetryError $e) {
 			var_dump($e->getMessage());

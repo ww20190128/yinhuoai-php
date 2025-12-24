@@ -96,6 +96,12 @@ $conf = array(
 		// 应用私钥
 		'private_key' => 'MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCaD47Ik0n0dsZSIArbmFEosXpN4e8XrPzhbdxOcPCs8A2EwR0ZzrXbB8IULxqBFOevhPlZKhjtvjhlblRyAonyguUgRHbvtq7gR0he/f+uwWl9qwzeQsribfFy1oW2tDMnaXiVfb3q/oVDwEMxuhwKqbVQ8o4SOAX/S5FOJEWp/L69vhSN96zb6cQUZ3IPJmzXRDeBBWmOqifctXIqhU6lLsEd5LHt+5GKTX6vBVkC6rgoOlL7LXuM0hgzCJpasW+Av2oswlrrXt3cpmsa+oqVdvVKCo0mRwkRNScd59L3zLQysS4TScYKat2oLTaP5GzlNfndRzPOl/JX2k695B2BAgMBAAECggEBAJVhZHdDqb/qsx3Kh/ypUnh8rjR6UFTKnWEQHz/H7vYgxVrlzQvLDTZV7W+YxMBIvuXHr+cvFIDhotlnA2aQ46VMGlMRT6nbnvFE7P1+l76hN2JsystwRD0NkcJiE8E2NSuP7yY0iEQlip5I/F5pMOt95puYtP0haV9DrJ7yOMI7GJAIzpClQgoip8v+zaxDS4BjlsRCT87iAZtXye7wClbr3DFHq24xe7pJYqdZHYX7iqrJ2aEBEGwazjxhOqlLNP8847mq52vtXXqixvAdavUPzIPwvySvLsDAkLDQxOLMFX6PlX+ejYuwBY16rKhLzNq+X5oPsfYmfNVGzn4lBgkCgYEAy6mOaaxqL/Wr7+gsV0/fXTe+m5IMOgZmiW51qUjAeEzJpp9bjLi5zD99FIuX2bt9MAVwQZE5uoEjg00YYwZqQ0IgLvwZjQgkRqKdEoeydSGrsoPUszJAPOnLIrJwyd5EAJJQvRYejW8yc90b99bjdqw8SWNvB+ne8V1cp/85gPMCgYEAwabWR2z9k4a8vMGNPY7PVShcORCTT4vuTse+DzGbe5oLOLAamSrLiECNiVMec/ZcS38U+1V1xEOHephJH2W46A4cPf3hcyDjGbhrhi7rk0VbiLH/eCIzZ3bFlL324S+0EGj6vFOZBPNwnW79QTE7FNyaaX+sLeZ6Mb/YIEZsZLsCgYEAnK9R9VLETyl+og/JLVMx0RG1/xIZffq2oDzvINHr4aGR8jLfyB/GMbEWldvfc4+e/Hbyqj8EXsxDehyyCl1BG4WgJQWm0q3U2tL4bO0hCqRg5/IsjcC3UyW7NnJ5+5SYVKg8nXyK/Nzzv9f4UHBuhzpzFzL8lOYEs0TUqBrfLqkCgYEAmZ6U+6JNYnuPO5m7RqsEdISI7Efm5EKYMGypq/npYtrnrfedkgXt4c97uAV08f7sZoOQjHTV8HS1g55M25hhX8zZwJ+m+iKLpXqz6YVNIc3yd/TkOVPAPYJt6Lntn+OszxvIVB9pExFfM7S5OL8qJDmAUNKULvFX3CFY/PmAwUMCgYEAxwTMFDWxOFIHGfoKFZYQv0U4DWBdo9kj5KEXQgGKX+TPakMtkPkPT5LZqXmEc4e46Q+ngxR11sKsl51Yl9SbdF7wHoXNWfvYgFijzibl+gTq5Ppt1dBmTlm+Hr1EL7l92AdHpawabXCtX0KjTR+YWgp9VdV5nxtYIngKYHGDuu4=',
 	),
+	'aliEditing' => array( // 阿里云剪辑
+		'accessKeyId' => '',
+		'accessKeySecret' => '',
+		'StorageType' => 'oss', // 仅支持 oss
+		'StorageLocation' => 'outin-***.oss-cn-shanghai.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+	),
 	'appConfig' => array(
 		'name' => '智乐心理',
 		'logo' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/logo.png',

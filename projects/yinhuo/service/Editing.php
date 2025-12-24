@@ -284,8 +284,8 @@ class Editing extends ServiceBase
     public function createCaption($userId, $editingId, $captionId, $info)
     {
     	$editingDao = \dao\Editing::singleton();
-    	$editingtt = $editingDao->readByPrimary($editingId);
-    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$userDao = \dao\User::singleton();
@@ -293,7 +293,7 @@ class Editing extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    	if ($editingtt->userId != $userId) {
+    	if ($editingEtt->userId != $userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingCaptionDao = \dao\EditingCaption::singleton();
@@ -518,7 +518,6 @@ class Editing extends ServiceBase
     	return $model;
     }
 
-    
     /**
      * 设置镜头
      *
@@ -984,6 +983,7 @@ class Editing extends ServiceBase
     			'mediaId2' 		=> intval($editingDecalEtt->mediaId2),
     			'mediaSize2' 	=> intval($editingDecalEtt->mediaSize2),
     			'mediaPostion1' => empty($editingDecalEtt->mediaPostion1) ? '0_0' : $editingDecalEtt->mediaPostion1,
+    				
     			'mediaPostion2' => empty($editingDecalEtt->mediaPostion2) ? '0_0' : $editingDecalEtt->mediaPostion2,
     			'media1'		=> array(),
     			'media2'		=> array(),
@@ -1006,10 +1006,20 @@ class Editing extends ServiceBase
     	$mediaModels = $this->getMediaModels($mediaEttList);
     	foreach ($editingDecalModels as $key => $editingDecalModel) {
     		if (!empty($mediaModels[$editingDecalModel['mediaId1']])) {
-    			$editingDecalModel['media1'] = $mediaModels[$editingDecalModel['mediaId1']];
+    			$media1 = $mediaModels[$editingDecalModel['mediaId1']];
+    			$media1['size'] = $editingDecalModel['mediaSize1'];
+    			$mediaPostionArr = explode('_', $editingDecalModel['mediaPostion1']);
+    			$media1['x'] = empty($mediaPostionArr['0']) ? 0 : intval($mediaPostionArr['0']);
+    			$media1['y'] = empty($mediaPostionArr['1']) ? 0 : intval($mediaPostionArr['1']);
+    			$editingDecalModel['media1'] = $media1;
     		}
     		if (!empty($mediaModels[$editingDecalModel['mediaId2']])) {
-    			$editingDecalModel['media2'] = $mediaModels[$editingDecalModel['mediaId2']];
+    			$media2 = $mediaModels[$editingDecalModel['mediaId2']];
+    			$media2['size'] = $editingDecalModel['mediaSize2'];
+    			$mediaPostionArr = explode('_', $editingDecalModel['mediaPostion2']);
+    			$media2['x'] = empty($mediaPostionArr['0']) ? 0 : intval($mediaPostionArr['0']);
+    			$media2['y'] = empty($mediaPostionArr['1']) ? 0 : intval($mediaPostionArr['1']);
+    			$editingDecalModel['media2'] = $media2;
     		}
     		$useLensList = array();
     		foreach ($editingDecalModel['useLensIds'] as $useLensId) {
@@ -1043,8 +1053,8 @@ class Editing extends ServiceBase
     public function createDecal($userId, $editingId, $decalId, $info)
     {
     	$editingDao = \dao\Editing::singleton();
-    	$editingtt = $editingDao->readByPrimary($editingId);
-    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$userDao = \dao\User::singleton();
@@ -1052,7 +1062,7 @@ class Editing extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    	if ($editingtt->userId != $userId) {
+    	if ($editingEtt->userId != $userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingDecalDao = \dao\EditingDecal::singleton();
@@ -1105,8 +1115,8 @@ class Editing extends ServiceBase
     public function createMusic($userId, $editingId, $musicId, $info)
     {
     	$editingDao = \dao\Editing::singleton();
-    	$editingtt = $editingDao->readByPrimary($editingId);
-    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$userDao = \dao\User::singleton();
@@ -1114,7 +1124,7 @@ class Editing extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    	if ($editingtt->userId != $userId) {
+    	if ($editingEtt->userId != $userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingMusicDao = \dao\EditingMusic::singleton();
@@ -1144,4 +1154,30 @@ class Editing extends ServiceBase
     	return empty($musicModels[$editingMusicEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
     
+    
+    /**
+     * 创建项目
+     *
+     * @return array
+     */
+    public function createProject($userId, $editingId)
+    {
+    	$editingDao = \dao\Editing::singleton();
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	if ($editingEtt->userId != $userId) {
+    		throw new $this->exception('剪辑已删除');
+    	}
+    	$editingInfo = $this->editingInfo($userEtt, $editingEtt);
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$aliEditingSv->createEditingProject($editingInfo);
+    	print_r($editingInfo);exit;
+    }
 }
