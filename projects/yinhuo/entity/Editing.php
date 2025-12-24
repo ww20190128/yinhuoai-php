@@ -38,11 +38,18 @@ class Editing extends EntityBase
     public $name = '';
 
     /**
+     * 标题
+     *
+     * @var varchar
+     */
+    public $title = '';
+    
+    /**
      * 话题
      *
      * @var varchar
      */
-    public $desc = '';
+    public $topic = '';
     
     /**
      * 用户Id

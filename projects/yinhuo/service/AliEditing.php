@@ -245,7 +245,7 @@ Ext（必填）：文件扩展名。
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
 			$lensVideoTrackClips = array(); // 镜头的VideoTracks 元素
 			
-			// # 关闭原声   转场设置  	选择时长
+			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffects = array(); // 镜头的效果-转场
 			if (!empty($lensRow['transitionType'])) { // #转场设置
@@ -268,12 +268,6 @@ Ext（必填）：文件扩展名。
 				);
 			}
 			
-			
-			
-			if (!empty($effects)) {
-				$videoTrackClip['Effects'] = $effects;
-			}
-			
 			if (empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaRow) {
 				$videoTrackClip = array(
 					'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
@@ -282,25 +276,13 @@ Ext（必填）：文件扩展名。
 				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $lensRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
-				$effects = array(); // 转场设置
-				if (!empty($lensRow['transitionType'])) { // 有设置转场
-					if ($lensRow['transitionType'] == 1 && !empty($lensRow['transitionIds'])) { // 自选转场
-						$effects[] = array(
-							'Type' => 'Transition',
-							'SubType' => implode(',', $lensRow['transitionIds']),
-						);
-					} elseif ($lensRow['transitionType'] == 2) { // 随机转场， 59个随机
-						$effects[] = array(
-							'Type' => 'Transition',
-							'SubType' => 'random',
-						);
-					}
+				// 素材特效
+				$effects = array();
+				if (!empty($lensTransitionEffects)) {
+					$effects = array_merge($effects, $lensTransitionEffects);
 				}
-				if (empty($mediaRow['originalSound'])) { // 关闭原声
-					$effects[] = array(
-						'Type' => 'Volume',
-						'Gain' => 0,
-					);
+				if (!empty($lensVolumeEffects)) {
+					$effects = array_merge($effects, $lensVolumeEffects);
 				}
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
