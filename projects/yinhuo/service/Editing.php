@@ -493,6 +493,7 @@ class Editing extends ServiceBase
     	$model = array(
     		'id' 			=> intval($editingEtt->id),
     		'name'			=> $editingEtt->name, // 剪辑名称
+    		'desc'			=> $editingEtt->desc, // 话题
     		'ratio'			=> $editingEtt->ratio, // 视频比例 可选 9:16/16:9/1:1 
     		'durationType' 	=> intval($editingEtt->durationType), // 视频时长类型 1  按视频时长  2  按配音时长
     		'fps' 			=> intval($editingEtt->fps), //  视频帧率  取值：25/30/60
@@ -672,6 +673,9 @@ class Editing extends ServiceBase
     	}
     	if (!empty($info['name'])) { // 名称
     		$editingEtt->set('name', $info['name']);
+    	}
+    	if (isset($info['desc'])) { // 话题
+    		$editingEtt->set('desc', $info['desc']);
     	}
     	$now = $this->frame->now;
     	// 视频配置-背景填充

@@ -238,21 +238,49 @@ Ext（必填）：文件扩展名。
 	public function getTimeline($editingInfo)
 	{
 		// 镜头
-		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
-		$videoTracks = array(); // 视频轨列表（镜头）
-
-		$subtitleTracks = array();
-		foreach ($lensList as $lensRow) {
-			$mediaList = $lensRow['mediaList']; // 镜头素材
-			$videoTrackClips = array();
+		$lensVideoTracks = array(); // 视频轨列表（镜头）
+		/**
+		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
+		 */
+		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
+			$lensVideoTrackClips = array(); // 镜头的VideoTracks 元素
 			
-			foreach ($mediaList as $mediaRow) {
+			// # 关闭原声   转场设置  	选择时长
+			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
+			$lensTransitionEffects = array(); // 镜头的效果-转场
+			if (!empty($lensRow['transitionType'])) { // #转场设置
+				if ($lensRow['transitionType'] == 1 && !empty($lensRow['transitionIds'])) { // 自选转场
+					$lensTransitionEffects[] = array(
+						'Type' => 'Transition',
+						'SubType' => implode(',', $lensRow['transitionIds']),
+					);
+				} elseif ($lensRow['transitionType'] == 2) { // 随机转场， 59个随机
+					$lensTransitionEffects[] = array(
+						'Type' => 'Transition',
+						'SubType' => 'random',
+					);
+				}
+			}
+			if (!empty($lensRow['originalSound'])) { // #关闭原声
+				$lensVolumeEffects[] = array(
+					'Type' => 'Volume',
+					'Gain' => 0,
+				);
+			}
+			
+			
+			
+			if (!empty($effects)) {
+				$videoTrackClip['Effects'] = $effects;
+			}
+			
+			if (empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaRow) {
 				$videoTrackClip = array(
 					'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
 					'Type' => $mediaRow['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
-				if (!empty($mediaRow['duration'])) { // 选择时长(秒) 选择时长
-					$videoTrackClip['Duration'] = $mediaRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
+				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
+					$videoTrackClip['Duration'] = $lensRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
 				$effects = array(); // 转场设置
 				if (!empty($lensRow['transitionType'])) { // 有设置转场
@@ -277,10 +305,10 @@ Ext（必填）：文件扩展名。
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
 				}
-				$videoTrackClips[] = $videoTrackClip;
+				$lensVideoTrackClips[] = $videoTrackClip;
 			}
-			$videoTracks[] = array(
-				'VideoTrackClips' => $videoTrackClips,
+			$lensVideoTracks[] = array(
+				'VideoTrackClips' => $lensVideoTrackClips,
 			);
 		}
 		
@@ -379,6 +407,14 @@ Ext（必填）：文件扩展名。
 	 */
 	public function createEditingProject($editingEtt)
 	{
+		$OutputMediaConfig = array(
+			// 
+			'MaxDuration' =>1, // 最大时长
+			'Video' => array(
+				'Fps'=> 50, // 帧率
+				'Orientation' => 1,// 视频比例
+			),	
+		);
 		$timeline = array(
 			
 			'AudioTracks' => array( // 	音频轨列表 （第二步）

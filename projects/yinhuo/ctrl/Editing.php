@@ -384,6 +384,12 @@ class Editing extends CtrlBase
 		if (isset($params['ratio'])) {
 			$info['ratio'] = $this->paramFilter('ratio', 'string');
 		}
+		if (isset($params['desc'])) {
+			$info['desc'] = $this->paramFilter('desc', 'string');
+		}
+		if (isset($params['name'])) {
+			$info['name'] = $this->paramFilter('name', 'string');
+		}
 		if (isset($params['durationType'])) {
 			$info['durationType'] = $this->paramFilter('durationType', 'intval');
 		}
