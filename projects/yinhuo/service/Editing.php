@@ -811,8 +811,8 @@ class Editing extends ServiceBase
     public function createTitle($userId, $editingId, $titleId, $info)
     {
     	$editingDao = \dao\Editing::singleton();
-    	$editingtt = $editingDao->readByPrimary($editingId);
-    	if (empty($editingtt) || $editingtt->status == \constant\Common::DATA_DELETE) {
+    	$editingEtt = $editingDao->readByPrimary($editingId);
+    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$userDao = \dao\User::singleton();
@@ -820,7 +820,7 @@ class Editing extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    	if ($editingtt->userId != $userId) {
+    	if ($editingEtt->userId != $userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingTitleDao = \dao\EditingTitle::singleton();
@@ -846,8 +846,8 @@ class Editing extends ServiceBase
     	}
     	$editingCaptionDao = \dao\EditingCaption::singleton();
     	if (!empty($info['captionIds'])) { // 添加文案
-    		$editingCaptionDaoEttList = $editingCaptionDao->readListByPrimary($info['captionIds']);
-    		$editingCaptionDaoEttList = $editingCaptionDao->refactorListByKey($editingCaptionDaoEttList);
+    		$editingCaptionEttList = $editingCaptionDao->readListByPrimary($info['captionIds']);
+    		$editingCaptionEttList = $editingCaptionDao->refactorListByKey($editingCaptionEttList);
     		if (!empty($editingCaptionEttList)) foreach ($editingCaptionEttList as $captionId => $editingCaptionEtt) {
     			if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
     				unset($editingCaptionEttList[$captionId]);
