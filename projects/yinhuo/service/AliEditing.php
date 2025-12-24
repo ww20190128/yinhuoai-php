@@ -256,11 +256,11 @@ Ext（必填）：文件扩展名。
 	}
 	
 	/**
-	 * 将文本组织成SubtitleTrack
+	 * 将文本组织成SubtitleTrack （标题）
 	 * 
 	 * @return array
 	 */
-	private function getSubtitleTrackByCaption($captionRow, $titleRow = array())
+	private static function captionToSubtitleTrack($captionRow, $titleRow = array())
 	{
 		$subtitleTrackClip = array( // 文案1
 			'Type' => 'Text', // 类型
@@ -290,8 +290,7 @@ Ext（必填）：文件扩展名。
 		if (!empty($captionRow['style'])) { // 样式
 			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 2 && !empty($captionRow['EffectColorStyle'])) { // 花字
 				$subtitleTrackClip['EffectColorStyle'] = $captionRow['EffectColorStyle'];
-			}
-			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
+			} elseif (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
 				if (!empty($captionRow['color'])) { // 颜色
 					$subtitleTrackClip['FontColor'] = $captionRow['color'];
 				}
@@ -319,20 +318,152 @@ Ext（必填）：文件扩展名。
 	 */
 	private function getTimeline($editingInfo)
 	{
-		// 镜头
-		$lensVideoTracks = array(); // 视频轨列表（镜头）
-		$lensAudioTracks = array(); // 视频轨列表（配音）
-		/**
-		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
-		 * 一个镜头一个AudioTracks 元素array('AudioTrackClips'=> $lensAudioTrackClips)
-		 */
+		// 转场/滤镜
+		$editingTransitionEffect = array(); // 用于镜头间的转场(放到镜头结束点)
+		if (!empty($editingInfo['transitionIds'])) { // 转场
+			if (in_array(-1, $editingInfo['transitionIds'])) { // 随机转场
+				$editingTransitionEffect = array(
+					'Type' => 'Transition',
+					'SubType' => 'random',
+				);
+			} else { // 自选转场
+				$editingTransitionEffect = array(
+					'Type' => 'Transition',
+					'SubType' => implode(',', $editingInfo['transitionIds']),
+				);
+			}
+		}
+		// 滤镜（针对全局画面添加滤镜）， 只加1种滤镜
+		$editingFilterEffectTrackItem = array();
+		if (!empty($editingInfo['filterIds'])) { // 滤镜
+			if (in_array(-1, $editingInfo['filterIds'])) { // 随机滤镜
+				$editingFilterEffectTrackItem = array(
+					'Type' => 'Filter',
+					'SubType' => 'random',
+				);
+			} else { // 自选滤镜
+				$editingFilterEffectTrackItem = array(
+					'Type' => 'Filter',
+					'SubType' => implode(',', $editingInfo['filterIds']),
+				);
+			}
+		}
+		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
+		// 标题
+		$subtitleTracks = array();
+		if (!empty($editingInfo['titleList'])) foreach ($editingInfo['titleList'] as $key => $titleRow) {
+			$subtitleTrackClips = array();
+			if (!empty($titleRow['captionList'])) foreach ($titleRow['captionList'] as $captionRow) {
+				// 跟镜头对齐
+				if (empty($lensList[$key])) { // 没有镜头
+					continue;
+				}
+				$subtitleTrackClip = self::captionToSubtitleTrack($captionRow, $titleRow);
+				// 跟镜头对齐
+				$subtitleTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
+				$subtitleTrackClips[] = $subtitleTrackClip;
+			}
+			$subtitleTracks[] = array(
+				'subtitleTrackClips' => $subtitleTrackClips,
+			);
+		}
+		
+		// 背景音乐
+		$musicAudioTrackClips = array();
+		if (!empty($editingInfo['musicList'])) foreach ($editingInfo['musicList'] as $key => $musicRow) {
+			$audioTrackClip = array(
+				'MediaURL' => $musicRow['url'],
+			);
+			$effectVolume = array();
+			if (!empty($editingInfo['volume']['backgroundVolume'])) { // 背景音量
+				$effectVolume = array(
+					'Type' => 'Volume',
+					'Gain' => $editingInfo['volume']['backgroundVolume'],
+				);
+			}
+			$effects = array();
+			if (!empty($effectVolume)) {
+				$effects[] = $effectVolume;
+			}
+			if (!empty($effects)) {
+				$audioTrackClip['Effects'] = $effects;
+			}
+			// 跟镜头对齐
+			if (empty($lensList[$key])) { // 没有镜头
+				continue;
+			}
+			$audioTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
+			$musicAudioTrackClips[] = $audioTrackClip;
+		}
+		
+		// 贴纸
+		$decalVideoTracks = array();
+		if (!empty($editingInfo['decalList'])) foreach ($editingInfo['decalList'] as $key => $decalRow) {
+			$useLensList = $decalRow['useLensList']; // 适用的场景 
+			$clipIds = array(); // 适用的镜头ID
+			foreach ($useLensList as $useLensRow) {
+				if ($useLensRow['id'] == -1) {
+					$clipIds = array();
+					break;
+				} else {
+					$clipIds[] = $useLensRow['id'];
+				}
+			}
+			if (empty($decalRow['useLensList'])) {
+				$clipIds = array();
+			}
+			if (empty($lensList[$key])) {
+				continue;
+			}
+			$decalVideoTrackClips = array();
+			if (!empty($decalRow['media1'])) { // 第1个素材
+				$videoTrackClip = array( // 文案1
+					'Type' => $decalRow['media1']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $decalRow['media1']['url'],
+				);
+				if (!empty($decalRow['media1']['size'])) { // 大小
+					$videoTrackClip['Width'] = 1;
+					$videoTrackClip['Height'] = $decalRow['media1']['size'] * 0.01;
+				}
+				if (!empty($decalRow['media1']['x']) && !empty($decalRow['media1']['y'])) { // 位置
+					$videoTrackClip['X'] = $decalRow['media1']['x'];
+					$videoTrackClip['Y'] = $decalRow['media1']['y'];
+				}
+				if (!empty($clipIds)) { // 适用的镜头
+					$videoTrackClip['ClipId'] = reset($clipIds); // 镜头ID
+				}
+				$decalVideoTrackClips[] = $videoTrackClip;
+			}
+			if (!empty($decalRow['media2'])) { // 第2个素材
+				$videoTrackClip = array( // 文案1
+					'Type' => $decalRow['media2']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $decalRow['media2']['url'],
+				);
+				if (!empty($decalRow['media2']['size'])) { // 大小
+					$videoTrackClip['Width'] = 1;
+					$videoTrackClip['Height'] = $decalRow['media2']['size'] * 0.01;
+				}
+				if (!empty($decalRow['media2']['x']) && !empty($decalRow['media2']['y'])) { // 位置
+					$videoTrackClip['X'] = $decalRow['media2']['x'];
+					$videoTrackClip['Y'] = $decalRow['media2']['y'];
+				}
+				if (!empty($clipIds)) { // 适用的镜头
+					$videoTrackClip['ClipId'] = reset($clipIds); // 镜头ID
+				}
+				$decalVideoTrackClips[] = $videoTrackClip;
+			}
+			$decalVideoTracks[] = array(
+				'VideoTrackClips' => $decalVideoTrackClips,
+			);
+		}
+		
 		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
-		$globalAudioTrackClips = array(); // 全局配音
+		$editingAudioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubType'])) { // 配音类型  1 手动设置  2  配音文件(文件夹-旁白配音)
 			if (!empty($editingInfo['dubCaptionList']) && $editingInfo['dubType'] == 1) { // 手动配音
 				foreach ($editingInfo['dubCaptionList'] as $captionRow) {
 					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo);
-					$globalAudioTrackClips[] = $audioTrackClip;
+					$editingAudioTrackClips[] = $audioTrackClip;
 				}
 			} elseif (!empty($editingInfo['dubMediaList']) && $editingInfo['dubType'] == 2) { // 配音文件
 				$effectVolume = array(); // 音量效果
@@ -360,17 +491,36 @@ Ext（必填）：文件扩展名。
 					if (!empty($effects)) {
 						$audioTrackClip['Effects'] = $effects;
 					}
-					$globalAudioTrackClips[] = $audioTrackClip;
+					$editingAudioTrackClips[] = $audioTrackClip;
 				}
 			}
 		}
 
+		$editingAudioTracks = array();
+		$musicAudioTracks = array(); // 背景音乐
+		// $decalVideoTracks
+		if (!empty($musicAudioTrackClips)) { // 音乐
+			$musicAudioTracks[] = array(
+				'VideoTrackClips' => $musicAudioTrackClips,
+			);
+		}
+		if (!empty($editingAudioTrackClips)) {
+			$editingAudioTracks[] = array(
+				'AudioTrackClips' => $editingAudioTrackClips,
+			);
+		}
+		// 镜头
+		$lensVideoTracks = array(); // 视频轨列表（镜头）
+		$lensAudioTracks = array(); // 视频轨列表（配音）
+		/**
+		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
+		 * 一个镜头一个AudioTracks 元素array('AudioTrackClips'=> $lensAudioTrackClips)
+		 */
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
 			$lensVideoTrackClips = array(); // 镜头的VideoTracks 视频/图片
-			
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
-			$lensTransitionEffects = array(); // 镜头的效果-转场
+			$lensTransitionEffects = array(); // 镜头的效果-转场 在素材间转场，1种效果
 			if (!empty($lensRow['transitionType'])) { // #转场设置
 				if ($lensRow['transitionType'] == 1 && !empty($lensRow['transitionIds'])) { // 自选转场
 					$lensTransitionEffects[] = array(
@@ -390,10 +540,10 @@ Ext（必填）：文件扩展名。
 					'Gain' => 0,
 				);
 			}
-			if (empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaRow) {
+			if (!empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaKey => $mediaRow) {
 				$videoTrackClip = array(
 					'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
-					'ReferenceClipId' => "lens_" . $lensRow['id'], // 镜头标记，用于对齐
+					'ReferenceClipId' => $lensRow['id'], // 镜头标记，用于对齐
 					'Type' => $mediaRow['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
 				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
@@ -401,25 +551,31 @@ Ext（必填）：文件扩展名。
 				}
 				// 素材特效列表
 				$effects = array();
-				if (!empty($lensTransitionEffects)) {
-					$effects = array_merge($effects, $lensTransitionEffects);
-				}
 				if (!empty($lensVolumeEffects)) {
 					$effects = array_merge($effects, $lensVolumeEffects);
+				}
+				if ($mediaKey + 1 == count($lensRow['mediaList'])) { // 最后一个
+					if (!empty($editingTransitionEffect)) { // 添加镜头间转场
+						$effects[] = $editingTransitionEffect;
+					}
+				} else {
+					if (!empty($lensTransitionEffects)) { // 添加素材间转场
+						$effects = array_merge($effects, $lensTransitionEffects);
+					}
 				}
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
 				}
 				$lensVideoTrackClips[] = $videoTrackClip;
 			}
-			$lensAudioTrackClips = array(); // 镜头的AudioTracks 配音
+			$lensAudioTrackClips = array(); // 镜头的 AudioTracks 配音
 			// 配音 - 文本字幕
-			if (!empty(empty($globalAudioTrackClips) && $lensRow['dubCaptionList']) && $lensRow['dubType'] == 1) { // 手动配音
+			if (empty($editingAudioTrackClips) && !empty($lensRow['dubCaptionList']) && $lensRow['dubType'] == 1) { // 手动配音
 				foreach ($lensRow['dubCaptionList'] as $captionRow) {
 					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo, $lensRow);
 					$audioTrackClips[] = $audioTrackClip;
 				}
-			} elseif (empty($globalAudioTrackClips) && !empty($lensRow['dubMediaList']) && $lensRow['dubType'] == 2) { // 配音文件
+			} elseif (empty($editingAudioTrackClips) && !empty($lensRow['dubMediaList']) && $lensRow['dubType'] == 2) { // 配音文件
 				$effectVolume = array(); // 音量效果
 				if (!empty($editingInfo['volume'])) {
 					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
@@ -432,7 +588,7 @@ Ext（必填）：文件扩展名。
 				foreach ($lensRow['dubMediaList'] as $mediaRow) {
 					$audioTrackClip = array(
 						'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
-						'ClipId' => "lens_" . $lensRow['id'], // 镜头标记，用于对齐
+						'ClipId' => $lensRow['id'], // 镜头标记，用于对齐
 					);
 					if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
 						$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
@@ -461,53 +617,15 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
-
-//======================================================
-		// 标题
-		$subtitleTracks = array(); // 字幕轨列表， 标题组
-		if (!empty($editingInfo['titleList'])) foreach ($editingInfo['titleList'] as $titleRow) {
-			foreach ($titleRow['captionList'] as $captionRow) {
-				$subtitleTrackClip = $this->getSubtitleTrack($captionRow, $titleRow);
-				$subtitleTrackClips[] = $subtitleTrackClip;
-			}
-			$subtitleTracks[] = array(
-				'subtitleTrackClips' => $subtitleTrackClips,	
-			);
-		}
-		
-		// 贴纸
-		$videoTracks = array();
-		$decalList = empty($editingInfo['decalList']) ? array() : $editingInfo['decalList'];
-		foreach ($decalList as $decalRow) {
-			if (!empty($decalRow['media1'])) {
-				$videoTrackClip = array( // 文案1
-					'Type' => $decalRow['media1']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
-					'MediaURL' => $decalRow['media1']['url'],
-				);
-				if (!empty($decalRow['mediaSize1'])) { // 大小
-					$subtitleTrackClip['Width'] = 1;
-					$subtitleTrackClip['Height'] = $decalRow['mediaSize1'] * 0.01;
-				}
-				if (!empty($decalRow['mediaPostion1'])) { // 位置
-					$subtitleTrackClip['X'] = $decalRow['mediaPostion1'];
-					$subtitleTrackClip['Y'] = $decalRow['mediaPostion1'];
-				}
-			}
-		}
-		
-		// 音乐
-		$audioTrackClips = array();
-		$musicList = empty($editingInfo['musicList']) ? array() : $editingInfo['musicList'];
-		foreach ($musicList as $musicRow) {
-			$audioTrackClip = array(
-				'MediaURL' => $musicRow['url'],
-			);
-		}
-		
 		return array(
-			'VideoTracks' => $videoTracks,
-			'AudioTracks' => $audioTracks,
-			'SubtitleTracks' => $subtitleTracks,
+			'VideoTracks' => array_merge($lensVideoTracks, $decalVideoTracks), // 视频轨道
+			'AudioTracks' => array_merge($lensAudioTracks, $musicAudioTracks), // 音频轨道
+			'EffectTracks' => array( // 针对全局画面添加滤镜，只加1个滤镜
+				array(
+					'EffectTrackItems' => array($editingFilterEffectTrackItem),
+				)
+			),
+			'SubtitleTracks' => $subtitleTracks, // 标题
 		);
 	}
 	
@@ -526,105 +644,7 @@ Ext（必填）：文件扩展名。
 				'Orientation' => 1,// 视频比例
 			),	
 		);
-		$timeline = array(
-			
-			'AudioTracks' => array( // 	音频轨列表 （第二步）
-				array(
-					'AudioTrackClips' => array(
-						array(
-							'Content' => "回龙观盒马鲜生开业啦,盒马鲜生开业啦,附近的商场新开了一家盒马鲜生，今天是第一天开业,商场里的人不少，零食、酒水都比较便宜大家也快来看看呀",
-							'Type' => 'AI_TTS',
-							'Voice' => 'zhiqing',
-							'Effects' => array(
-								array( // 音量
-									'Type' => 'Volume',
-									'Gain' => 1,
-								),
-								array(
-									'FontSize' => 34, // 字号
-									'Y' => 0.658, // 位置
-									'Alignment' => 'TopCenter', // 排版
-									'AdaptMode' => 'AutoWrap',
-									'Type' => 'AI_ASR',
-									'Font' => 'FZHei-B01S' // 字体
-								),
-							),
-						
-						),
-						
-					),	
-						
-					'AudioTrackClips' => array(
-						array( // 配音文件1
-							"MediaUrl" => "https://your-bucket.oss-cn-shanghai.aliyuncs.com/your_audio.mp3",
-						), 
-						array( // 配音文件2
-							"MediaUrl" => "https://your-bucket.oss-cn-shanghai.aliyuncs.com/your_audio.mp3",
-						),
-					),
-				),
-				array(
-						
-				),
-			),
-			'SubtitleTracks' => array( // 标题组（字幕轨列表）
-				array( 
-					'SubtitleTrackClips' => array(
-						array( // 文案1
-							'TimelineIn' => 0, // 显示时长-开始
-							'TimelineOut' => 0, // 显示时长-结束
-							'Type' => 'Text', // 类型
-							'X' => '0',
-							'Y' => '200', // 位置
-							'Font' => "KaiTi", // 字体
-							'Content' => '这里是标题', // 文案内容
-							'AdaptMode' => 'AutoWrap', // 自动换行
-							'Alignment' => 'TopCenter', // 排版
-							'FontSize' => '80', // 字号
-							'FontColorOpacity' => '1', // 
-							'EffectColorStyle' => 'CS0003-000011', // 花字
-							'FontColor' => "#ffffff", // 样式-颜色
-							
-							"Outline" => 2, // 字体样式- 字幕边框- 边框大小
-							"OutlineColour" => "#0e0100",  // 字体样式- 字幕边框- 边框颜色
-							
-							'BorderStyle' => 3 , // BorderStyle 不透明背景必须设置 BoderStyle = 3 
-							"BackColour" => "#000000", // 背景颜色
-						),
-						array( // 文案2
-							'Type' => 'Text',
-							'X' => '0',
-							'Y' => '200',
-							'Content' => '这里是标题',
-							'Alignment' => 'TopCenter',
-							'FontSize' => '80',
-							'FontColorOpacity' => '1',
-							'EffectColorStyle' => 'CS0003-000011',
-						),
-					),
-				),
-				
-			),
-			'EffectTracks' => array( // 针对全局画面添加滤镜
-				array(
-					'EffectTrackItems' => array(
-						array(
-							'Type' => 'Filter',
-							'SubType' => 'wiperight,perlin', // random 随机转场
-							'Duration' => 2, // 转场时长
-							// https://help.aliyun.com/zh/ims/developer-reference/effect-configuration-description?scm=20140722.S_help%40%40%E6%96%87%E6%A1%A3%40%40198824._.ID_help%40%40%E6%96%87%E6%A1%A3%40%40198824-RL_ExtParams-LOC_doc%7EUND%7Eab-OR_ser-PAR1_2102029c17665518368855674d3268-V_4-PAR3_r-RE_new5-P0_0-P1_0&spm=a2c4g.11186623.help-search.i40
-								'ExtParams' => json_encode(array(
-										
-									// brightness 亮度
-									// contrast 对比度
-									// 	saturation  饱和度
-									// tint  色度（色调）
-								)), // 颜色调整
-						),
-					),
-				),
-			), 
-		// 
+		
 		
 		/**
 		 * 
@@ -646,7 +666,7 @@ Ext（必填）：文件扩展名。
  2.  视频时长
  3. 视频帧率
 		 */
-		); // 云剪辑工程时间线
+
 		$MaterialMaps = array(); // 工程关联素材
 		
 		try {

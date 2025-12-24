@@ -38,6 +38,20 @@ class EditingTitle extends EntityBase
     public $editingId;
     
     /**
+     * 开始时间
+     *
+     * @var int
+     */
+    public $start;
+    
+    /**
+     * 结束时间
+     *
+     * @var int
+     */
+    public $end;
+    
+    /**
      * 字幕ID列表
      *
      * @var varchar
