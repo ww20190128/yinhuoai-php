@@ -879,6 +879,7 @@ class Editing extends ServiceBase
     		$editingTitleModels[$editingTitleEtt->id] = array(
     			'id' 			=> intval($editingTitleEtt->id),
     			'updateTime' 	=> intval($editingTitleEtt->updateTime),
+    			'createTime' 	=> intval($editingTitleEtt->createTime),
     			'captionIds'	=> $captionIds,
     		);
     		$allCaptionIds = array_merge($allCaptionIds, $captionIds);
@@ -897,7 +898,7 @@ class Editing extends ServiceBase
     		}
     		uasort($captionList, array($commonSv, 'sortByCreateTime'));
     		$editingTitleModel['title'] = empty($captionList) ? 0 : reset($captionList)['text'];
-    		$editingTitleModel['captionList'] = $captionList;
+    		$editingTitleModel['captionList'] = array_values($captionList);
     		$editingTitleModels[$key] = $editingTitleModel;
     	}
     	$commonSv = \service\Common::singleton();
