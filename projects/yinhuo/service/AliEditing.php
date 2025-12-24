@@ -173,11 +173,94 @@ Ext（必填）：文件扩展名。
 // 云剪辑工程管理================
 
 	/**
-	 * 获取标题
-	 *
+	 * 将文本组织成AudioTrackClip（文本字幕）
+	 * 
 	 * @return array
 	 */
-	private function getSubtitleTrack($captionRow, $titleRow = array())
+	private static function captionToAudioTrackClip($captionRow, $editingInfo, $lensRow = array())
+	{
+		$audioTrackClip = array( // 文案1
+			'Type' => 'AI_TTS', // 类型
+			'Content' => $captionRow['text'], // 文案内容
+			'Voice' => 'zhiqing', // 配音   全局
+		);
+		// 字体效果
+		$effectFont = array(
+			'type' => 'AI_ASR',
+		);
+		if (!empty($lensRow)) {
+			$effectFont['ClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+		}
+		$effectVolume = array(); // 音量效果
+		if (!empty($editingInfo['volume'])) {
+			if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
+				$effectVolume = array(
+					'Type' => 'Volume',
+					'Gain' => $editingInfo['volume']['dubVolume'],
+				);
+			}
+			if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+				$effectFont['SpeechRate'] = $editingInfo['volume']['dubSpeed'];
+			}
+		}
+		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
+			$effectFont['FontColorOpacity'] = 0;
+		}
+		if (!empty($captionRow['font'])) { // 字体
+			if (!empty($captionRow['text-align'])) { // 排版
+				$effectFont['Alignment'] = $captionRow['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+			}
+			if (!empty($captionRow['position'])) { // 位置
+				$effectFont['Y'] = $captionRow['position'];
+			}
+			if (!empty($captionRow['font-size'])) { // 字号
+				$effectFont['FontSize'] = $captionRow['font-size'];
+			}
+			if (!empty($captionRow['font-family'])) { // 字体
+				$effectFont['Font'] = $captionRow['font-size'];
+			}
+		}
+		if (!empty($captionRow['style'])) { // 样式
+			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 2 && !empty($captionRow['EffectColorStyle'])) { // 花字
+				$effectFont['EffectColorStyle'] = $captionRow['EffectColorStyle'];
+			}
+			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['color'])) { // 颜色
+					$effectFont['FontColor'] = $captionRow['color'];
+				}
+				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 2 && !empty($captionRow['background'])) { // 字幕背景
+					$effectFont['BackColour'] = $captionRow['background'];
+					$effectFont['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
+				}
+				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 3) { // 字幕边框
+					if (!empty($captionRow['border-size'])) { // 边框大小
+						$effectFont['Outline'] = $captionRow['border-size'];
+					}
+					if (!empty($captionRow['border-color'])) { // 边框颜色
+						$effectFont['OutlineColour'] = $captionRow['border-color'];
+					}
+				}
+			}
+		}
+		$effects = array();
+		if (!empty($effectFont)) {
+			$effects[] = $effectFont;
+		}
+		if (!empty($effectVolume)) {
+			$effects[] = $effectVolume;
+		}
+		if (!empty($effects)) {
+			$audioTrackClip['Effects'] = $effects;
+		}
+		return $audioTrackClip;
+	}
+	
+	/**
+	 * 将文本组织成SubtitleTrack
+	 * 
+	 * @return array
+	 */
+	private function getSubtitleTrackByCaption($captionRow, $titleRow = array())
 	{
 		$subtitleTrackClip = array( // 文案1
 			'Type' => 'Text', // 类型
@@ -217,7 +300,6 @@ Ext（必填）：文件扩展名。
 					$subtitleTrackClip['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
 				}
 				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 3) { // 字幕边框
-					$subtitleTrackClip['BackColour'] = $captionRow['color'];
 					if (!empty($captionRow['border-size'])) { // 边框大小
 						$subtitleTrackClip['Outline'] = $captionRow['border-size'];
 					}
@@ -235,15 +317,56 @@ Ext（必填）：文件扩展名。
 	 *
 	 * @return array
 	 */
-	public function getTimeline($editingInfo)
+	private function getTimeline($editingInfo)
 	{
 		// 镜头
 		$lensVideoTracks = array(); // 视频轨列表（镜头）
+		$lensAudioTracks = array(); // 视频轨列表（配音）
 		/**
 		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
+		 * 一个镜头一个AudioTracks 元素array('AudioTrackClips'=> $lensAudioTrackClips)
 		 */
+		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
+		$globalAudioTrackClips = array(); // 全局配音
+		if (!empty($editingInfo['dubType'])) { // 配音类型  1 手动设置  2  配音文件(文件夹-旁白配音)
+			if (!empty($editingInfo['dubCaptionList']) && $editingInfo['dubType'] == 1) { // 手动配音
+				foreach ($editingInfo['dubCaptionList'] as $captionRow) {
+					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo);
+					$globalAudioTrackClips[] = $audioTrackClip;
+				}
+			} elseif (!empty($editingInfo['dubMediaList']) && $editingInfo['dubType'] == 2) { // 配音文件
+				$effectVolume = array(); // 音量效果
+				if (!empty($editingInfo['volume'])) {
+					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
+						$effectVolume = array(
+							'Type' => 'Volume',
+							'Gain' => $editingInfo['volume']['dubVolume'],
+						);
+					}
+				}
+				foreach ($editingInfo['dubMediaList'] as $mediaRow) {
+					$audioTrackClip = array(
+						'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
+					);
+					if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+						$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
+					}
+					if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
+					}
+					$effects = array();
+					if (!empty($effectVolume)) {
+						$effects[] = $effectVolume;
+					}
+					if (!empty($effects)) {
+						$audioTrackClip['Effects'] = $effects;
+					}
+					$globalAudioTrackClips[] = $audioTrackClip;
+				}
+			}
+		}
+
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
-			$lensVideoTrackClips = array(); // 镜头的VideoTracks 元素
+			$lensVideoTrackClips = array(); // 镜头的VideoTracks 视频/图片
 			
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
@@ -267,16 +390,16 @@ Ext（必填）：文件扩展名。
 					'Gain' => 0,
 				);
 			}
-			
 			if (empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaRow) {
 				$videoTrackClip = array(
 					'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
+					'ReferenceClipId' => "lens_" . $lensRow['id'], // 镜头标记，用于对齐
 					'Type' => $mediaRow['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
 				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $lensRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
-				// 素材特效
+				// 素材特效列表
 				$effects = array();
 				if (!empty($lensTransitionEffects)) {
 					$effects = array_merge($effects, $lensTransitionEffects);
@@ -289,54 +412,60 @@ Ext（必填）：文件扩展名。
 				}
 				$lensVideoTrackClips[] = $videoTrackClip;
 			}
-			$lensVideoTracks[] = array(
-				'VideoTrackClips' => $lensVideoTrackClips,
-			);
-		}
-		
-		$audioTracks = array();
-		// 全局配音,如果有剪辑全局配音 ，镜头配音就不生效
-		if (!empty($editingInfo['dubType'])) { // 配音类型  1 手动设置  2  配音文件(文件夹-旁白配音)
-			$audioTrackClips = array();
-			if ($editingInfo['dubType'] == 1 && !empty($editingInfo['dubCaptionList'])) {
-				foreach ($editingInfo['dubCaptionList'] as $captionRow) {
-					
-				}
-			} elseif ($editingInfo['dubType'] == 2 && !empty($editingInfo['dubMediaList'])) {
-				foreach ($editingInfo['dubMediaList'] as $mediaRow) {
-					$audioTrackClip = array(
-						'MediaURL' => $mediaRow['url'], // 播放链接，旁白配音
-					);
+			$lensAudioTrackClips = array(); // 镜头的AudioTracks 配音
+			// 配音 - 文本字幕
+			if (!empty(empty($globalAudioTrackClips) && $lensRow['dubCaptionList']) && $lensRow['dubType'] == 1) { // 手动配音
+				foreach ($lensRow['dubCaptionList'] as $captionRow) {
+					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo, $lensRow);
 					$audioTrackClips[] = $audioTrackClip;
 				}
-			}
-			$audioTracks[] = array(
-				'AudioTrackClips' => $audioTrackClips,
-			);
-		} else { // 镜头配音
-			$audioTrackClips = array();
-			foreach ($lensList as $lensRow) {
-				if (!empty($lensRow['dubType'])) { // 镜头配音
-					if ($lensRow['dubType'] == 1 && !empty($lensRow['dubCaptionList'])) { // 手动设置
-					
-					} elseif ($lensRow['dubType'] == 2 && !empty($lensRow['dubMediaList'])) { // 配音文件
-						foreach ($lensRow['dubMediaList'] as $mediaRow) {
-							$audioTrackClip = array(
-								'MediaURL' => $mediaRow['url'], // 播放链接，旁白配音
-							);
-							$audioTrackClips[] = $audioTrackClip;
-						}
+			} elseif (empty($globalAudioTrackClips) && !empty($lensRow['dubMediaList']) && $lensRow['dubType'] == 2) { // 配音文件
+				$effectVolume = array(); // 音量效果
+				if (!empty($editingInfo['volume'])) {
+					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
+						$effectVolume = array(
+							'Type' => 'Volume',
+							'Gain' => $editingInfo['volume']['dubVolume'],
+						);
 					}
 				}
+				foreach ($lensRow['dubMediaList'] as $mediaRow) {
+					$audioTrackClip = array(
+						'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
+						'ClipId' => "lens_" . $lensRow['id'], // 镜头标记，用于对齐
+					);
+					if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+						$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
+					}
+					if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
+						
+					}
+					$effects = array();
+					if (!empty($effectVolume)) {
+						$effects[] = $effectVolume;
+					}
+					if (!empty($effects)) {
+						$audioTrackClip['Effects'] = $effects;
+					}
+					$lensAudioTrackClips[] = $audioTrackClip;
+				}
 			}
-			$audioTracks[] = array(
-				'AudioTrackClips' => $audioTrackClips,
-			);
+			if (!empty($lensVideoTrackClips)) {
+				$lensVideoTracks[] = array(
+					'VideoTrackClips' => $lensVideoTrackClips,
+				);
+			}
+			if (!empty($lensAudioTrackClips)) {
+				$lensAudioTracks[] = array(
+					'AudioTrackClips' => $lensAudioTrackClips,
+				);
+			}
 		}
+
+//======================================================
 		// 标题
 		$subtitleTracks = array(); // 字幕轨列表， 标题组
-		$titleList = empty($editingInfo['titleList']) ? array() : $editingInfo['titleList'];
-		foreach ($titleList as $titleRow) {
+		if (!empty($editingInfo['titleList'])) foreach ($editingInfo['titleList'] as $titleRow) {
 			foreach ($titleRow['captionList'] as $captionRow) {
 				$subtitleTrackClip = $this->getSubtitleTrack($captionRow, $titleRow);
 				$subtitleTrackClips[] = $subtitleTrackClip;
