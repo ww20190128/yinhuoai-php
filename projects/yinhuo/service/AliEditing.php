@@ -357,6 +357,13 @@ Ext（必填）：文件扩展名。
 		}
 		
 		// 音乐
+		$audioTrackClips = array();
+		$musicList = empty($editingInfo['musicList']) ? array() : $editingInfo['musicList'];
+		foreach ($musicList as $musicRow) {
+			$audioTrackClip = array(
+				'MediaURL' => $musicRow['url'],
+			);
+		}
 		
 		return array(
 			'VideoTracks' => $videoTracks,
@@ -458,12 +465,40 @@ Ext（必填）：文件扩展名。
 							'Type' => 'Filter',
 							'SubType' => 'wiperight,perlin', // random 随机转场
 							'Duration' => 2, // 转场时长
-								'ExtParams' => json_encode(array()), // 颜色调整
+							// https://help.aliyun.com/zh/ims/developer-reference/effect-configuration-description?scm=20140722.S_help%40%40%E6%96%87%E6%A1%A3%40%40198824._.ID_help%40%40%E6%96%87%E6%A1%A3%40%40198824-RL_ExtParams-LOC_doc%7EUND%7Eab-OR_ser-PAR1_2102029c17665518368855674d3268-V_4-PAR3_r-RE_new5-P0_0-P1_0&spm=a2c4g.11186623.help-search.i40
+								'ExtParams' => json_encode(array(
+										
+									// brightness 亮度
+									// contrast 对比度
+									// 	saturation  饱和度
+									// tint  色度（色调）
+								)), // 颜色调整
 						),
 					),
 				),
 			), 
 		// 
+		
+		/**
+		 * 
+		 * 音量调整Effect Type:Volume 调音
+		 * 		配音音量
+		 * 		背景音量
+		 * 		配音语速
+		 * 
+		 * https://help.aliyun.com/zh/ims/developer-reference/access-the-video-clip-web-sdk?scm=20140722.S_help%40%40%E6%96%87%E6%A1%A3%40%40453478._.ID_help%40%40%E6%96%87%E6%A1%A3%40%40453478-RL_%E8%AF%AD%E9%80%9F-LOC_doc%7EUND%7Eab-OR_ser-PAR1_212a5d3d17665522380104558d0553-V_4-PAR3_r-RE_new5-P0_1-P1_0&spm=a2c4g.11186623.help-search.i75
+		 * interface VoiceConfig {
+  volume: number; // 音量，取值0~100，默认值50
+  speech_rate: number; // 语速，取值范围：-500～500，默认值：0
+  pitch_rate: number; // 语调，取值范围：-500～500，默认值：0
+  format?: string; // 输出文件格式，支持：PCM/WAV/MP3
+}
+
+
+ 1.  视频比例
+ 2.  视频时长
+ 3. 视频帧率
+		 */
 		); // 云剪辑工程时间线
 		$MaterialMaps = array(); // 工程关联素材
 		
