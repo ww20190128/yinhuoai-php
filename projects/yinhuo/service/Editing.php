@@ -879,6 +879,8 @@ class Editing extends ServiceBase
     			'id' 			=> intval($editingTitleEtt->id),
     			'updateTime' 	=> intval($editingTitleEtt->updateTime),
     			'createTime' 	=> intval($editingTitleEtt->createTime),
+    				'start' 	=> intval($editingTitleEtt->start),
+    				'end' 	=> intval($editingTitleEtt->end),
     			'captionIds'	=> $captionIds,
     		);
     		$allCaptionIds = array_merge($allCaptionIds, $captionIds);

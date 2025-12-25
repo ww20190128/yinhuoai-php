@@ -7,7 +7,8 @@ use Darabonba\OpenApi\Models\Config;
 use AlibabaCloud\SDK\ICE\V20201109\Models\UploadMediaByURLRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\GetUrlUploadInfosRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\RefreshUploadMediaRequest;
-
+use AlibabaCloud\Credentials\Credential;
+use AlibabaCloud\SDK\ICE\V20201109\Models\CreateEditingProjectRequest;
 /**
  * 阿里云-剪辑
  *
@@ -76,7 +77,10 @@ class AliEditing extends ServiceBase
 			$request = new UploadMediaByURLRequest();
 			$request->uploadURLs = $uploadURLs; // 媒体源文件 URL
 			$request->uploadTargetConfig = json_encode($uploadTargetConfig);
-			$response = $client->uploadMediaByURL($request);
+			$response = self::$client->uploadMediaByURL($request);
+			
+			
+			print_r($response);exit;
 			echo json_encode($response->body);
 		} catch (TeaUnableRetryError $e) {
 			var_dump($e);
@@ -654,9 +658,14 @@ Ext（必填）：文件扩展名。
 	 */
 	public function createEditingProject($editingInfo)
 	{
+
+		$urlArr = array('https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/image/5/4afc0dd0bd07adc1ce003885ada43877.png');
+		$this->uploadMediaByURL($urlArr);
+		exit;
+		
 		$timeline = $this->getTimeline($editingInfo);
 		
-print_r($timeline);exit;
+
 		$outputMediaConfig = array(
 			// 
 			'MaxDuration' =>1, // 最大时长
@@ -688,13 +697,14 @@ print_r($timeline);exit;
 		try {
 			// 创建云剪辑工程
 	    	$request = new CreateEditingProjectRequest();
-	   	 	$request->title = $editingEtt->name;
-	    	$request->description = "测试工程描述";
+	   	 	$request->title = $editingInfo['name'];
+	    	$request->description = $editingInfo['topic'];
 	    	$request->timeline = json_encode($timeline);
-	    	$request->coverURL = "http://xxxx/coverUrl.jpg";
-	    	$response = $client->createEditingProject($request);
+	    //	$request->coverURL = "http://xxxx/coverUrl.jpg";
+	    	$response = self::$client->createEditingProject($request);
+	   
 	    	$projectId = $response->body->project->projectId;
-    var_dump($response);
+    print_r($projectId);exit;
 		} catch (TeaUnableRetryError $e) {
 			var_dump($e->getMessage());
 			var_dump($e->getErrorInfo());
