@@ -1179,7 +1179,8 @@ class Editing extends ServiceBase
     	}
     	$editingInfo = $this->editingInfo($userEtt, $editingEtt);
     	$aliEditingSv = \service\AliEditing::singleton();
-    	$aliEditingSv->createEditingProject($editingInfo);
-    	print_r($editingInfo);exit;
+    	$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
+    	// 是否保存为模板
+    	print_r($projectId);exit;
     }
 }

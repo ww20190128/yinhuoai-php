@@ -8,7 +8,12 @@ use AlibabaCloud\SDK\ICE\V20201109\Models\UploadMediaByURLRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\GetUrlUploadInfosRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\RefreshUploadMediaRequest;
 use AlibabaCloud\Credentials\Credential;
+
+use AlibabaCloud\SDK\ICE\V20201109\Models\SearchEditingProjectRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\CreateEditingProjectRequest;
+use AlibabaCloud\SDK\ICE\V20201109\Models\GetEditingProjectRequest;
+use AlibabaCloud\SDK\ICE\V20201109\Models\UpdateEditingProjectRequest;
+use AlibabaCloud\SDK\ICE\V20201109\Models\DeleteEditingProjectsRequest;
 /**
  * 阿里云-剪辑
  *
@@ -69,6 +74,8 @@ class AliEditing extends ServiceBase
 			$uploadURLs = $urlArr;
 		}
 		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
+		
+	
 		$uploadTargetConfig = array(
 			'StorageType' => $aliEditingConf['StorageType'],
 			'StorageLocation' => $aliEditingConf['StorageLocation'],
@@ -223,7 +230,7 @@ Ext（必填）：文件扩展名。
 				$effectFont['FontSize'] = $captionRow['font-size'];
 			}
 			if (!empty($captionRow['font-family'])) { // 字体
-				$effectFont['Font'] = $captionRow['font-size'];
+				$effectFont['Font'] = $captionRow['font-family'];
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
@@ -290,7 +297,7 @@ Ext（必填）：文件扩展名。
 				$subtitleTrackClip['FontSize'] = $captionRow['font-size'];
 			}
 			if (!empty($captionRow['font-family'])) { // 字体
-				$subtitleTrackClip['Font'] = $captionRow['font-size'];
+				$subtitleTrackClip['Font'] = $captionRow['font-family'];
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
@@ -324,6 +331,8 @@ Ext（必填）：文件扩展名。
 	 */
 	private function getTimeline($editingInfo)
 	{
+$editingInfo['transitionIds'] = array(-1);
+$editingInfo['filterIds'] = array(-1);
 		// 转场/滤镜
 		$editingTransitionEffect = array(); // 用于镜头间的转场(放到镜头结束点)
 		if (!empty($editingInfo['transitionIds'])) { // 转场
@@ -339,6 +348,7 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
+
 		// 滤镜（针对全局画面添加滤镜）， 只加1种滤镜
 		$editingFilterEffectTrackItem = array();
 		if (!empty($editingInfo['filterIds'])) { // 滤镜
@@ -354,7 +364,11 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
+		
+
+		
 		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
+
 		// 标题
 		$subtitleTracks = array();
 		if (!empty($editingInfo['titleList'])) foreach ($editingInfo['titleList'] as $key => $titleRow) {
@@ -374,9 +388,8 @@ Ext（必填）：文件扩展名。
 					'subtitleTrackClips' => $subtitleTrackClips,
 				);
 			}
-			
 		}
-		
+
 		// 背景音乐
 		$musicAudioTrackClips = array();
 		if (!empty($editingInfo['musicList'])) foreach ($editingInfo['musicList'] as $key => $musicRow) {
@@ -404,6 +417,7 @@ Ext（必填）：文件扩展名。
 			$audioTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
 			$musicAudioTrackClips[] = $audioTrackClip;
 		}
+		
 		
 		// 贴纸
 		$decalVideoTracks = array();
@@ -467,7 +481,7 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
-		
+	
 		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
 		$editingAudioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubType'])) { // 配音类型  1 手动设置  2  配音文件(文件夹-旁白配音)
@@ -506,6 +520,7 @@ Ext（必填）：文件扩展名。
 				}
 			}
 		}
+		
 
 		$editingAudioTracks = array();
 		$musicAudioTracks = array(); // 背景音乐
@@ -520,6 +535,8 @@ Ext（必填）：文件扩展名。
 				'AudioTrackClips' => $editingAudioTrackClips,
 			);
 		}
+		
+		
 		// 镜头
 		$lensVideoTracks = array(); // 视频轨列表（镜头）
 		$lensAudioTracks = array(); // 视频轨列表（配音）
@@ -628,6 +645,7 @@ Ext（必填）：文件扩展名。
 				);
 			}
 		}
+		
 		$effectTracks = array();
 		$result = array();
 		$videoTracks = array_merge($lensVideoTracks, $decalVideoTracks);// 视频轨道
@@ -658,58 +676,69 @@ Ext（必填）：文件扩展名。
 	 */
 	public function createEditingProject($editingInfo)
 	{
-
-		$urlArr = array('https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/image/5/4afc0dd0bd07adc1ce003885ada43877.png');
-		$this->uploadMediaByURL($urlArr);
-		exit;
-		
+		// 获取时间线
 		$timeline = $this->getTimeline($editingInfo);
-		
-
-		$outputMediaConfig = array(
-			// 
-			'MaxDuration' =>1, // 最大时长
-			'Video' => array(
-				'Fps'=> 50, // 帧率
-				'Orientation' => 1,// 视频比例
-			),	
-		);
-		
-		
-		/**
-
-		 * https://help.aliyun.com/zh/ims/developer-reference/access-the-video-clip-web-sdk?scm=20140722.S_help%40%40%E6%96%87%E6%A1%A3%40%40453478._.ID_help%40%40%E6%96%87%E6%A1%A3%40%40453478-RL_%E8%AF%AD%E9%80%9F-LOC_doc%7EUND%7Eab-OR_ser-PAR1_212a5d3d17665522380104558d0553-V_4-PAR3_r-RE_new5-P0_1-P1_0&spm=a2c4g.11186623.help-search.i75
-		 * interface VoiceConfig {
-  volume: number; // 音量，取值0~100，默认值50
-  speech_rate: number; // 语速，取值范围：-500～500，默认值：0
-  pitch_rate: number; // 语调，取值范围：-500～500，默认值：0
-  format?: string; // 输出文件格式，支持：PCM/WAV/MP3
-}
-
-
-
- 2.  视频时长
-
-		 */
-
-		$MaterialMaps = array(); // 工程关联素材
-		
+		if (empty($timeline)) {
+			return false;
+		}
+		// 创建云剪辑工程
 		try {
-			// 创建云剪辑工程
 	    	$request = new CreateEditingProjectRequest();
 	   	 	$request->title = $editingInfo['name'];
 	    	$request->description = $editingInfo['topic'];
 	    	$request->timeline = json_encode($timeline);
-	    //	$request->coverURL = "http://xxxx/coverUrl.jpg";
 	    	$response = self::$client->createEditingProject($request);
-	   
+	    	$project = empty($response->body->project->projectId) ? array() : $response->body->project->projectId;
+	    	
+	    	print_r($project);exit;
 	    	$projectId = $response->body->project->projectId;
-    print_r($projectId);exit;
 		} catch (TeaUnableRetryError $e) {
-			var_dump($e->getMessage());
-			var_dump($e->getErrorInfo());
-			var_dump($e->getLastException());
-			var_dump($e->getLastRequest());
+			return false;
 		}
+	}
+	
+	/**
+	 * 获取云剪辑工程
+	 *
+	 * @return array
+	 */
+	public function getEditingProject($projectId)
+	{
+		$request = new GetEditingProjectRequest();
+		$request->projectId = $projectId;
+		$response = self::$client->getEditingProject($request);
+		$project = $response->body->project;
+		
+		print_r($project);exit;
+	}
+	
+	/**
+	 * 提交合成作业
+	 *
+	 * @return array
+	 */
+	public function submitMediaProducingJob ($projectId)
+	{
+		$request = new SubmitMediaProducingJobRequest();
+    	$request->projectId = "****9b4d7cf14dc7b83b0e801cbe****";
+    	$request->outputMediaConfig = "{\"mediaURL\":\"https://***sample.aliyuncs.com/ice/***\"}";
+    	$response = $client->submitMediaProducingJob($request);
+	
+		print_r($project);exit;
+	}
+	
+	/**
+	 * 获取单个合成任务
+	 *
+	 * @return array
+	 */
+	public function getMediaProducingJobRequest($jobId)
+	{
+		$request = new GetMediaProducingJobRequest();
+   	 	$request->jobId = $jobId;
+    	$response = $client->getMediaProducingJob($request);
+    	var_dump($response);
+	
+		print_r($project);exit;
 	}
 }
