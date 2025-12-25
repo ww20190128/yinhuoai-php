@@ -1,108 +1,47 @@
 
-CREATE TABLE IF NOT EXISTS `editing` (
+CREATE TABLE IF NOT EXISTS `project` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `projectId` varchar(256) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '所属用户ID',
   `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
-  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
-  `type` char(8) NOT NULL DEFAULT '' COMMENT '类型',
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
-
-  `voiceIds` varchar(256) NOT NULL DEFAULT '' COMMENT '全局配音Id列表',
   `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
   `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑' ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-工程' AUTO_INCREMENT=4 ;
 
-剪辑Id
-名称
-全局配音Id列表
-是否显示字幕
-配音文件
-手动设置字幕Id
+-- --------------------------------------------------------
 
-标题
-音乐Id列表
-贴纸
+--
+-- 表的结构 `projectClip`
+--
 
-
-视频比例
-视频时长
-
-视频帧率
-
-配音音量
-背景音量
-配音语速 
-转场id列表
-滤镜id列表
-对比度
-饱和度
-亮度
-色度
------------------------------
-字幕
-
-CREATE TABLE IF NOT EXISTS `caption` (
+CREATE TABLE IF NOT EXISTS `projectClip` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `text` varchar(256) NOT NULL DEFAULT '' COMMENT '文本',
-  
- `font` varchar(256) NOT NULL DEFAULT '' COMMENT '字体',
- `style` varchar(256) NOT NULL DEFAULT '' COMMENT '样式',
-
-
+  `projectId` int(11) NOT NULL DEFAULT '0' COMMENT '工程ID',
+  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '地址',
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `projectId` (`projectId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-成品' AUTO_INCREMENT=1 ;
 
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `template`
+--
+
+CREATE TABLE IF NOT EXISTS `template` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `projectId` varchar(256) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '所属用户ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
   `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
   `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='字幕' AUTO_INCREMENT=1 ;
-
-字体：
-	排版：text-align
-	位置：position
-	字号：font-size
-	字体：font-family
-
-样式:
-普通样式：
-	颜色：color
-	字体样式：font-style：1  暂不设置   2  字幕背景  3  字幕边框
-	背景颜色：background
-	边框颜色：border-color
-	边框大小:  border-size
-花字：effectColorStyle
-
-
-字幕Id   剪辑Id   镜头Id   	  ·    排版 	位置   字号   字体   花字       普通样式   颜色     字体样式     背景颜色      边框颜色    边框大小
-
----------------------
-镜头
-
-镜头Id	名称	
-关闭/开启原声
-转场Id
-选择时长
-配音文件
-手动设置字幕Id
--------------------
-
-
-
-
-
-
-主键Id    素材Id   所属镜头Id     配音
-
-
-
-
-
-
-标题
-
-
-标题组
-
-Id     文案Id
-
-
-	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-模板' AUTO_INCREMENT=1 ;

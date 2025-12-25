@@ -1155,32 +1155,5 @@ class Editing extends ServiceBase
     	$musicModels = $this->getMusicModels(array($editingMusicEtt));
     	return empty($musicModels[$editingMusicEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
-    
-    
-    /**
-     * 创建项目
-     *
-     * @return array
-     */
-    public function createProject($userId, $editingId)
-    {
-    	$editingDao = \dao\Editing::singleton();
-    	$editingEtt = $editingDao->readByPrimary($editingId);
-    	if (empty($editingEtt) || $editingEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('剪辑已删除');
-    	}
-    	$userDao = \dao\User::singleton();
-    	$userEtt = $userDao->readByPrimary($userId);
-    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('用户不存在');
-    	}
-    	if ($editingEtt->userId != $userId) {
-    		throw new $this->exception('剪辑已删除');
-    	}
-    	$editingInfo = $this->editingInfo($userEtt, $editingEtt);
-    	$aliEditingSv = \service\AliEditing::singleton();
-    	$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
-    	// 是否保存为模板
-    	print_r($projectId);exit;
-    }
+   
 }

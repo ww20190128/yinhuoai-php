@@ -437,23 +437,5 @@ class Editing extends CtrlBase
 		return $editingSv->reviseEditing($this->userId, $editingId, $info);
 	}
 	
-	/**
-	 * 生成视频
-	 *
-	 * @return array
-	 */
-	public function createProject()
-	{
-		$params = $this->params;
-		if (empty($this->userId)) {
-			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
-		}
-		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
-		if (empty($editingId)) {
-			throw new $this->exception('请求参数错误');
-		}
-		$editingSv = \service\Editing::singleton();
-		return $editingSv->createProject($this->userId, $editingId);
-	}
-	
+
 }

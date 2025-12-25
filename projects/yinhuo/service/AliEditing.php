@@ -688,13 +688,12 @@ $editingInfo['filterIds'] = array(-1);
 	    	$request->description = $editingInfo['topic'];
 	    	$request->timeline = json_encode($timeline);
 	    	$response = self::$client->createEditingProject($request);
-	    	$project = empty($response->body->project->projectId) ? array() : $response->body->project->projectId;
-	    	
-	    	print_r($project);exit;
+	    	$project = empty($response->body->project) ? array() : $response->body->project;
 	    	$projectId = $response->body->project->projectId;
 		} catch (TeaUnableRetryError $e) {
 			return false;
 		}
+		return $projectId;
 	}
 	
 	/**
