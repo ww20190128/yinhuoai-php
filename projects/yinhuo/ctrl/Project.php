@@ -28,6 +28,13 @@ class Project extends CtrlBase
 		if (!empty($params['name'])) {
 			$info['name'] = $this->paramFilter('name', 'string');
 		}
+		if (!empty($params['numLimit'])) {
+			$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
+		}
+		if (isset($params['savaTemplate'])) {
+			$info['savaTemplate'] = $this->paramFilter('savaTemplate', 'intval');
+		}
+	
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProject($this->userId, $editingId, $info);
 	}

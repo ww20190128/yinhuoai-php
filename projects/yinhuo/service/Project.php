@@ -51,12 +51,13 @@ class Project extends ServiceBase
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
     	$aliEditingSv = \service\AliEditing::singleton();
-    	//$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
-$projectId = '0d729ee22f18401d8fe71022accacf1e';
+    	$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
+//$projectId = '0d729ee22f18401d8fe71022accacf1e';
     	// 是否保存为模板
     	if (empty($projectId)) {
     		throw new $this->exception('创建剪辑工程失败');
     	}
+    	// 创建剪辑工程
     	$now = $this->frame->now;
 		$projectDao = \dao\Project::singleton();
 		$projectEtt = $projectDao->getNewEntity();
@@ -65,9 +66,20 @@ $projectId = '0d729ee22f18401d8fe71022accacf1e';
 		$projectEtt->projectId = $projectId;
 		$projectEtt->createTime = $now;
 		$projectEtt->updateTime = $now;
-		$projectDao->create($projectEtt);
+		$proProjectId = $projectDao->create($projectEtt);
+		
+		if (!empty($info['savaTemplate'])) { // 创建模板
+			$templateDao = \dao\Template::singleton();
+			$templateEtt = $templateDao->getNewEntity();
+			$templateEtt->editingId = $editingId;
+			$templateEtt->name = empty($info['name']) ? $editingInfo['name'] : $info['name'];
+			$templateEtt->projectId = $proProjectId;
+			$templateEtt->createTime = $now;
+			$templateEtt->updateTime = $now;
+			$templateDao->create($templateEtt);
+		}
     	return array(
-    		'projectId' => $projectId,	
+    		'projectId' => $proProjectId,	
     	);
     }
     
