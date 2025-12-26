@@ -57,24 +57,27 @@ class App extends ServiceBase
     
     /**
      * 获取热门音乐分类
-     *
+     * 
      * @return array
      */
     public function getActorClassifys()
     {
-    	$actorArr = cfg('actor');
+
+    	$actorArr = cfg('actorAil');
+
     	$map = array();
     	if (!empty($actorArr)) foreach ($actorArr as $key => $value) {
     		$listArr = explode("\n", $value);
     		foreach ($listArr as $row) {
     			$rowArr = explode("|", $row);
-    			if ($rowArr['2'] != '中文') {
+    			if (count($rowArr) != 3) {
     				continue;
     			}
+    			$url = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/audio_ai/' . $rowArr['1'] . ".wav";
     			$one = array(
-    				'name' => $rowArr['0'],
-    				'id' => $rowArr['1'],
-    				'max' => end($rowArr), // 是否支持MIX
+    				'name' 	=> $rowArr['0'],
+    				'id' 	=> $rowArr['1'],
+    				'url'	=> $url,
     			);
     			$map[$key][$one['id']] = $one;
     		}

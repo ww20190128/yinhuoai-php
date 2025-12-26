@@ -37,6 +37,7 @@ class App extends CtrlBase
 			'list' => array_values($list),
 		);
 	}
+	
 	/**
 	 * 获取配音演员分类列表
 	 *
