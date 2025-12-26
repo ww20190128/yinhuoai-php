@@ -25,7 +25,6 @@ class Project extends CtrlBase
 		}
 		$params = (array)$params;
 		$info = array();
-	
 		if (!empty($params['name'])) {
 			$info['name'] = $this->paramFilter('name', 'string');
 		}
