@@ -104,7 +104,7 @@ $conf = array(
 		//oss-cn-beijing-internal.aliyuncs.com
 		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 	),
-	'' => array(
+	'x' => array(
 		'keyId' => 'api-key-20251222143438',
 		'keySecret' => 'a3e46e90-e3d8-4fcc-bcbc-ded163538359',
 	),

@@ -101,7 +101,8 @@ $conf = array(
 		'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
 		'accessKeySecret' => 'p52taYKYaKAJpkaWqvbH2gWuZJDZcs',
 		'StorageType' => 'oss', // 仅支持 oss
-		'StorageLocation' => 'outin-***.oss-cn-shanghai.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+		//oss-cn-beijing-internal.aliyuncs.com
+		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 	),
 	'appConfig' => array(
 		'name' => '智乐心理',

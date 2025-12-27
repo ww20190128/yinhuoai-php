@@ -1,6 +1,9 @@
 <?php
 namespace service;
 require_once('vendor/autoload.php');
+use AlibabaCloud\Tea\Exception\TeaUnableRetryError;
+use AlibabaCloud\Dara\Exception\DaraUnableRetryException;
+
 use AlibabaCloud\SDK\ICE\V20201109\ICE;
 use AlibabaCloud\SDK\ICE\V20201109\Models;
 use Darabonba\OpenApi\Models\Config;
@@ -14,6 +17,13 @@ use AlibabaCloud\SDK\ICE\V20201109\Models\CreateEditingProjectRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\GetEditingProjectRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\UpdateEditingProjectRequest;
 use AlibabaCloud\SDK\ICE\V20201109\Models\DeleteEditingProjectsRequest;
+
+use AlibabaCloud\SDK\ICE\V20201109\Models\SubmitMediaProducingJobRequest;
+use AlibabaCloud\SDK\ICE\V20201109\Models\GetMediaProducingJobRequest;
+
+use AlibabaCloud\SDK\ICE\V20201109\Models\GetMediaInfoRequest;
+
+use AlibabaCloud\SDK\ICE\V20201109\Models\RegisterMediaInfoRequest;
 /**
  * 阿里云-剪辑
  *
@@ -50,7 +60,7 @@ class AliEditing extends ServiceBase
 				$credential = new Credential([]);
 				$config = new Config([
 					'credential' => $credential,
-					'endpoint' => 'ice.cn-shanghai.aliyuncs.com'
+					'endpoint' => 'ice.cn-beijing.aliyuncs.com'
 				]);
 				$config->accessKeyId = $aliEditingConf['accessKeyId'];
 				$config->accessKeySecret = $aliEditingConf['accessKeySecret'];
@@ -60,130 +70,6 @@ class AliEditing extends ServiceBase
 		}
 		return self::$instance;
 	}
-	
-	/**
-	 * 通过URL上传
-	 *
-	 * @return array
-	 */
-	public function uploadMediaByURL($urlArr)
-	{
-		if (is_array($urlArr)) {
-			$uploadURLs = implode(',', $urlArr);
-		} else {
-			$uploadURLs = $urlArr;
-		}
-		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
-		
-	
-		$uploadTargetConfig = array(
-			'StorageType' => $aliEditingConf['StorageType'],
-			'StorageLocation' => $aliEditingConf['StorageLocation'],
-		);
-		try {
-			$request = new UploadMediaByURLRequest();
-			$request->uploadURLs = $uploadURLs; // 媒体源文件 URL
-			$request->uploadTargetConfig = json_encode($uploadTargetConfig);
-			$response = self::$client->uploadMediaByURL($request);
-			
-			
-			print_r($response);exit;
-			echo json_encode($response->body);
-		} catch (TeaUnableRetryError $e) {
-			var_dump($e);
-		}
-	}
-	
-	/**
-	 * 获取URL上传信息
-	 *
-	 * @return array
-	 */
-	public function getUrlUploadInfos($urlArr, $jobIds = array())
-	{
-		if (is_array($urlArr)) { // 最多支持 10 个
-			$uploadURLs = implode(',', $urlArr);
-		} else {
-			$uploadURLs = $urlArr;
-		}
-		try {
-			$request = new GetUrlUploadInfosRequest();
-			$request->uploadURLs = $uploadURLs; // 媒体源文件 URL
-			$response = $client->uploadMediaByURL($request);
-			echo json_encode($response->body);
-		} catch (TeaUnableRetryError $e) {
-			var_dump($e->getMessage());
-    		var_dump($e->getErrorInfo());
-    		var_dump($e->getLastException());
-    		var_dump($e->getLastRequest());
-		}
-	}
-	
-	/**
-	 * 获取URL上传信息（获取媒资数据）
-	 * 
-	 * @return array
-	 */
-	public function refreshUploadMedia($mediaId)
-	{
-		try {
-			$request = new RefreshUploadMediaRequest();
-			$request->mediaId = $mediaId; // 媒资 ID
-			$response = $client->refreshUploadMedia($request);
-			echo json_encode($response->body);
-		} catch (TeaUnableRetryError $e) {
-			var_dump($e->getMessage());
-			var_dump($e->getErrorInfo());
-			var_dump($e->getLastException());
-			var_dump($e->getLastRequest());
-		}
-	}
-	
-	/**
-	 * 获取音视频、图片和辅助媒资的上传地址和凭证。并创建媒资信息。
-	 * 
-	 * 获取上传地址和凭证为智能媒体服务的核心基础，是每个上传操作的必经过程。
-	 * 如果视频上传凭证失效（默认有效期为 3000 秒），请调用刷新视频上传凭证接口重新获取上传凭证。
-	 * 上传后，可通过配置回调，接收上传事件通知或调用 GetMediaInfo 接口根据返回的媒资状态来判断是否上传成功。
-	 * 本接口返回的 MediaId 参数，可以用于媒资生命周期管理或媒体处理。
-	 * @return array
-	 */
-	public function createUploadMedia($mediaId)
-	{
-		/**
-		 * Type（必填）：文件类型，取值 video、image、audio、text、other。
-Name（必填）：文件名，不带扩展名。
-Size（选填）：文件大小。
-Ext（必填）：文件扩展名。
-		 */
-		$fileInfo = array(
-			'Type' => $Type, // 文件类型，取值 video、image、audio、text、other。
-			'Name' => $name, // 文件名，不带扩展名。
-			'Size' => $Size, // 文件大小。
-			'Ext' => $Ext, // 文件扩展名。
-		);
-		$mediaMetaData = array( // 上传媒资的元数据
-			'Title' => $Type, // 文件类型，取值 video、image、audio、text、other。
-			'Description' => $name, // 文件名，不带扩展名。
-			'CateId' => $Size, // 文件大小。
-			'BusinessType' => $Ext, // 文件扩展名
-		); 
-		try {
-			$request = new CreateUploadMediaRequest();
-			$request->fileInfo = json_encode($fileInfo); // 文件信息
-			$request->mediaMetaData = json_encode($mediaMetaData);
-			$request->uploadTargetConfig = "fullText = '中国'";
-			$response = $client->createUploadMedia($request);
-			echo json_encode($response->body);
-		} catch (TeaUnableRetryError $e) {
-			var_dump($e->getMessage());
-			var_dump($e->getErrorInfo());
-			var_dump($e->getLastException());
-			var_dump($e->getLastRequest());
-		}
-	}
-	
-// 云剪辑工程管理================
 
 	/**
 	 * 将文本组织成AudioTrackClip（文本字幕）
@@ -273,18 +159,18 @@ Ext（必填）：文件扩展名。
 	 * 
 	 * @return array
 	 */
-	private static function captionToSubtitleTrack($captionRow, $titleRow = array())
+	private static function captionToSubtitleTrack($captionRow, $titleInfo = array())
 	{
 		$subtitleTrackClip = array( // 文案1
 			'Type' => 'Text', // 类型
 			'Content' => $captionRow['text'], // 文案内容
 			'AdaptMode' => 'AutoWrap', // 自动换行
 		);
-		if (!empty($titleRow['start'])) {
-			$subtitleTrackClip['TimelineIn'] = $titleRow['start']; // 显示时长-开始
+		if (!empty($titleInfo['start'])) {
+			$subtitleTrackClip['TimelineIn'] = $titleInfo['start']; // 显示时长-开始
 		}
-		if (!empty($titleRow['end'])) {
-			$subtitleTrackClip['TimelineOut'] = $titleRow['end']; // 显示时长-结束
+		if (!empty($titleInfo['end'])) {
+			$subtitleTrackClip['TimelineOut'] = $titleInfo['end']; // 显示时长-结束
 		}
 		if (!empty($captionRow['font'])) { // 字体
 			if (!empty($captionRow['text-align'])) { // 排版
@@ -331,8 +217,8 @@ Ext（必填）：文件扩展名。
 	 */
 	private function getTimeline($editingInfo)
 	{
-$editingInfo['transitionIds'] = array(-1);
-$editingInfo['filterIds'] = array(-1);
+$chlipInfo['transitionIds'] = array(-1);
+$chlipInfo['filterIds'] = array(-1);
 		// 转场/滤镜
 		$editingTransitionEffect = array(); // 用于镜头间的转场(放到镜头结束点)
 		if (!empty($editingInfo['transitionIds'])) { // 转场
@@ -364,23 +250,15 @@ $editingInfo['filterIds'] = array(-1);
 				);
 			}
 		}
-		
-
-		
 		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
 
 		// 标题
 		$subtitleTracks = array();
-		if (!empty($editingInfo['titleList'])) foreach ($editingInfo['titleList'] as $key => $titleRow) {
+		if (!empty($editingInfo['titleInfo']))  {
+			$titleInfo = $editingInfo['titleInfo'];
 			$subtitleTrackClips = array();
-			if (!empty($titleRow['captionList'])) foreach ($titleRow['captionList'] as $captionRow) {
-				// 跟镜头对齐
-				if (empty($lensList[$key])) { // 没有镜头
-					continue;
-				}
-				$subtitleTrackClip = self::captionToSubtitleTrack($captionRow, $titleRow);
-				// 跟镜头对齐
-				$subtitleTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
+			if (!empty($titleInfo['captionList'])) foreach ($titleInfo['captionList'] as $captionRow) {
+				$subtitleTrackClip = self::captionToSubtitleTrack($captionRow, $titleInfo);
 				$subtitleTrackClips[] = $subtitleTrackClip;
 			}
 			if (!empty($subtitleTrackClips)) {
@@ -392,9 +270,9 @@ $editingInfo['filterIds'] = array(-1);
 
 		// 背景音乐
 		$musicAudioTrackClips = array();
-		if (!empty($editingInfo['musicList'])) foreach ($editingInfo['musicList'] as $key => $musicRow) {
+		if (!empty($editingInfo['musicInfo'])) {
 			$audioTrackClip = array(
-				'MediaURL' => $musicRow['url'],
+				'MediaURL' => $editingInfo['musicInfo']['url'],
 			);
 			$effectVolume = array();
 			if (!empty($editingInfo['volume']['backgroundVolume'])) { // 背景音量
@@ -410,19 +288,14 @@ $editingInfo['filterIds'] = array(-1);
 			if (!empty($effects)) {
 				$audioTrackClip['Effects'] = $effects;
 			}
-			// 跟镜头对齐
-			if (empty($lensList[$key])) { // 没有镜头
-				continue;
-			}
-			$audioTrackClip['ClipId'] = $lensList[$key]['id']; // 镜头ID
 			$musicAudioTrackClips[] = $audioTrackClip;
 		}
-		
-		
+
 		// 贴纸
 		$decalVideoTracks = array();
-		if (!empty($editingInfo['decalList'])) foreach ($editingInfo['decalList'] as $key => $decalRow) {
-			$useLensList = $decalRow['useLensList']; // 适用的场景 
+		if (!empty($editingInfo['decalInfo'])) {
+			$decalInfo = $editingInfo['decalInfo'];
+			$useLensList = $decalInfo['useLensList']; // 适用的场景 
 			$clipIds = array(); // 适用的镜头ID
 			foreach ($useLensList as $useLensRow) {
 				if ($useLensRow['id'] == -1) {
@@ -432,41 +305,39 @@ $editingInfo['filterIds'] = array(-1);
 					$clipIds[] = $useLensRow['id'];
 				}
 			}
-			if (empty($decalRow['useLensList'])) {
+			if (empty($decalInfo['useLensList'])) {
 				$clipIds = array();
 			}
-			if (empty($lensList[$key])) {
-				continue;
-			}
+	
 			$decalVideoTrackClips = array();
-			if (!empty($decalRow['media1'])) { // 第1个素材
+			if (!empty($decalInfo['media1'])) { // 第1个素材
 				$videoTrackClip = array( // 文案1
-					'Type' => $decalRow['media1']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
-					'MediaURL' => $decalRow['media1']['url'],
+					'Type' => $decalInfo['media1']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $decalInfo['media1']['url'],
 				);
-				if (!empty($decalRow['media1']['size'])) { // 大小
+				if (!empty($decalInfo['media1']['size'])) { // 大小
 					$videoTrackClip['Width'] = 1;
-					$videoTrackClip['Height'] = $decalRow['media1']['size'] * 0.01;
+					$videoTrackClip['Height'] = $decalInfo['media1']['size'] * 0.01;
 				}
-				if (!empty($decalRow['media1']['x']) && !empty($decalRow['media1']['y'])) { // 位置
-					$videoTrackClip['X'] = $decalRow['media1']['x'];
-					$videoTrackClip['Y'] = $decalRow['media1']['y'];
+				if (!empty($decalInfo['media1']['x']) && !empty($decalInfo['media1']['y'])) { // 位置
+					$videoTrackClip['X'] = $decalInfo['media1']['x'];
+					$videoTrackClip['Y'] = $decalInfo['media1']['y'];
 				}
 				if (!empty($clipIds)) { // 适用的镜头
 					$videoTrackClip['ClipId'] = reset($clipIds); // 镜头ID
 				}
 				$decalVideoTrackClips[] = $videoTrackClip;
 			}
-			if (!empty($decalRow['media2'])) { // 第2个素材
+			if (!empty($decalInfo['media2'])) { // 第2个素材
 				$videoTrackClip = array( // 文案1
-					'Type' => $decalRow['media2']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
-					'MediaURL' => $decalRow['media2']['url'],
+					'Type' => $decalInfo['media2']['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $decalInfo['media2']['url'],
 				);
-				if (!empty($decalRow['media2']['size'])) { // 大小
+				if (!empty($decalInfo['media2']['size'])) { // 大小
 					$videoTrackClip['Width'] = 1;
-					$videoTrackClip['Height'] = $decalRow['media2']['size'] * 0.01;
+					$videoTrackClip['Height'] = $decalInfo['media2']['size'] * 0.01;
 				}
-				if (!empty($decalRow['media2']['x']) && !empty($decalRow['media2']['y'])) { // 位置
+				if (!empty($decalInfo['media2']['x']) && !empty($decalInfo['media2']['y'])) { // 位置
 					$videoTrackClip['X'] = $decalRow['media2']['x'];
 					$videoTrackClip['Y'] = $decalRow['media2']['y'];
 				}
@@ -485,12 +356,11 @@ $editingInfo['filterIds'] = array(-1);
 		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
 		$editingAudioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubType'])) { // 配音类型  1 手动设置  2  配音文件(文件夹-旁白配音)
-			if (!empty($editingInfo['dubCaptionList']) && $editingInfo['dubType'] == 1) { // 手动配音
-				foreach ($editingInfo['dubCaptionList'] as $captionRow) {
-					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo);
-					$editingAudioTrackClips[] = $audioTrackClip;
-				}
-			} elseif (!empty($editingInfo['dubMediaList']) && $editingInfo['dubType'] == 2) { // 配音文件
+			if (!empty($editingInfo['dubCaptionInfo']) && $editingInfo['dubType'] == 1) { // 手动配音
+				$audioTrackClip = self::captionToAudioTrackClip($editingInfo['dubCaptionInfo'], $editingInfo);
+				$editingAudioTrackClips[] = $audioTrackClip;
+			} elseif (!empty($editingInfo['dubMediaInfo']) && $editingInfo['dubType'] == 2) { // 配音文件
+				$dubMediaInfo = $editingInfo['dubMediaInfo'];
 				$effectVolume = array(); // 音量效果
 				if (!empty($editingInfo['volume'])) {
 					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
@@ -500,27 +370,26 @@ $editingInfo['filterIds'] = array(-1);
 						);
 					}
 				}
-				foreach ($editingInfo['dubMediaList'] as $mediaRow) {
-					$audioTrackClip = array(
-						'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
-					);
-					if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
-						$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
-					}
-					if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
-					}
-					$effects = array();
-					if (!empty($effectVolume)) {
-						$effects[] = $effectVolume;
-					}
-					if (!empty($effects)) {
-						$audioTrackClip['Effects'] = $effects;
-					}
-					$editingAudioTrackClips[] = $audioTrackClip;
+				
+				$audioTrackClip = array(
+					'MediaURL' => $dubMediaInfo['url'], // 播放链接，视频/图片
+				);
+				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+					$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 				}
+				if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
+				}
+				$effects = array();
+				if (!empty($effectVolume)) {
+					$effects[] = $effectVolume;
+				}
+				if (!empty($effects)) {
+					$audioTrackClip['Effects'] = $effects;
+				}
+				$editingAudioTrackClips[] = $audioTrackClip;
+				
 			}
 		}
-		
 
 		$editingAudioTracks = array();
 		$musicAudioTracks = array(); // 背景音乐
@@ -568,28 +437,23 @@ $editingInfo['filterIds'] = array(-1);
 					'Gain' => 0,
 				);
 			}
-			if (!empty($lensRow['mediaList'])) foreach ($lensRow['mediaList'] as $mediaKey => $mediaRow) {
+			if (!empty($lensRow['mediaInfo']))  {
+				$mediaInfo = $lensRow['mediaInfo'];
 				$videoTrackClip = array(
-					'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
-					'ReferenceClipId' => $lensRow['id'], // 镜头标记，用于对齐
-					'Type' => $mediaRow['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
+					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
+					'ReferenceClipId' => $mediaInfo['id'], // 镜头标记，用于对齐
+					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
-				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
-					$videoTrackClip['Duration'] = $lensRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
+				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
+					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
 				// 素材特效列表
 				$effects = array();
 				if (!empty($lensVolumeEffects)) {
 					$effects = array_merge($effects, $lensVolumeEffects);
 				}
-				if ($mediaKey + 1 == count($lensRow['mediaList'])) { // 最后一个
-					if (!empty($editingTransitionEffect)) { // 添加镜头间转场
-						$effects[] = $editingTransitionEffect;
-					}
-				} else {
-					if (!empty($lensTransitionEffects)) { // 添加素材间转场
-						$effects = array_merge($effects, $lensTransitionEffects);
-					}
+				if (!empty($editingTransitionEffect)) { // 添加镜头间转场
+					$effects[] = $editingTransitionEffect;
 				}
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
@@ -598,12 +462,10 @@ $editingInfo['filterIds'] = array(-1);
 			}
 			$lensAudioTrackClips = array(); // 镜头的 AudioTracks 配音
 			// 配音 - 文本字幕
-			if (empty($editingAudioTrackClips) && !empty($lensRow['dubCaptionList']) && $lensRow['dubType'] == 1) { // 手动配音
-				foreach ($lensRow['dubCaptionList'] as $captionRow) {
-					$audioTrackClip = self::captionToAudioTrackClip($captionRow, $editingInfo, $lensRow);
-					$audioTrackClips[] = $audioTrackClip;
-				}
-			} elseif (empty($editingAudioTrackClips) && !empty($lensRow['dubMediaList']) && $lensRow['dubType'] == 2) { // 配音文件
+			if (empty($editingAudioTrackClips) && !empty($lensRow['dubCaptionInfo']) && $lensRow['dubType'] == 1) { // 手动配音
+				$audioTrackClip = self::captionToAudioTrackClip($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
+				$audioTrackClips[] = $audioTrackClip;
+			} elseif (empty($editingAudioTrackClips) && !empty($lensRow['dubMediaInfo']) && $lensRow['dubType'] == 2) { // 配音文件
 				$effectVolume = array(); // 音量效果
 				if (!empty($editingInfo['volume'])) {
 					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
@@ -613,26 +475,27 @@ $editingInfo['filterIds'] = array(-1);
 						);
 					}
 				}
-				foreach ($lensRow['dubMediaList'] as $mediaRow) {
-					$audioTrackClip = array(
-						'MediaURL' => $mediaRow['url'], // 播放链接，视频/图片
-						'ClipId' => $lensRow['id'], // 镜头标记，用于对齐
-					);
-					if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
-						$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
-					}
-					if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
-						
-					}
-					$effects = array();
-					if (!empty($effectVolume)) {
-						$effects[] = $effectVolume;
-					}
-					if (!empty($effects)) {
-						$audioTrackClip['Effects'] = $effects;
-					}
-					$lensAudioTrackClips[] = $audioTrackClip;
+				$dubMediaInfo = $lensRow['dubMediaInfo'];
+				
+				$audioTrackClip = array(
+					'MediaURL' => $dubMediaInfo['url'], // 播放链接，视频/图片
+					'ClipId' => $dubMediaInfo['id'], // 镜头标记，用于对齐
+				);
+				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+					$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 				}
+				if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
+						
+				}
+				$effects = array();
+				if (!empty($effectVolume)) {
+					$effects[] = $effectVolume;
+				}
+				if (!empty($effects)) {
+					$audioTrackClip['Effects'] = $effects;
+				}
+				$lensAudioTrackClips[] = $audioTrackClip;
+			
 			}
 			if (!empty($lensVideoTrackClips)) {
 				$lensVideoTracks[] = array(
@@ -669,32 +532,7 @@ $editingInfo['filterIds'] = array(-1);
 		return $result;
 	}
 	
-	/**
-	 * 创建云剪辑工程
-	 * 
-	 * @return array
-	 */
-	public function createEditingProject($editingInfo)
-	{
-		// 获取时间线
-		$timeline = $this->getTimeline($editingInfo);
-		if (empty($timeline)) {
-			return false;
-		}
-		// 创建云剪辑工程
-		try {
-	    	$request = new CreateEditingProjectRequest();
-	   	 	$request->title = $editingInfo['name'];
-	    	$request->description = $editingInfo['topic'];
-	    	$request->timeline = json_encode($timeline);
-	    	$response = self::$client->createEditingProject($request);
-	    	$project = empty($response->body->project) ? array() : $response->body->project;
-	    	$projectId = $response->body->project->projectId;
-		} catch (TeaUnableRetryError $e) {
-			return false;
-		}
-		return $projectId;
-	}
+	
 	
 	/**
 	 * 获取云剪辑工程
@@ -710,34 +548,96 @@ $editingInfo['filterIds'] = array(-1);
 		
 		print_r($project);exit;
 	}
-	
+
+//======================================	
 	/**
-	 * 提交合成作业
+	 * 创建云剪辑工程
 	 *
 	 * @return array
 	 */
-	public function submitMediaProducingJob ($projectId)
+	public function createEditingProject($chipParam)
 	{
-		$request = new SubmitMediaProducingJobRequest();
-    	$request->projectId = "****9b4d7cf14dc7b83b0e801cbe****";
-    	$request->outputMediaConfig = "{\"mediaURL\":\"https://***sample.aliyuncs.com/ice/***\"}";
-    	$response = $client->submitMediaProducingJob($request);
-	
-		print_r($project);exit;
+		// 获取时间线
+		$timeline = $this->getTimeline($chipParam);
+		if (empty($timeline)) {
+			return false;
+		}
+		// 创建云剪辑工程
+		try {
+			$request = new CreateEditingProjectRequest();
+			$request->title = $chipParam['name'];
+			$request->description = $chipParam['topic'];
+			$request->timeline = json_encode($timeline);
+			$response = self::$client->createEditingProject($request);
+			$projectId = empty($response->body->project->projectId) ? array() : $response->body->project->projectId;
+		} catch (TeaUnableRetryError $e) {
+			return false;
+		}
+		return $projectId;
 	}
 	
 	/**
-	 * 获取单个合成任务
+	 * 删除云剪辑工程
 	 *
 	 * @return array
 	 */
-	public function getMediaProducingJobRequest($jobId)
+	public function deleteEditingProjects($projectIds)
 	{
-		$request = new GetMediaProducingJobRequest();
-   	 	$request->jobId = $jobId;
-    	$response = $client->getMediaProducingJob($request);
-    	var_dump($response);
-	
-		print_r($project);exit;
+		try {
+    		$request = new DeleteEditingProjectsRequest();
+   	 		$request->projectIds = is_array($projectIds) ? implode(',', $projectIds) : $projectIds;
+    		$response = $client->deleteEditingProjects($request);
+		} catch (TeaUnableRetryError $e) {
+			return false;
+		}
+		return true;
 	}
+	
+	/**
+	 * 通过project创建合成任务
+	 *
+	 * @return array
+	 */
+	public function submitMediaProducingJob($projectId, $chipParam)
+	{
+		$orientation = '';
+		$width = $height = 0;
+		if ($chipParam['ratio'] == '9:16') {
+			$orientation = 'Horizontal';
+		} elseif ($chipParam['ratio'] == '16:9') {
+			$orientation = 'Vertical';
+		} else {
+			$width = 900;
+			$height = 900;
+		}
+		$outputMediaConfig = array(
+			'MediaURL' => '', // 指定输出到OSS的媒资文件URL。
+			'Video' => array(
+				'Fps' => $chipParam['fps'], // 输出视频流帧率
+			),	
+		);
+		if (!empty($width) && empty($height)) {
+			$outputMediaConfig['Width'] = $width;
+			$outputMediaConfig['Height'] = $height;
+		}
+		$UserData = array(
+			'NotifyAddress' => '', // 为任务完成的回调url
+			'RegisterMediaNotifyAddress' => '', // 为成片媒资分析完成的回调	
+		);
+		try {
+			// 通过project创建合成任务
+		    $request = new SubmitMediaProducingJobRequest();
+		    $request->projectId = $projectId;
+		    $request->outputMediaConfig = json_encode($outputMediaConfig);
+		    $response = self::$client->submitMediaProducingJob($request);
+			// 获取资源id
+			
+		} catch (DaraUnableRetryException $e) {
+			return false;
+		} catch (TeaUnableRetryError $e) {
+			return false;
+		}
+		return true;
+	}
+
 }

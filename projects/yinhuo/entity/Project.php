@@ -31,13 +31,6 @@ class Project extends EntityBase
     public $id;
 
     /**
-     * 工程ID
-     *
-     * @var varchar
-     */
-    public $projectId = '';
-
-    /**
      * 剪辑ID
      *
      * @var int

@@ -147,6 +147,7 @@ class Folder extends ServiceBase
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$aliEditingSv = \service\AliEditing::singleton();
     	if (is_iteratable($uploadFiles)) foreach ($uploadFiles as $uploadFile) {
     		$file = $uploadFile['file']; // 文件内容
     		$fileSize = filesize($file); // 文件大小
@@ -160,8 +161,7 @@ class Folder extends ServiceBase
     			continue;
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-    		// 创建媒体
-    		
+
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
     		$mediaEtt->type = $folderEtt->type;

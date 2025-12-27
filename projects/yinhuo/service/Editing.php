@@ -1156,4 +1156,55 @@ class Editing extends ServiceBase
     	return empty($musicModels[$editingMusicEtt->id]) ? array() : $musicModels[$editingMusicEtt->id];
     }
    
+    /**
+     * 随机剪辑参数
+     *
+     * @return array
+     */
+    public function randomChipParam($editingInfo)
+    {
+    	$lensList = $editingInfo['lensList'];
+    	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
+    		// 媒体
+    		if (!empty($lensRow['mediaList'])) {
+    			$lensRow['mediaInfo'] = $lensRow['mediaList'][array_rand($lensRow['mediaList'], 1)];
+    		}
+    		// 手动配音
+    		if (!empty($lensRow['dubCaptionList'])) {
+    			$lensRow['dubCaptionInfo'] = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
+    		}
+    		// 旁白配音
+    		if (!empty($lensRow['dubMediaList'])) {
+    			$lensRow['dubMediaInfo'] = $lensRow['dubMediaList'][array_rand($lensRow['dubMediaList'], 1)];
+    		}
+    		unset($lensRow['mediaList']);
+    		unset($lensRow['dubCaptionList']);
+    		unset($lensRow['dubMediaList']);
+    		$editingInfo['lensList'][$lensKey] = $lensRow;
+    	}
+    	// 手动配音
+    	if (!empty($editingInfo['dubCaptionList'])) {
+    		$editingInfo['dubCaptionInfo'] = $editingInfo['dubCaptionList'][array_rand($editingInfo['dubCaptionList'], 1)];
+    	}
+    	// 旁白配音
+    	if (!empty($editingInfo['dubMediaList'])) {
+    		$editingInfo['dubMediaInfo'] = $editingInfo['dubMediaList'][array_rand($editingInfo['dubMediaList'], 1)];
+    	}
+    	if (!empty($editingInfo['titleList'])) {
+    		$editingInfo['titleInfo'] = $editingInfo['titleList'][array_rand($editingInfo['titleList'], 1)];
+    	}
+    	if (!empty($editingInfo['musicList'])) {
+    		$editingInfo['musicInfo'] = $editingInfo['musicList'][array_rand($editingInfo['musicList'], 1)];
+    	}
+    	if (!empty($editingInfo['decalList'])) {
+    		$editingInfo['decalInfo'] = $editingInfo['decalList'][array_rand($editingInfo['decalList'], 1)];
+    	}
+    	unset($editingInfo['dubCaptionList']);
+    	unset($editingInfo['dubMediaList']);
+    	unset($editingInfo['titleList']);
+    	unset($editingInfo['musicList']);
+    	unset($editingInfo['decalList']);
+    	return $editingInfo;
+    }
+    
 }
