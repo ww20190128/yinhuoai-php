@@ -17,19 +17,35 @@ class Project extends CtrlBase
 	{
 		$params = $this->params;
 		$params = (array)$params;
-$this->userId = 1;
-
-		
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
-$editingId = 1;
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createPreview($this->userId, $editingId);
+	}
+	
+	/**
+	 * 获取成品
+	 *
+	 * @return array
+	 */
+	public function getProjectClip()
+	{
+		$params = $this->params;
+		$params = (array)$params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$clipId = $this->paramFilter('clipId', 'intval', 0); // 剪辑Id
+		if (empty($clipId)) {
+			throw new $this->exception('请求参数错误');
+		}
+		$projectSv = \service\Project::singleton();
+		return $projectSv->getProjectClip($this->userId, $clipId);
 	}
 	
 	/**
@@ -40,26 +56,21 @@ $editingId = 1;
 	public function createProject()
 	{
 		$params = $this->params;
-		$params = (array)$params;
-$this->userId = 1;
-$editingId = 1;
-$params['name'] = '剪辑工程001';
-$params['numLimit'] = 200;
-$params['savaTemplate'] = 1;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
-		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
+		$params = (array)$params;
+		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id	
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
-		
 		$info = array();
 		if (!empty($params['name'])) {
 			$info['name'] = $this->paramFilter('name', 'string');
 		}
 		if (!empty($params['numLimit'])) {
 			$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
+			$info['numLimit'] = min($info['numLimit'], 1000);
 		}
 		if (isset($params['savaTemplate'])) { // 是否保存为模板
 			$info['savaTemplate'] = $this->paramFilter('savaTemplate', 'intval');
@@ -195,12 +206,12 @@ $params['savaTemplate'] = 1;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
-		$id = $this->paramFilter('id', 'string');
-		if (empty($id)) {
+		$ids =  $this->paramFilter('ids', 'array');
+		if (empty($ids)) {
 			throw new $this->exception('请求参数错误');
 		}
 		$projectSv = \service\Project::singleton();
-		return $projectSv->createProjectClips($this->userId, $id);
+		return $projectSv->createProjectClips($this->userId, $ids);
 	}
 
 }

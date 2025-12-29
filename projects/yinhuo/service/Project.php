@@ -58,10 +58,14 @@ class Project extends ServiceBase
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
     	$aliEditingSv = \service\AliEditing::singleton();
-    
-    	$chipParam = $editingSv->randomChipParam($editingInfo);
     	
-    	$projectId = $aliEditingSv->createEditingProject($chipParam); // 工程ID
+    	$chipParam = $editingSv->randomChipParam($editingInfo);
+    	if (empty($chipParam)) {
+    		throw new $this->exception('创建剪辑工程失败');
+    	}
+    	$now = $this->frame->now;
+
+    	$projectId = $aliEditingSv->createEditingProject($chipParam); // 工程ID	
     	// 是否保存为模板
     	if (empty($projectId)) {
     		throw new $this->exception('创建剪辑工程失败');
@@ -70,9 +74,61 @@ class Project extends ServiceBase
     	if (empty($jobId)) {
     		throw new $this->exception('视频合成失败');
     	}
+   		$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEtt = $projectClipDao->getNewEntity();
+    	$projectClipEtt->projectId = $projectId;
+    	$projectClipEtt->previewUrl = $chipParam['previewUrl'];
+    	$projectClipEtt->chipParam = json_encode($chipParam, JSON_UNESCAPED_UNICODE);
+    	$projectClipEtt->jobId = $jobId;
+    	$projectClipEtt->createTime = $now;
+    	$projectClipEtt->updateTime = $now;
+    	$projectClipId = $projectClipDao->create($projectClipEtt);
     	return array(
     		'jobId' => $jobId,
     		'projectId' => $projectId,
+    		'id' => intval($projectClipId),
+    		'previewUrl' => $projectClipEtt->previewUrl,
+    	);
+    }
+    
+    /**
+     * 获取成品
+     *
+     * @return array
+     */
+    public function getProjectClip($userId, $clipId)
+    {
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEtt = $projectClipDao->readByPrimary($clipId);
+    	if (empty($projectClipEtt) || $projectClipEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('成品已删除');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$aliEditingSv = \service\AliEditing::singleton();
+		if (empty($projectClipEtt->mediaURL)) {
+			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($projectClipEtt->jobId);
+			if (empty($mediaProducingJob)) {
+				throw new $this->exception('视频合成失败');
+			}
+			$now = $this->frame->now;
+			$projectClipEtt->set('jobStatus', $mediaProducingJob['status']);
+			$projectClipEtt->set('mediaURL', empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL']);
+			$projectClipEtt->set('mediaId', empty($mediaProducingJob['mediaId']) ? '' : $mediaProducingJob['mediaId']);
+			$projectClipEtt->set('duration', empty($mediaProducingJob['duration']) ? 0 : $mediaProducingJob['duration']);
+			$projectClipEtt->set('updateTime', $now);
+			$projectClipDao->update($projectClipEtt);
+		}
+    	return array(
+    		'jobId' => $projectClipEtt->jobId,
+    		'projectId' => $projectClipEtt->projectId,
+    		'id' => intval($projectClipEtt->id),
+    		'mediaURL' => $projectClipEtt->mediaURL,
+    		'jobStatus' => $projectClipEtt->jobStatus,
+    		'previewUrl' => $projectClipEtt->previewUrl,
     	);
     }
     
@@ -96,7 +152,6 @@ class Project extends ServiceBase
     	if ($editingEtt->userId != $userId) {
     		throw new $this->exception('剪辑已删除');
     	}
-
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
     	$aliEditingSv = \service\AliEditing::singleton();
@@ -105,13 +160,13 @@ class Project extends ServiceBase
     	if (empty($projectId)) {
     		throw new $this->exception('创建剪辑工程失败');
     	}
-    	
     	// 创建剪辑工程
     	$now = $this->frame->now;
 		$projectDao = \dao\Project::singleton();
 		$projectEtt = $projectDao->getNewEntity();
 		$projectEtt->id = $projectId;
 		$projectEtt->editingId = $editingId;
+		$projectEtt->userId = $editingEtt->userId;
 		$projectEtt->name = empty($info['name']) ? $editingInfo['name'] : $info['name'];
 		$projectEtt->createTime = $now;
 		$projectEtt->updateTime = $now;
@@ -122,12 +177,32 @@ class Project extends ServiceBase
 			$templateEtt->editingId = $editingId;
 			$templateEtt->name = empty($info['name']) ? $editingInfo['name'] : $info['name'];
 			$templateEtt->projectId = $projectId;
+			$templateEtt->userId = $editingEtt->userId;
 			$templateEtt->createTime = $now;
 			$templateEtt->updateTime = $now;
 			$templateDao->create($templateEtt);
 		}
+		$aliEditingSv = \service\AliEditing::singleton();
+		$chipParamList = array();
+		for ($index = 1; $index <= $info['numLimit']; $index++) {
+			$chipParam = $editingSv->randomChipParam($editingInfo);
+			$chipParamList[$index] = $chipParam;
+		}
+		$projectClipDao = \dao\ProjectClip::singleton();
+		$projectClipIds = array();
+		foreach ($chipParamList as $chipParam) {
+			$projectClipEtt = $projectClipDao->getNewEntity();
+			$projectClipEtt->projectId = $projectId;
+			$projectClipEtt->chipParam = json_encode($chipParam, true);
+			$projectClipEtt->previewUrl = $chipParam['previewUrl'];
+			$projectClipEtt->createTime = $now;
+			$projectClipEtt->updateTime = $now;
+			$projectClipId = $projectClipDao->create($projectClipEtt);
+			$projectClipIds[] = $projectClipId;
+		}
     	return array(
-    		'projectId' => $projectId,	
+    		'projectId' => $projectId,
+    		'clipNum' => count($projectClipIds),
     	);
     }
     
@@ -158,7 +233,6 @@ class Project extends ServiceBase
     			'updateTime' 	=> intval($projectEtt->updateTime),
     		);
     	}
-
     	$commonSv = \service\Common::singleton();
     	uasort($projectModels, array($commonSv, 'sortByCreateTime'));
     	return $projectModels;
@@ -185,20 +259,22 @@ class Project extends ServiceBase
     		throw new $this->exception('剪辑工程已删除');
     	}
     	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEttList = array(
+    	$projectClipEttList = $projectClipDao->readListByIndex(array(
     		'projectId' => $id,
-    	);
-    	
+    	));
     	$projectClipModels = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		$projectModels[$projectEtt->id] = array(
+    		$projectClipModels[$projectEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
-    			'url'			=> $projectClipEtt->url,
-    			'createTime' 	=> intval($projectClipEtt->createTime),
-    			'updateTime' 	=> intval($projectClipEtt->updateTime),
+    			'jobId' 		=> $projectClipEtt->jobId,
+    			'projectId' 	=> $projectClipEtt->projectId,
+    			'clipId' 		=> intval($projectClipEtt->id),
+    			'mediaURL' 		=> $projectClipEtt->mediaURL,
+    			'jobStatus' 	=> $projectClipEtt->jobStatus,
+    			'previewUrl' 	=> $projectClipEtt->previewUrl,
     		);
     	}
     	$commonSv = \service\Common::singleton();
@@ -288,7 +364,7 @@ class Project extends ServiceBase
     	$projectClipEttList = $projectClipDao->readByPrimary($ids);
     	$projectIds = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
-    		$projectIds[] = $projectClipEtt->id;
+    		$projectIds[] = $projectClipEtt->projectId;
     	}
     	$projectDao = \dao\Project::singleton();
     	$projectEttList = $projectClipDao->readByPrimary($projectIds);
@@ -315,31 +391,52 @@ class Project extends ServiceBase
      *
      * @return array
      */
-    public function createProjectClips($userId, $id)
+    public function createProjectClips($userId, $ids)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEttList = $projectClipDao->readByPrimary($ids);
+   	 	$projectIds = array();
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		$projectIds[] = $projectClipEtt->projectId;
+    	}
     	$projectDao = \dao\Project::singleton();
-    	$projectEtt = $projectDao->readByPrimary($id);
-    	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('剪辑工程已删除');
+    	$projectEttList = $projectClipDao->readByPrimary($projectIds);
+    	if (!empty($projectEttList)) foreach ($projectEttList as $projectEtt) {
+	    	if ($projectEtt->status == \constant\Common::DATA_DELETE) {
+	    		throw new $this->exception('剪辑工程已删除');
+	    	}
+	    	if ($projectEtt->userId != $userEtt->userId) {
+	    		throw new $this->exception('剪辑工程已删除');
+	    	}
     	}
-    	if ($projectEtt->userId != $userEtt->userId) {
-    		throw new $this->exception('剪辑工程已删除');
-    	}
-    	$editingDao = \service\Editing::singleton();
-    	$editingInfo = $editingDao->editingInfo($userEtt, $projectEtt->editingId);
-    	if (empty($editingInfo)) {
-    		throw new $this->exception('剪辑工程已删除');
-    	}
-    	// 提交剪辑合成作业
+    	$now = $this->frame->now;
     	$aliEditingSv = \service\AliEditing::singleton();
-    	$aliEditingSv->submitMediaProducingJob($projectEtt->id, $editingInfo);
+    	$clipNum = 0;
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		$chipParam = json_decode($projectClipEtt->chipParam, true);
+			if (empty($chipParam) || empty($projectClipEtt->projectId)) {
+				continue;
+			}
+			if (!empty($projectClipEtt->mediaURL) || empty($projectClipEtt->jobId)) { // 有生成
+				continue;
+			}
+			$jobId = $aliEditingSv->submitMediaProducingJob($projectClipEtt->projectId, $chipParam);
+			if (empty($jobId)) {
+				continue;
+			}
+			$projectClipEtt->set('jobId', $jobId);
+			$projectClipEtt->set('updateTime', $now);
+			$projectClipDao->update($projectClipEtt);
+			$clipNum++;
+    	}
     	return array(
-    			'result' => 1,
+    		'clipNum' => $clipNum,
     	);
     }
+    
 }

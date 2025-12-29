@@ -1163,32 +1163,70 @@ class Editing extends ServiceBase
      */
     public function randomChipParam($editingInfo)
     {
-    	$lensList = $editingInfo['lensList'];
-    	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
-    		// 媒体
-    		if (!empty($lensRow['mediaList'])) {
-    			$lensRow['mediaInfo'] = $lensRow['mediaList'][array_rand($lensRow['mediaList'], 1)];
-    		}
-    		// 手动配音
-    		if (!empty($lensRow['dubCaptionList'])) {
-    			$lensRow['dubCaptionInfo'] = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
-    		}
-    		// 旁白配音
-    		if (!empty($lensRow['dubMediaList'])) {
-    			$lensRow['dubMediaInfo'] = $lensRow['dubMediaList'][array_rand($lensRow['dubMediaList'], 1)];
-    		}
-    		unset($lensRow['mediaList']);
-    		unset($lensRow['dubCaptionList']);
-    		unset($lensRow['dubMediaList']);
-    		$editingInfo['lensList'][$lensKey] = $lensRow;
-    	}
+    	// 全局配音
     	// 手动配音
+    	$editingDub = array();
     	if (!empty($editingInfo['dubCaptionList'])) {
     		$editingInfo['dubCaptionInfo'] = $editingInfo['dubCaptionList'][array_rand($editingInfo['dubCaptionList'], 1)];
     	}
     	// 旁白配音
     	if (!empty($editingInfo['dubMediaList'])) {
     		$editingInfo['dubMediaInfo'] = $editingInfo['dubMediaList'][array_rand($editingInfo['dubMediaList'], 1)];
+    	}
+    	// 全局转场
+    	if (!empty($editingInfo['transitionIds'])) { // 转场
+    		if (in_array(-1, $editingInfo['transitionIds'])) { // 随机转场
+    			$editingInfo['transitionSubType'] = 'random';
+    		} else { // 自选转场
+    			$editingInfo['transitionSubType'] = implode(',', $editingInfo['transitionIds']);
+    		}
+    	}
+    	$lensList = $editingInfo['lensList'];
+    	$editingInfo['previewUrl'] = ''; // 预览视频的URL
+    	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
+    		// 媒体
+    		if (!empty($lensRow['mediaList'])) {
+    			$lensRow['mediaInfo'] = $lensRow['mediaList'][array_rand($lensRow['mediaList'], 1)];
+    			if (empty($editingInfo['previewUrl'])) {
+    				$editingInfo['previewUrl'] = $lensRow['mediaInfo']['url'];
+    			}
+    		}
+    		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 优先全局手动配音
+    			$lensDub = array(); // 镜头配音
+    			if (!empty($lensRow['dubCaptionList'])) {
+    				$lensDub['dubCaptionInfo'] = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
+    			}
+    			// 旁白配音
+    			if (!empty($lensRow['dubMediaList'])) {
+    				$lensDub['dubMediaInfo'] = $lensRow['dubMediaList'][array_rand($lensRow['dubMediaList'], 1)];
+    			}
+    			if (!empty($lensDub['dubCaptionInfo'])) { // 优先手动配音
+    				$lensRow['dubCaptionInfo'] = $lensDub['dubCaptionInfo'];
+    			} elseif (!empty($lensDub['dubMediaInfo'])) {
+    				$lensRow['dubMediaInfo'] = $lensDub['dubMediaInfo'];
+    			}
+    		} else {
+    			if (!empty($editingDub['dubCaptionInfo'])) { // 优先手动配音
+    				$lensRow['dubCaptionInfo'] = $editingDub['dubCaptionInfo'];
+    			} elseif (!empty($editingDub['dubMediaInfo'])) {
+    				$lensRow['dubMediaInfo'] = $editingDub['dubMediaInfo'];
+    			}
+    		}
+    		if (!empty($editingInfo['transitionSubType'])) { // 优先全局转场
+    			$lensRow['transitionSubType'] = $editingInfo['transitionSubType'];
+    		} else {
+    			if (!empty($lensRow['transitionIds'])) { // 转场
+    				if (in_array(-1, $lensRow['transitionIds'])) { // 随机转场
+    					$lensRow['transitionSubType'] = 'random';
+    				} else { // 自选转场
+    					$lensRow['transitionSubType'] = implode(',', $lensRow['transitionIds']);
+    				}
+    			}
+    		}
+    		unset($lensRow['mediaList']);
+    		unset($lensRow['dubCaptionList']);
+    		unset($lensRow['dubMediaList']);
+    		$editingInfo['lensList'][$lensKey] = $lensRow;
     	}
     	if (!empty($editingInfo['titleList'])) {
     		$editingInfo['titleInfo'] = $editingInfo['titleList'][array_rand($editingInfo['titleList'], 1)];
@@ -1199,11 +1237,16 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['decalList'])) {
     		$editingInfo['decalInfo'] = $editingInfo['decalList'][array_rand($editingInfo['decalList'], 1)];
     	}
+    	if (!empty($editingInfo['actorList'])) {
+    		$editingInfo['actorInfo'] = $editingInfo['actorList'][array_rand($editingInfo['actorList'], 1)];
+    	}
     	unset($editingInfo['dubCaptionList']);
     	unset($editingInfo['dubMediaList']);
     	unset($editingInfo['titleList']);
     	unset($editingInfo['musicList']);
     	unset($editingInfo['decalList']);
+    	unset($editingInfo['actorList']);
+
     	return $editingInfo;
     }
     

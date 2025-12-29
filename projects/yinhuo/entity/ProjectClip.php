@@ -33,16 +33,44 @@ class ProjectClip extends EntityBase
     /**
      * 工程ID
      *
-     * @var varchar
+     * @var int
      */
-    public $projectId = 0;
-
+    public $projectId = '';
+    
     /**
-     * 地址
+     * 视频预览地址
      *
      * @var varchar
      */
-    public $url = '';
+    public $previewUrl = '';
+
+    /**
+     * 参数
+     *
+     * @var text
+     */
+    public $chipParam;
+
+    /**
+     * 任务Id
+     *
+     * @var varchar
+     */
+    public $jobId = '';
+
+    /**
+     * 任务状态
+     *
+     * @var char
+     */
+    public $jobStatus = '';
+
+    /**
+     * 视频地址
+     *
+     * @var varchar
+     */
+    public $mediaURL = '';
 
     /**
      * 状态
@@ -65,5 +93,18 @@ class ProjectClip extends EntityBase
      */
     public $updateTime = 0;
 
+    /**
+     * 时长 
+     *
+     * @var int
+     */
+    public $duration = 0;
+    
+    /**
+     * 媒资Id
+     *
+     * @var int
+     */
+    public $mediaId = 0;
 // 表结构end
 }
