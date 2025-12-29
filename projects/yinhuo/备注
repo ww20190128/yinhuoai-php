@@ -1,7 +1,5 @@
-
 CREATE TABLE IF NOT EXISTS `project` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `projectId` varchar(256) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `id` char(64) NOT NULL DEFAULT '' COMMENT '工程ID',
   `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
   `userId` int(11) NOT NULL DEFAULT '0' COMMENT '所属用户ID',
   `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
@@ -9,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `project` (
   `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
   `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-工程' AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-工程';
 
 -- --------------------------------------------------------
 
@@ -19,14 +17,20 @@ CREATE TABLE IF NOT EXISTS `project` (
 
 CREATE TABLE IF NOT EXISTS `projectClip` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `projectId` int(11) NOT NULL DEFAULT '0' COMMENT '工程ID',
-  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '地址',
+  `projectId` char(64) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `previewUrl` varchar(256) NOT NULL DEFAULT '' COMMENT '预览地址',
+  `chipParam` text NOT NULL COMMENT '参数',
+  `jobId` char(64) NOT NULL DEFAULT '' COMMENT '任务Id',
+  `jobStatus` char(16) NOT NULL DEFAULT '' COMMENT '任务状态',
+  `mediaURL` varchar(256) NOT NULL DEFAULT '' COMMENT '地址',
+  `mediaId` char(64) NOT NULL DEFAULT '' COMMENT '媒资Id',
+  `duration` int(11) NOT NULL DEFAULT '0' COMMENT '时长',
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
   `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
   `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `projectId` (`projectId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-成品' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-成品';
 
 -- --------------------------------------------------------
 
@@ -44,4 +48,4 @@ CREATE TABLE IF NOT EXISTS `template` (
   `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
   `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-模板' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-模板';

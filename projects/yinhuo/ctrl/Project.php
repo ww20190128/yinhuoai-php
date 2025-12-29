@@ -9,6 +9,17 @@ namespace ctrl;
 class Project extends CtrlBase
 {
 	/**
+	 * 为任务完成的回调url
+	 *
+	 * @return array
+	 */
+	public function producingJobcallback()
+	{
+		$params = $this->params;
+		
+	}
+	
+	/**
 	 * 生成预览
 	 *
 	 * @return array

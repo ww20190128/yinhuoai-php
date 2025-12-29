@@ -566,9 +566,9 @@ class AliEditing extends ServiceBase
 			$outputMediaConfig['Width'] = $width;
 			$outputMediaConfig['Height'] = $height;
 		}
+		$serve_url = $aliEditingConf = self::$instance->frame->conf['serve_url'];
 		$UserData = array(
-			'NotifyAddress' => '', // 为任务完成的回调url
-			'RegisterMediaNotifyAddress' => '', // 为成片媒资分析完成的回调	
+			'NotifyAddress' => $serve_url . 'op=Project.producingJobcallback', // 为任务完成的回调url
 		);
 		try {
 			// 通过project创建合成任务
