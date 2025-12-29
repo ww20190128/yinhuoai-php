@@ -500,23 +500,7 @@ class AliEditing extends ServiceBase
 		}
 		return $result;
 	}
-
-	/**
-	 * 获取云剪辑工程
-	 *
-	 * @return array
-	 */
-	public function getEditingProject($projectId)
-	{
-		$request = new GetEditingProjectRequest();
-		$request->projectId = $projectId;
-		$response = self::$client->getEditingProject($request);
-		$project = $response->body->project;
-		
-		print_r($project);exit;
-	}
-
-//======================================	
+	
 	/**
 	 * 创建云剪辑工程
 	 *
@@ -571,8 +555,9 @@ class AliEditing extends ServiceBase
 			$width = 900;
 			$height = 900;
 		}
+		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
 		$outputMediaConfig = array(
-			'MediaURL' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/test.mp4', // 指定输出到OSS的媒资文件URL。
+			'MediaURL' => $aliEditingConf['chipUrlBase'] . chipUrlBase . '_' . strtotime(date('Ymd')) . '_' . rand(0, 9999) . '.mp4', // 指定输出到OSS的媒资文件URL。
 			'Video' => array(
 				'Fps' => $chipParam['fps'], // 输出视频流帧率
 			),	

@@ -103,6 +103,7 @@ $conf = array(
 		'StorageType' => 'oss', // 仅支持 oss
 		//oss-cn-beijing-internal.aliyuncs.com
 		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+		'chipUrlBase' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/',
 	),
 	'appConfig' => array(
 		'name' => '智乐心理',
