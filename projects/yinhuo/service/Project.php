@@ -243,7 +243,7 @@ class Project extends ServiceBase
      *
      * @return array
      */
-    public function getProjectClipList($userId, $id)
+    public function getProjectClipList($userId, $id, $type)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -267,6 +267,15 @@ class Project extends ServiceBase
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
+    		if ($type == 1) { // 预览
+    			if (!empty($projectClipEtt->mediaURL)) {
+    				continue;
+    			}
+    		} elseif ($type == 2) { // 成品
+    			if (empty($projectClipEtt->mediaURL)) {
+    				continue;
+    			}
+    		} 
     		$projectClipModels[$projectEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
     			'jobId' 		=> $projectClipEtt->jobId,
