@@ -949,8 +949,8 @@ class Editing extends ServiceBase
     			'id' 			=> intval($editingMusicEtt->id),
     			'conId'			=> intval($editingMusicEtt->conId),
     			'type'			=> intval($editingMusicEtt->type),
-    			'url'			=> 'xxxxx',
-    			'name'			=> 'xxxx',
+    			'url'			=> $editingMusicEtt->publishUrl,
+    			'name'			=> $editingMusicEtt->name,
     			'duration'		=> 100, // 播放时长
     			'updateTime'	=> intval($editingMusicEtt->updateTime),
     			'createTime'	=> intval($editingMusicEtt->createTime),

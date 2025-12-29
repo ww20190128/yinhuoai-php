@@ -90,7 +90,7 @@ class App extends ServiceBase
 		$musicClassifyDao = \dao\MusicClassify::singleton();
 		$musicClassifyEttList = $musicClassifyDao->readListByWhere();
 		$list = array();
-		foreach ($musicClassifyEttList as $musicClassifyEtt) {
+		if (!empty($musicClassifyEttList)) foreach ($musicClassifyEttList as $musicClassifyEtt) {
 			$list[] = array(
 				'id' 	=> intval($musicClassifyEtt->id),
 				'id' 	=> $musicClassifyEtt->name,
@@ -106,9 +106,7 @@ class App extends ServiceBase
      */
     public function getActorClassifys()
     {
-
     	$actorArr = cfg('actorAil');
-
     	$map = array();
     	if (!empty($actorArr)) foreach ($actorArr as $key => $value) {
     		$listArr = explode("\n", $value);
@@ -160,7 +158,7 @@ class App extends ServiceBase
     		'classifyId' => $classifyId,
     	));
     	$list = array();
-    	foreach ($musicEttList as $musicEtt) {
+    	if (!empty($musicEttList)) foreach ($musicEttList as $musicEtt) {
     		$list[] = array(
     			'id' 			=> intval($musicEtt->id),
     			'name'			=> $musicEtt->name,
