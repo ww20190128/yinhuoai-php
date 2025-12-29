@@ -29,29 +29,73 @@ class App extends ServiceBase
     }
     
     /**
+     * 同步音乐数据
+     *
+     * @return array
+     */
+    public function sysnMusic($authorization)
+    {
+    	$musicDao = \dao\Music::singleton();
+		$musicClassifyDao = \dao\MusicClassify::singleton();
+    	$url = "https://api.pyp.canzan.com/company/material/hot_music_cate";
+    	$response = httpGetContents($url, null, 5, ["authorization: {$authorization}"]);
+    	$response = empty($response) ? array() : json_decode($response, true);
+    	$response = empty($response) ? array() : $response['data'];
+    	$now = $this->frame->now;
+    	foreach ($response as $row) {
+    		$musicClassifyEtt = $musicClassifyDao->readByPrimary($row['id']);
+    		if (empty($musicClassifyEtt)) {
+    			$musicClassifyEtt = $musicClassifyDao->getNewEntity();
+    			$musicClassifyEtt->id = $row['id'];
+    			$musicClassifyEtt->name = $row['title'];
+    			$musicClassifyDao->create($musicClassifyEtt);
+    		}
+    		$classifyId = $row['id'];
+    		$listUrl = "https://api.pyp.canzan.com/company/material/hot_music_list?cate={$row['id']}&limit=1000";
+    		$response = httpGetContents($listUrl, null, 5, ["authorization: {$authorization}"]);
+    		$response = empty($response) ? array() : json_decode($response, true);
+    		$list = empty($response['data']['list']) ? array() : $response['data']['list'];
+    		$ids = array();
+    		foreach ($list as $val) {
+    			$ids[] = $val['id'];
+    		}
+    		$haveMusicEttList = $musicDao->readListByPrimary($ids);
+    		$haveMusicEttList = $musicDao->refactorListByKey($haveMusicEttList);
+    		foreach ($list as $val) {
+    			if (!empty($haveMusicEttList[$val['id']])) {
+    				continue;
+    			}
+    			$musicEtt = $musicDao->getNewEntity();
+    			$musicEtt->id = $val['id'];
+    			$musicEtt->name = $val['name'];
+    			$musicEtt->duration = $val['duration'];
+    			$musicEtt->publishUrl = $val['publish_url'];
+    			$musicEtt->playUrl = $val['play_url'];
+    			$musicEtt->classifyId = $classifyId;
+    			$musicEtt->createTime = $now;
+    			$musicEtt->updateTime = $now;
+    			$musicDao->create($musicEtt);
+    		}
+    	}
+    	exit;
+    }
+    
+    /**
      * 获取热门音乐分类
      *
      * @return array
      */
     public function getMusicClassifys()
     {
-    	$list = array();
-    	$list[] = array(
-    		'id' => 1,
-    		'name' => '推荐',
-    	);
-    	$list[] = array(
-    		'id' => 2,
-    		'name' => '热门榜',
-    	);
-    	$list[] = array(
-    		'id' => 3,
-    		'name' => '飙升榜(新)',
-    	);
-    	$list[] = array(
-    		'id' => 4,
-    		'name' => '原创榜',
-    	);
+		$musicClassifyDao = \dao\MusicClassify::singleton();
+		$musicClassifyEttList = $musicClassifyDao->readListByWhere();
+		$list = array();
+		foreach ($musicClassifyEttList as $musicClassifyEtt) {
+			$list[] = array(
+				'id' 	=> intval($musicClassifyEtt->id),
+				'id' 	=> $musicClassifyEtt->name,
+			);
+		}
     	return $list;
     }
     
@@ -106,19 +150,25 @@ class App extends ServiceBase
     
     /**
      * 获取热门音乐分类
-     *duration:100, // 播放时长
-    
+     * 
      * @return array
      */
-    public function getMusicList()
+    public function getMusicList($classifyId)
     {
+    	$musicDao = \dao\Music::singleton();
+    	$musicEttList = $musicDao->readListByIndex(array(
+    		'classifyId' => $classifyId,
+    	));
     	$list = array();
-    	$list[] = array(
-    		'id' => 1,
-    		'name' => '音乐名称',
-    		'url' => 'https:xxxx',
-    		'duration' => 119,
-    	);
+    	foreach ($musicEttList as $musicEtt) {
+    		$list[] = array(
+    			'id' 			=> intval($musicEtt->id),
+    			'name'			=> $musicEtt->name,
+    			'duration'		=> intval($musicEtt->duration),
+    			'publishUrl'	=> $musicEtt->publishUrl,
+    			'playUrl'		=> $musicEtt->playUrl,
+    		);
+    	}
     	return $list;
     }
 
