@@ -34,13 +34,13 @@ class Project extends ServiceBase
         }
         return self::$instance;
     }
-    
+  
     /**
-     * 生成预览
+     * 获取预览
      *
      * @return array
      */
-    public function createPreview($userId, $editingId)
+    public function getPreview($userId, $editingId)
     {
     	$editingDao = \dao\Editing::singleton();
     	$editingEtt = $editingDao->readByPrimary($editingId);
@@ -52,83 +52,41 @@ class Project extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    	if ($editingEtt->userId != $userId) {
+    	if ($editingEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
-    	$aliEditingSv = \service\AliEditing::singleton();
-    	
-    	$chipParam = $editingSv->randomChipParam($editingInfo);
-    	if (empty($chipParam)) {
-    		throw new $this->exception('创建剪辑工程失败');
-    	}
+    	$preview = empty($editingEtt->preview) ? array() : json_decode($editingEtt->preview, true);
     	$now = $this->frame->now;
-
-    	$projectId = $aliEditingSv->createEditingProject($chipParam); // 工程ID	
-    	// 是否保存为模板
-    	if (empty($projectId)) {
-    		throw new $this->exception('创建剪辑工程失败');
-    	}
-    	$jobId = $aliEditingSv->submitMediaProducingJob($projectId, $chipParam);
-    	if (empty($jobId)) {
-    		throw new $this->exception('视频合成失败');
-    	}
-   		$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEtt = $projectClipDao->getNewEntity();
-    	$projectClipEtt->projectId = $projectId;
-    	$projectClipEtt->previewUrl = $chipParam['previewUrl'];
-    	$projectClipEtt->chipParam = json_encode($chipParam, JSON_UNESCAPED_UNICODE);
-    	$projectClipEtt->jobId = $jobId;
-    	$projectClipEtt->createTime = $now;
-    	$projectClipEtt->updateTime = $now;
-    	$projectClipId = $projectClipDao->create($projectClipEtt);
-    	return array(
-    		'jobId' => $jobId,
-    		'projectId' => $projectId,
-    		'id' => intval($projectClipId),
-    		'previewUrl' => $projectClipEtt->previewUrl,
-    	);
-    }
-    
-    /**
-     * 获取成品
-     *
-     * @return array
-     */
-    public function getProjectClip($userId, $clipId)
-    {
-    	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEtt = $projectClipDao->readByPrimary($clipId);
-    	if (empty($projectClipEtt) || $projectClipEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('成品已删除');
-    	}
-    	$userDao = \dao\User::singleton();
-    	$userEtt = $userDao->readByPrimary($userId);
-    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('用户不存在');
-    	}
     	$aliEditingSv = \service\AliEditing::singleton();
-		if (empty($projectClipEtt->mediaURL)) {
-			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($projectClipEtt->jobId);
+    	if (empty($preview['jobId'])) { // 没有预览任务
+    		$chipParam = $editingSv->randomChipParam($editingInfo);
+    		if (empty($chipParam)) {
+    			throw new $this->exception('生成预览失败');
+    		}
+    		$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+    		if (empty($jobId)) {
+    			throw new $this->exception('视频合成失败');
+    		}
+    		$preview['jobId'] = $jobId;
+    		$editingEtt->set('updateTime', $now);
+    		$editingDao->update($editingEtt);
+    	} elseif (empty($preview['mediaURL'])) {
+			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($preview['jobId']);
 			if (empty($mediaProducingJob)) {
 				throw new $this->exception('视频合成失败');
 			}
-			$now = $this->frame->now;
-			$projectClipEtt->set('jobStatus', $mediaProducingJob['status']);
-			$projectClipEtt->set('mediaURL', empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL']);
-			$projectClipEtt->set('mediaId', empty($mediaProducingJob['mediaId']) ? '' : $mediaProducingJob['mediaId']);
-			$projectClipEtt->set('duration', empty($mediaProducingJob['duration']) ? 0 : $mediaProducingJob['duration']);
-			$projectClipEtt->set('updateTime', $now);
-			$projectClipDao->update($projectClipEtt);
+			$preview['jobStatus'] = $mediaProducingJob['status'];
+			$preview['mediaURL'] = empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL'];
+			$preview['duration'] = empty($mediaProducingJob['duration']) ? '' : $mediaProducingJob['duration'];
+			$editingEtt->set('preview', json_encode($preview, JSON_UNESCAPED_UNICODE));
+			$editingEtt->set('updateTime', $now);
+			$editingDao->update($editingEtt);
 		}
     	return array(
-    		'jobId' => $projectClipEtt->jobId,
-    		'projectId' => $projectClipEtt->projectId,
-    		'id' => intval($projectClipEtt->id),
-    		'mediaURL' => $projectClipEtt->mediaURL,
-    		'jobStatus' => $projectClipEtt->jobStatus,
-    		'previewUrl' => $projectClipEtt->previewUrl,
+    		'mediaURL' => $preview['mediaURL'],
+    		'jobStatus' => $preview['jobStatus'],
     	);
     }
     

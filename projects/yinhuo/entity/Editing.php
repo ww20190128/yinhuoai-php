@@ -177,5 +177,11 @@ class Editing extends EntityBase
      */
     public $updateTime = 0;
 
+    /**
+     * 预览信息
+     *
+     * @var int
+     */
+    public $preview = '';
 // 表结构end
 }

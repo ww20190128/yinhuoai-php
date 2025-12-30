@@ -543,7 +543,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return array
 	 */
-	public function submitMediaProducingJob($projectId, $chipParam)
+	public function submitMediaProducingJob($chipParam, $projectId = '')
 	{
 		$orientation = '';
 		$width = $height = 0;
@@ -570,10 +570,16 @@ class AliEditing extends ServiceBase
 		$UserData = array(
 			'NotifyAddress' => $serve_url . 'op=Project.producingJobcallback', // 为任务完成的回调url
 		);
+		$timeline = $this->getTimeline($chipParam);
 		try {
 			// 通过project创建合成任务
 		    $request = new SubmitMediaProducingJobRequest();
-		    $request->projectId = $projectId;
+		    if (!empty($projectId)) {
+		    	$request->projectId = $projectId;
+		    }
+		    if (!empty($timeline)) {
+		    	$request->timeline = json_encode($timeline);
+		    }
 		    $request->outputMediaConfig = json_encode($outputMediaConfig);
 		    $response = self::$client->submitMediaProducingJob($request);
 		    $jobId = empty($response->body->jobId) ? array() : $response->body->jobId;

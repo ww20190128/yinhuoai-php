@@ -16,15 +16,14 @@ class Project extends CtrlBase
 	public function producingJobcallback()
 	{
 		$params = $this->params;
-		
 	}
 	
 	/**
-	 * 生成预览
+	 * 获取预览
 	 *
 	 * @return array
 	 */
-	public function createPreview()
+	public function getPreview()
 	{
 		$params = $this->params;
 		$params = (array)$params;
@@ -36,27 +35,7 @@ class Project extends CtrlBase
 			throw new $this->exception('请求参数错误');
 		}
 		$projectSv = \service\Project::singleton();
-		return $projectSv->createPreview($this->userId, $editingId);
-	}
-	
-	/**
-	 * 获取成品
-	 *
-	 * @return array
-	 */
-	public function getProjectClip()
-	{
-		$params = $this->params;
-		$params = (array)$params;
-		if (empty($this->userId)) {
-			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
-		}
-		$clipId = $this->paramFilter('clipId', 'intval', 0); // 剪辑Id
-		if (empty($clipId)) {
-			throw new $this->exception('请求参数错误');
-		}
-		$projectSv = \service\Project::singleton();
-		return $projectSv->getProjectClip($this->userId, $clipId);
+		return $projectSv->getPreview($this->userId, $editingId);
 	}
 	
 	/**
