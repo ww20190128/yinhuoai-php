@@ -80,8 +80,8 @@ class Template extends ServiceBase
     		throw new $this->exception('剪辑工程已删除');
     	}
     	$now = $this->frame->now;
-    	$templateDao->set('status', \constant\Common::DATA_DELETE);
-    	$templateDao->set('updateTime', $now);
+    	$templateEtt->set('status', \constant\Common::DATA_DELETE);
+    	$templateEtt->set('updateTime', $now);
     	$templateDao->update($templateEtt);
     	return array(
     		'result' => 1,
