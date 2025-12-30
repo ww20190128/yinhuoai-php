@@ -107,6 +107,13 @@ class User extends ModelBase
      * @var varchar
      */
     public $city = '';
+    
+    /**
+     * 用户最近编辑的剪辑Id
+     *
+     * @var varchar
+     */
+    public $editingId = 0;
  
 // 表结构end
 

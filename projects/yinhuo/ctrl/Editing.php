@@ -22,7 +22,7 @@ class Editing extends CtrlBase
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
 		$templateId = $this->paramFilter('templateId', 'intval', 0); // 模板Id
 		$editingSv = \service\Editing::singleton();
-		return $editingSv->editingInfo($this->userId, $editingId, $templateId);
+		return $editingSv->getUserEditingInfo($this->userId, $editingId, $templateId);
 	}
 	
 	/**

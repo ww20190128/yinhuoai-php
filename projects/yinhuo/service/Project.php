@@ -82,7 +82,7 @@ class Project extends ServiceBase
     		do {
     			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($preview['jobId']);
     		} while (empty($mediaProducingJob) && --$tries > 0);
-			if (empty($mediaProducingJob) || in_array($mediaProducingJob['jobStatus'], array('Failed'))) {
+			if (empty($mediaProducingJob) || (!empty($mediaProducingJob['jobStatus']) && in_array($mediaProducingJob['jobStatus'], array('Failed')))) {
 				$preview['jobId'] = '';
 				$editingEtt->set('preview', json_encode($preview, JSON_UNESCAPED_UNICODE));
 				$editingDao->update($editingEtt);

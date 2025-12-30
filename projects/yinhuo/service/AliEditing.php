@@ -45,7 +45,7 @@ class AliEditing extends ServiceBase
 	/**
 	 * 单例模式
 	 *
-	 * @return AliPay
+	 * @return AliEditing
 	 * 
 	 */
 	public static function singleton()
@@ -229,6 +229,32 @@ class AliEditing extends ServiceBase
 				);
 			}
 		}
+		// 视频调色
+		$editingFilterEffectTrackColorItem = array();
+		if (!empty($editingInfo['color'])) { // 颜色配置
+			$colorArr = $editingInfo['color'];
+			$extParams = array('effect=color');
+			if (!empty($colorArr['contrast'])) { // 对比度 取值范围 -100 ~ 100
+				$extParams[] = "contrast={$colorArr['contrast']}";
+			}
+			if (!empty($colorArr['saturation'])) { // 饱和度  取值范围 -100 ~ 100
+				$extParams[] = "saturability={$colorArr['saturation']}";
+			}
+			if (!empty($colorArr['luminance'])) { // 亮度   取值范围 -100 ~ 100
+				$extParams[] = "brightness={$colorArr['luminance']}";
+			}
+			if (!empty($colorArr['chroma'])) { // 色度  取值范围 -100 ~ 100
+				$extParams[] = "tint={$colorArr['chroma']}";
+			}
+			if (count($extParams) > 1) {
+				$editingFilterEffectTrackColorItem = array(
+					'Type' => 'Filter',
+					'SubType' => 'color',
+					'ExtParams' => implode(',', $extParams),
+				);
+			}
+		}
+		
 		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
 
 		// 标题
@@ -252,6 +278,7 @@ class AliEditing extends ServiceBase
 		if (!empty($editingInfo['musicInfo'])) {
 			$audioTrackClip = array(
 				'MediaURL' => $editingInfo['musicInfo']['url'],
+				'LoopMode' => true, // 循环
 			);
 			$effectVolume = array();
 			if (!empty($editingInfo['volume']['backgroundVolume'])) { // 背景音量
@@ -311,6 +338,16 @@ class AliEditing extends ServiceBase
 				if (!empty($clipIds)) { // 适用的镜头
 					$videoTrackClip['ReferenceClipId'] = 'lens_' . reset($clipIds); // 镜头ID
 				}
+				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO) { // 视频静音
+					$effectVolume = array(
+						'Type' => 'Volume',
+						'Gain' => 0,
+					);
+					$effects = array();
+					$effects[] = $effectVolume;
+					$videoTrackClip['Effects'] = $effects;
+				}
+			
 				$decalVideoTrackClips[] = $videoTrackClip;
 			}
 			if (!empty($decalVideoTrackClips)) {
@@ -371,8 +408,7 @@ class AliEditing extends ServiceBase
 				'AudioTrackClips' => $editingAudioTrackClips,
 			);
 		}
-		
-		
+			
 		// 镜头
 		$lensVideoTracks = array(); // 视频轨列表（镜头）
 		$lensAudioTracks = array(); // 视频轨列表（配音）
@@ -380,13 +416,13 @@ class AliEditing extends ServiceBase
 		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
 		 * 一个镜头一个AudioTracks 元素array('AudioTrackClips'=> $lensAudioTrackClips)
 		 */
-		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
+		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
 			
 			$lensVideoTrackClips = array(); // 镜头的VideoTracks 视频/图片
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffects = array(); // 镜头的效果-转场 在素材间转场，1种效果
-			if (!empty($lensRow['transitionSubType'])) { // #转场设置
+			if (!empty($lensRow['transitionSubType']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
 				$lensTransitionEffects[] = array(
 					'Type' => 'Transition',
 					'SubType' => $lensRow['transitionSubType'],
@@ -488,10 +524,18 @@ class AliEditing extends ServiceBase
 		if (!empty($audioTracks)) {
 			$result['AudioTracks'] = $audioTracks;
 		}
+		$effectTrackItems = array();
 		if (!empty($editingFilterEffectTrackItem)) { // 针对全局画面添加滤镜，只加1个滤镜
+			$effectTrackItems[] = $editingFilterEffectTrackItem;
+		}
+		if (!empty($editingFilterEffectTrackColorItem)) {
+			$effectTrackItems[] = $editingFilterEffectTrackColorItem;
+		}
+
+		if (!empty($effectTrackItems)) { // 针对全局画面添加滤镜，只加1个滤镜
 			$result['EffectTracks'] = array(
 				array(
-					'EffectTrackItems' => array($editingFilterEffectTrackItem),
+					'EffectTrackItems' => $effectTrackItems,
 				)
 			);
 		}
@@ -532,10 +576,11 @@ class AliEditing extends ServiceBase
     		$request = new DeleteEditingProjectsRequest();
    	 		$request->projectIds = is_array($projectIds) ? implode(',', $projectIds) : $projectIds;
     		$response = $client->deleteEditingProjects($request);
+    		$requestId = empty($response->body->requestId) ? array() : $response->body->requestId;
 		} catch (TeaUnableRetryError $e) {
 			return false;
 		}
-		return $response;
+		return $requestId;
 	}
 	
 	/**
@@ -556,26 +601,30 @@ class AliEditing extends ServiceBase
 			$height = 900;
 		}
 		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
+		$mediaURL = $aliEditingConf['chipUrlBase'] . $chipParam['id'] . '_' . strtotime(date('Y-m-d H:i:s')) . '.mp4';
 		$outputMediaConfig = array(
-			'MediaURL' => $aliEditingConf['chipUrlBase'] . chipUrlBase . '_' . strtotime(date('Ymd')) . '_' . rand(0, 9999) . '.mp4', // 指定输出到OSS的媒资文件URL。
+			'MediaURL' => $mediaURL, // 指定输出到OSS的媒资文件URL。
 			'Video' => array(
 				'Fps' => $chipParam['fps'], // 输出视频流帧率
 			),	
 		);
-		if (!empty($width) && empty($height)) {
+		if (!empty($orientation)) {
+			$outputMediaConfig['Video']['Orientation'] = $orientation;
+		}
+		if (!empty($width) && !empty($height)) {
 			$outputMediaConfig['Width'] = $width;
 			$outputMediaConfig['Height'] = $height;
 		}
 		$serve_url = $aliEditingConf = self::$instance->frame->conf['serve_url'];
-		$UserData = array(
+		$userData = array(
 			'NotifyAddress' => $serve_url . 'op=Project.producingJobcallback', // 为任务完成的回调url
 		);
 		$timeline = $this->getTimeline($chipParam);
 		try {
-			// 通过project创建合成任务
 		    $request = new SubmitMediaProducingJobRequest();
-		    $request->timeline = json_encode($timeline);
-		    $request->outputMediaConfig = json_encode($outputMediaConfig);
+		    $request->timeline = json_encode($timeline, JSON_UNESCAPED_UNICODE);
+		    $request->outputMediaConfig = json_encode($outputMediaConfig, JSON_UNESCAPED_UNICODE);
+		    $request->userData = json_encode($userData, JSON_UNESCAPED_UNICODE);
 		    $response = self::$client->submitMediaProducingJob($request);
 		    $jobId = empty($response->body->jobId) ? array() : $response->body->jobId;
 		} catch (DaraUnableRetryException $e) {
@@ -605,4 +654,5 @@ class AliEditing extends ServiceBase
 		}
 		return (array)$mediaProducingJob;
 	}
+	
 }
