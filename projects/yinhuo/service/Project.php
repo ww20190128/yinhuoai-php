@@ -272,7 +272,7 @@ class Project extends ServiceBase
     	}
     	return array(
     		'canCreateTotalNum' => $canCreateTotalNum,
-    		'totalNum' => $previewTotalNum,
+    		'totalNum' => $previewTotalNum + $canCreateTotalNum,
     		'list' => array_values($dataList),
     	);
     }
