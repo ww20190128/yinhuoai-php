@@ -122,16 +122,21 @@ class Project extends ServiceBase
     		if (empty($projectId)) {
     			throw new $this->exception('创建剪辑工程失败');
     		}
+    		if (empty($info['numLimit'])) {
+    			throw new $this->exception('请输入生成数量');
+    		}
     		$projectDao = \dao\Project::singleton();
     		$projectEtt = $projectDao->getNewEntity();
     		$projectEtt->id = $projectId;
     		$projectEtt->editingId = $editingId;
     		$projectEtt->userId = $editingEtt->userId;
+    		$projectEtt->numLimit = $info['numLimit']; // 成品数量
     		$projectEtt->name = empty($info['name']) ? $editingInfo['name'] : $info['name'];
     		$projectEtt->createTime = $now;
     		$projectEtt->updateTime = $now;
     		$projectDao->create($projectEtt);
     	}
+    	$templateId = 0;
 		if (!empty($info['type']) && in_array($info['type'], array(2,3))) { // 创建模板
 			$templateEtt = $templateDao->getNewEntity();
 			$templateEtt->editingId = $editingId;
@@ -140,29 +145,11 @@ class Project extends ServiceBase
 			$templateEtt->userId = $editingEtt->userId;
 			$templateEtt->createTime = $now;
 			$templateEtt->updateTime = $now;
-			$templateDao->create($templateEtt);
-		}
-		$aliEditingSv = \service\AliEditing::singleton();
-		$chipParamList = array();
-		for ($index = 1; $index <= $info['numLimit']; $index++) {
-			$chipParam = $editingSv->randomChipParam($editingInfo);
-			$chipParamList[$index] = $chipParam;
-		}
-		$projectClipDao = \dao\ProjectClip::singleton();
-		$projectClipIds = array();
-		foreach ($chipParamList as $chipParam) {
-			$projectClipEtt = $projectClipDao->getNewEntity();
-			$projectClipEtt->projectId = $projectId;
-			$projectClipEtt->chipParam = json_encode($chipParam, true);
-			$projectClipEtt->previewUrl = $chipParam['previewUrl'];
-			$projectClipEtt->createTime = $now;
-			$projectClipEtt->updateTime = $now;
-			$projectClipId = $projectClipDao->create($projectClipEtt);
-			$projectClipIds[] = $projectClipId;
+			$templateId = $templateDao->create($templateEtt);
 		}
     	return array(
     		'projectId' => $projectId,
-    		'clipNum' => count($projectClipIds),
+    		'templateId' => intval($templateId),
     	);
     }
     
@@ -196,6 +183,90 @@ class Project extends ServiceBase
     	$commonSv = \service\Common::singleton();
     	uasort($projectModels, array($commonSv, 'sortByCreateTime'));
     	return $projectModels;
+    }
+    
+    /**
+     * 预览列表
+     *
+     * @return array
+     */
+    public function getProjectPreviewList($userId, $id, $pageNum, $pageLimit)
+    {
+$pageNum = 5;
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$projectDao = \dao\Project::singleton();
+    	$projectEtt = $projectDao->readByPrimary($id);
+    	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    	if ($projectEtt->userId != $userEtt->userId) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEttList = $projectClipDao->readListByIndex(array(
+    		'projectId' => $id,
+    	));
+    	$numLimit = intval($projectEtt->numLimit);
+    	$previewModels = array(); // 预览
+    	$clipModels = array(); // 成品
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) { // 已删除
+    			continue;
+    		}
+    		$projectClipModel = array(
+    			'id' 			=> intval($projectClipEtt->id),
+    			'mediaURL' 		=> $projectClipEtt->mediaURL,
+    			'jobStatus' 	=> $projectClipEtt->jobStatus,
+    			'previewUrl' 	=> $projectClipEtt->previewUrl,
+    		);
+    		if (!empty($projectClipEtt->mediaURL)) { // 已生成成片
+    			$clipModels[$projectClipEtt->id] = $projectClipModel;
+    		} else {
+    			$previewModels[$projectClipEtt->id] = $projectClipModel;
+    		}
+    	}
+    	// 需要创建的总数量
+    	$canCreateTotalNum = $numLimit - count($projectClipEttList);
+    	$previewTotalNum = count($previewModels);
+    	$editingSv = \service\Editing::singleton();
+    	$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    	// 分页显示
+    	$dataList = array_slice($previewModels, ($pageNum - 1) * $pageLimit, $pageLimit);
+    	if ($canCreateTotalNum > 0 && empty($dataList)) { // 创建
+    		$chipParamList = array();
+    		for ($index = 1; $index <= $pageLimit; $index++) {
+    			$chipParam = $editingSv->randomChipParam($editingInfo);
+    			$chipParamList[$index] = $chipParam;
+    		}
+    		$now = $this->frame->now;
+    		foreach ($chipParamList as $chipParam) {
+    			$projectClipEtt = $projectClipDao->getNewEntity();
+    			$projectClipEtt->projectId = $projectEtt->id;
+    			$projectClipEtt->chipParam = json_encode($chipParam, true);
+    			$projectClipEtt->previewUrl = $chipParam['previewUrl'];
+    			$projectClipEtt->createTime = $now;
+    			$projectClipEtt->updateTime = $now;
+    			$projectClipId = $projectClipDao->create($projectClipEtt);
+    			$projectClipModel = array(
+    				'id' 			=> intval($projectClipId),
+    				'mediaURL' 		=> $projectClipEtt->mediaURL,
+    				'jobStatus' 	=> $projectClipEtt->jobStatus,
+    				'previewUrl' 	=> $projectClipEtt->previewUrl,
+    			);
+    			$dataList[] = $projectClipModel;
+    			$previewTotalNum++;
+    			$canCreateTotalNum--;
+    		}
+    	}
+    	return array(
+    		'canCreateTotalNum' => $canCreateTotalNum,
+    		'totalNum' => $previewTotalNum,
+    		'list' => array_values($dataList),
+    	);
     }
     
     /**

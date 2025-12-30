@@ -109,7 +109,7 @@ class Template extends ServiceBase
     		throw new $this->exception('剪辑工程已删除');
     	}
     	if (!empty($info['name'])) {
-    		$projectEtt->set('name', $info['name']);
+    		$templateEtt->set('name', $info['name']);
     	}
     	$now = $this->frame->now;
     	$templateEtt->set('status', \constant\Common::DATA_DELETE);

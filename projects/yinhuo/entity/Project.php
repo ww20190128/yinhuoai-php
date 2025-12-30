@@ -65,5 +65,11 @@ class Project extends EntityBase
      */
     public $updateTime = 0;
 
+    /**
+     * 成品数量限制
+     *
+     * @var int
+     */
+    public $numLimit = 0;
 // 表结构end
 }
