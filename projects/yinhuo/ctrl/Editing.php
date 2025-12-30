@@ -20,8 +20,9 @@ class Editing extends CtrlBase
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
 		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
+		$templateId = $this->paramFilter('templateId', 'intval', 0); // 模板Id
 		$editingSv = \service\Editing::singleton();
-		return $editingSv->editingInfo($this->userId, $editingId);
+		return $editingSv->editingInfo($this->userId, $editingId, $templateId);
 	}
 	
 	/**

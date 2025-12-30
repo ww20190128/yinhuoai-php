@@ -365,8 +365,16 @@ class Editing extends ServiceBase
      *
      * @return array
      */
-    public function editingInfo($userEtt, $editingEtt)
+    public function editingInfo($userEtt, $editingEtt, $templateId = 0)
     {
+    	if (!empty($templateId)) {
+    		$templateDao = \dao\Template::singleton();
+    		$templateEtt = $templateDao->readByPrimary($templateId);
+    		if (empty($templateEtt) || $templateEtt->status == \constant\Common::DATA_DELETE) {
+    			throw new $this->exception('模板已删除');
+    		}
+    		$editingEtt = intval($templateEtt->editingId);
+    	}
     	$userDao = \dao\User::singleton();
     	if (is_numeric($userEtt)) {
     		$userEtt = $userDao->readByPrimary($userEtt);
