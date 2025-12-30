@@ -50,6 +50,7 @@ class Template extends ServiceBase
     		$templateModels[$templateEtt->id] = array(
     			'id' 			=> intval($templateEtt->id),
     			'name'			=> $templateEtt->name,
+    			'editingId'		=> intval($templateEtt->editingId),
     			'createTime' 	=> intval($templateEtt->createTime),
     			'updateTime' 	=> intval($templateEtt->updateTime),
     		);
