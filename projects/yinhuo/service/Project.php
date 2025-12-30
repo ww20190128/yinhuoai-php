@@ -56,26 +56,37 @@ class Project extends ServiceBase
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingSv = \service\Editing::singleton();
-    	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
     	$preview = empty($editingEtt->preview) ? array() : json_decode($editingEtt->preview, true);
     	$now = $this->frame->now;
     	$aliEditingSv = \service\AliEditing::singleton();
-    	if (empty($preview['jobId'])) { // 没有预览任务
+    	if (empty($preview['jobId'])) { // 没有生成预览任务
+    		$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
     		$chipParam = $editingSv->randomChipParam($editingInfo);
     		if (empty($chipParam)) {
-    			throw new $this->exception('生成预览失败');
+    			throw new $this->exception('预览生成失败');
     		}
-    		$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+    		$tries = 3;
+    		do {
+    			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+    		} while (empty($jobId) && --$tries > 0);
     		if (empty($jobId)) {
-    			throw new $this->exception('视频合成失败');
+    			throw new $this->exception('预览生成失败');
     		}
+    		$preview['createTime'] = $now;
     		$preview['jobId'] = $jobId;
+    		$editingEtt->set('preview', json_encode($preview, JSON_UNESCAPED_UNICODE));
     		$editingEtt->set('updateTime', $now);
     		$editingDao->update($editingEtt);
-    	} elseif (empty($preview['mediaURL'])) {
-			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($preview['jobId']);
-			if (empty($mediaProducingJob)) {
-				throw new $this->exception('视频合成失败');
+    	} elseif (empty($preview['mediaURL'])) { // 没有生成视频
+    		$tries = 3;
+    		do {
+    			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($preview['jobId']);
+    		} while (empty($mediaProducingJob) && --$tries > 0);
+			if (empty($mediaProducingJob) || in_array($mediaProducingJob['jobStatus'], array('Failed'))) {
+				$preview['jobId'] = '';
+				$editingEtt->set('preview', json_encode($preview, JSON_UNESCAPED_UNICODE));
+				$editingDao->update($editingEtt);
+				throw new $this->exception('预览生成失败');
 			}
 			$preview['jobStatus'] = $mediaProducingJob['status'];
 			$preview['mediaURL'] = empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL'];
@@ -85,8 +96,8 @@ class Project extends ServiceBase
 			$editingDao->update($editingEtt);
 		}
     	return array(
-    		'mediaURL' => $preview['mediaURL'],
-    		'jobStatus' => $preview['jobStatus'],
+    		'mediaURL' => empty($preview['mediaURL']) ? '' : $preview['mediaURL'],
+    		'jobStatus' => empty($preview['jobStatus']) ? '' : $preview['jobStatus'],
     	);
     }
     
@@ -112,17 +123,21 @@ class Project extends ServiceBase
     	}
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
-    	$aliEditingSv = \service\AliEditing::singleton();
+    	
     	$templateDao = \dao\Template::singleton();
     	$now = $this->frame->now;
     	$projectId = '';
     	if (!empty($info['type']) && in_array($info['type'], array(1, 3))) { // 创建剪辑工程
-    		$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
+    		$aliEditingSv = \service\AliEditing::singleton();
+    		$tries = 3;
+    		do {
+    			$projectId = $aliEditingSv->createEditingProject($editingInfo); // 工程ID
+    		} while (empty($projectId) && --$tries > 0);
     		// 是否保存为模板
     		if (empty($projectId)) {
     			throw new $this->exception('创建剪辑工程失败');
     		}
-    		if (empty($info['numLimit'])) {
+    		if (empty($info['numLimit']) || $info['numLimit'] <= 0) {
     			throw new $this->exception('请输入生成数量');
     		}
     		$projectDao = \dao\Project::singleton();
@@ -343,7 +358,10 @@ class Project extends ServiceBase
     	}
     	// 删除云剪辑工程
     	$aliEditingSv = \service\AliEditing::singleton();
-    	$aliEditingSv->deleteEditingProjects($projectEtt->id);
+    	$tries = 3;
+    	do {
+    		$delete = $aliEditingSv->deleteEditingProjects($projectEtt->id);
+    	} while (empty($delete) && --$tries > 0);
     	$now = $this->frame->now;
     	$projectEtt->set('status', \constant\Common::DATA_DELETE);
     	$projectEtt->set('updateTime', $now);
@@ -376,7 +394,6 @@ class Project extends ServiceBase
     	if (!empty($info['name'])) {
     		$projectEtt->set('name', $info['name']);
     	}
-    
     	$now = $this->frame->now;
     	$projectEtt->set('status', \constant\Common::DATA_DELETE);
     	$projectEtt->set('updateTime', $now);
@@ -461,10 +478,13 @@ class Project extends ServiceBase
 			if (empty($chipParam) || empty($projectClipEtt->projectId)) {
 				continue;
 			}
-			if (!empty($projectClipEtt->mediaURL) || empty($projectClipEtt->jobId)) { // 有生成
+			if (!empty($projectClipEtt->mediaURL)) { // 有生成
 				continue;
 			}
-			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+			$tries = 3;
+			do {
+				$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+			} while (empty($jobId) && --$tries > 0);
 			if (empty($jobId)) {
 				continue;
 			}

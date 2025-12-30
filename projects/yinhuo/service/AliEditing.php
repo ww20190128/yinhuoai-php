@@ -535,7 +535,7 @@ class AliEditing extends ServiceBase
 		} catch (TeaUnableRetryError $e) {
 			return false;
 		}
-		return true;
+		return $response;
 	}
 	
 	/**

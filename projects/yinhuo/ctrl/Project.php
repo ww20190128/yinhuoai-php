@@ -26,7 +26,6 @@ class Project extends CtrlBase
 	public function getPreview()
 	{
 		$params = $this->params;
-		$params = (array)$params;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
@@ -54,16 +53,16 @@ class Project extends CtrlBase
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
-		$info = array();
+		$info = array(
+			'type' => $this->paramFilter('type', 'intval', 1), // 1  创建剪辑 2 保存模板 3保存模板&创建剪辑 
+		);
 		if (!empty($params['name'])) {
 			$info['name'] = $this->paramFilter('name', 'string');
 		}
 		if (!empty($params['numLimit'])) {
 			$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
-			$info['numLimit'] = min($info['numLimit'], 1000);
+			$info['numLimit'] = min($info['numLimit'], 2000);
 		}
-		// 1  创建剪辑 2 保存模板 3保存模板&创建剪辑 
-		$info['type'] = $this->paramFilter('type', 'intval', 1);
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProject($this->userId, $editingId, $info);
 	}
@@ -197,7 +196,7 @@ class Project extends CtrlBase
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
-		$ids =  $this->paramFilter('ids', 'array');
+		$ids = $this->paramFilter('ids', 'array');
 		if (empty($ids)) {
 			throw new $this->exception('请求参数错误');
 		}
