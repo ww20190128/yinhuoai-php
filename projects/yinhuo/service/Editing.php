@@ -941,20 +941,48 @@ class Editing extends ServiceBase
     private function getMusicModels($editingMusicEttList)
     {
     	$editingMusicModels = array();
+    	$musicIds = array();
+    	$mediaIds = array();
     	if (!empty($editingMusicEttList)) foreach ($editingMusicEttList as $editingMusicEtt) {
     		if ($editingMusicEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		$editingMusicModels[$editingMusicEtt->id] = array(
+    		if ($editingMusicEtt->type == 1) { // 音乐id
+    			$musicIds[$editingMusicEtt->conId] = $editingMusicEtt->conId;
+    		} else { // 素材id
+    			$mediaIds[$editingMusicEtt->conId] = $editingMusicEtt->conId;
+    		}
+    	}
+    	$musicDao = \dao\Music::singleton();
+    	$musicEttList = empty($musicIds) ? array() : $musicDao->readListByPrimary($musicIds);
+    	$musicEttList = $musicDao->refactorListByKey($musicEttList);
+    	
+    	$mediaDao = \dao\Media::singleton();
+    	$mediaEttList = empty($mediaIds) ? array() : $mediaDao->readListByPrimary($mediaIds);
+    	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    	
+    	if (!empty($editingMusicEttList)) foreach ($editingMusicEttList as $editingMusicEtt) {
+    		if ($editingMusicEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$editingMusicModel = array(
     			'id' 			=> intval($editingMusicEtt->id),
     			'conId'			=> intval($editingMusicEtt->conId),
     			'type'			=> intval($editingMusicEtt->type),
-    			'url'			=> $editingMusicEtt->publishUrl,
-    			'name'			=> $editingMusicEtt->name,
+    			'url'			=> '',
+    			'name'			=> '',
     			'duration'		=> 100, // 播放时长
     			'updateTime'	=> intval($editingMusicEtt->updateTime),
     			'createTime'	=> intval($editingMusicEtt->createTime),
     		);
+    		if ($editingMusicEtt->type == 1 && !empty($musicEttList[$editingMusicEtt->conId])) { // 音乐id
+    			$editingMusicModel['name'] = $musicEttList[$editingMusicEtt->conId]->name;
+    			$editingMusicModel['url'] = $musicEttList[$editingMusicEtt->conId]->publishUrl;
+    		} elseif (!empty($mediaEttList[$editingMusicEtt->conId])) { // 素材id
+    			$editingMusicModel['name'] = $mediaEttList[$editingMusicEtt->conId]->name;
+    			$editingMusicModel['url'] = $mediaEttList[$editingMusicEtt->conId]->url;
+    		}
+    		$editingMusicModels[$editingMusicEtt->id] = $editingMusicModel;
     	}
     	$commonSv = \service\Common::singleton();
     	uasort($editingMusicModels, array($commonSv, 'sortByCreateTime'));

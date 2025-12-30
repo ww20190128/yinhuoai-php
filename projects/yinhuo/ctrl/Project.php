@@ -83,9 +83,8 @@ class Project extends CtrlBase
 			$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
 			$info['numLimit'] = min($info['numLimit'], 1000);
 		}
-		if (isset($params['savaTemplate'])) { // 是否保存为模板
-			$info['savaTemplate'] = $this->paramFilter('savaTemplate', 'intval');
-		}
+		// 1  创建剪辑 2 保存模板 3保存模板&创建剪辑 
+		$info['type'] = $this->paramFilter('type', 'intval', 1);
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProject($this->userId, $editingId, $info);
 	}

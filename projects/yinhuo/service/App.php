@@ -93,7 +93,7 @@ class App extends ServiceBase
 		if (!empty($musicClassifyEttList)) foreach ($musicClassifyEttList as $musicClassifyEtt) {
 			$list[] = array(
 				'id' 	=> intval($musicClassifyEtt->id),
-				'id' 	=> $musicClassifyEtt->name,
+				'name' 	=> $musicClassifyEtt->name,
 			);
 		}
     	return $list;
