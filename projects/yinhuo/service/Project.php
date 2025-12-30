@@ -192,7 +192,6 @@ class Project extends ServiceBase
      */
     public function getProjectPreviewList($userId, $id, $pageNum, $pageLimit)
     {
-$pageNum = 5;
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
@@ -211,8 +210,10 @@ $pageNum = 5;
     		'projectId' => $id,
     	));
     	$numLimit = intval($projectEtt->numLimit);
-    	$previewModels = array(); // 预览
-    	$clipModels = array(); // 成品
+    	// 可创建的总数量
+    	$canCreateTotalNum = $numLimit - count($projectClipEttList);
+    	$previewModels = array(); // 预览列表
+    	$clipModels = array(); // 成品列表
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) { // 已删除
     			continue;
@@ -229,20 +230,27 @@ $pageNum = 5;
     			$previewModels[$projectClipEtt->id] = $projectClipModel;
     		}
     	}
-    	// 需要创建的总数量
-    	$canCreateTotalNum = $numLimit - count($projectClipEttList);
-    	$previewTotalNum = count($previewModels);
+    	$commonSv = \service\Common::singleton();
+    	uasort($previewModels, array($commonSv, 'sortByCreateTime'));
+    	
+    	$previewTotalNum = count($previewModels); // 预览总数
     	$editingSv = \service\Editing::singleton();
-    	$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    	
     	// 分页显示
     	$dataList = array_slice($previewModels, ($pageNum - 1) * $pageLimit, $pageLimit);
-    	if ($canCreateTotalNum > 0 && empty($dataList)) { // 创建
+    	$needCreateNum = 0;
+    	if (count($dataList) < $pageLimit) {
+    		$needCreateNum = $pageLimit - count($dataList);
+    	}
+    	$now = $this->frame->now;
+    	$needCreateNum = min($needCreateNum, $canCreateTotalNum); // 需要创建的数量
+    	if ($needCreateNum > 0) { // 创建
+    		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
     		$chipParamList = array();
-    		for ($index = 1; $index <= $pageLimit; $index++) {
+    		for ($index = 1; $index <= $needCreateNum; $index++) {
     			$chipParam = $editingSv->randomChipParam($editingInfo);
     			$chipParamList[$index] = $chipParam;
     		}
-    		$now = $this->frame->now;
     		foreach ($chipParamList as $chipParam) {
     			$projectClipEtt = $projectClipDao->getNewEntity();
     			$projectClipEtt->projectId = $projectEtt->id;
@@ -274,7 +282,7 @@ $pageNum = 5;
      *
      * @return array
      */
-    public function getProjectClipList($userId, $id, $type)
+    public function getProjectClipList($userId, $id)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -298,20 +306,11 @@ $pageNum = 5;
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		if ($type == 1) { // 预览
-    			if (!empty($projectClipEtt->mediaURL)) {
-    				continue;
-    			}
-    		} elseif ($type == 2) { // 成品
-    			if (empty($projectClipEtt->mediaURL)) {
-    				continue;
-    			}
-    		} 
+    		if (empty($projectClipEtt->mediaURL)) { // 已生成成片
+    			continue;
+    		}
     		$projectClipModels[$projectEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
-    			'jobId' 		=> $projectClipEtt->jobId,
-    			'projectId' 	=> $projectClipEtt->projectId,
-    			'clipId' 		=> intval($projectClipEtt->id),
     			'mediaURL' 		=> $projectClipEtt->mediaURL,
     			'jobStatus' 	=> $projectClipEtt->jobStatus,
     			'previewUrl' 	=> $projectClipEtt->previewUrl,

@@ -172,9 +172,8 @@ class Project extends CtrlBase
 		if (empty($id)) {
 			throw new $this->exception('请求参数错误');
 		}
-		$type = $this->paramFilter('type', 'intval');
 		$projectSv = \service\Project::singleton();
-		$dataList = $projectSv->getProjectClipList($this->userId, $id, $type);
+		$dataList = $projectSv->getProjectClipList($this->userId, $id);
 		$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
 		$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
 		// 符合条件的总条数
