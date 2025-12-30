@@ -675,7 +675,7 @@ class Editing extends ServiceBase
     		$editingEtt->set('name', $info['name']);
     	}
     	if (isset($info['title'])) { // 标题
-    		$editingEtt->set('desc', $info['title']);
+    		$editingEtt->set('title', $info['title']);
     	}
     	if (isset($info['topic'])) { // 话题
     		$editingEtt->set('topic', $info['topic']);
