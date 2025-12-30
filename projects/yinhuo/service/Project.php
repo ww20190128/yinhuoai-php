@@ -464,7 +464,7 @@ class Project extends ServiceBase
 			if (!empty($projectClipEtt->mediaURL) || empty($projectClipEtt->jobId)) { // 有生成
 				continue;
 			}
-			$jobId = $aliEditingSv->submitMediaProducingJob($projectClipEtt->projectId, $chipParam);
+			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
 			if (empty($jobId)) {
 				continue;
 			}

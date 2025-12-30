@@ -543,7 +543,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return array
 	 */
-	public function submitMediaProducingJob($chipParam, $projectId = '')
+	public function submitMediaProducingJob($chipParam)
 	{
 		$orientation = '';
 		$width = $height = 0;
@@ -574,12 +574,7 @@ class AliEditing extends ServiceBase
 		try {
 			// 通过project创建合成任务
 		    $request = new SubmitMediaProducingJobRequest();
-		    if (!empty($projectId)) {
-		    	$request->projectId = $projectId;
-		    }
-		    if (!empty($timeline)) {
-		    	$request->timeline = json_encode($timeline);
-		    }
+		    $request->timeline = json_encode($timeline);
 		    $request->outputMediaConfig = json_encode($outputMediaConfig);
 		    $response = self::$client->submitMediaProducingJob($request);
 		    $jobId = empty($response->body->jobId) ? array() : $response->body->jobId;
