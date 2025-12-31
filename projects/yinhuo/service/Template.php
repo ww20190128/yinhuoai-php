@@ -80,10 +80,7 @@ class Template extends ServiceBase
     	if ($templateEtt->userId != $userEtt->userId) {
     		throw new $this->exception('剪辑工程已删除');
     	}
-    	$now = $this->frame->now;
-    	$templateEtt->set('status', \constant\Common::DATA_DELETE);
-    	$templateEtt->set('updateTime', $now);
-    	$templateDao->update($templateEtt);
+    	$templateDao->remove($templateEtt);
     	return array(
     		'result' => 1,
     	);

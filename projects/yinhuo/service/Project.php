@@ -363,9 +363,7 @@ class Project extends ServiceBase
     		$delete = $aliEditingSv->deleteEditingProjects($projectEtt->id);
     	} while (empty($delete) && --$tries > 0);
     	$now = $this->frame->now;
-    	$projectEtt->set('status', \constant\Common::DATA_DELETE);
-    	$projectEtt->set('updateTime', $now);
-    	$projectDao->update($projectEtt);
+    	$projectDao->remove($projectEtt);
     	return array(
     		'result' => 1,
     	);
@@ -395,7 +393,6 @@ class Project extends ServiceBase
     		$projectEtt->set('name', $info['name']);
     	}
     	$now = $this->frame->now;
-
     	$projectEtt->set('updateTime', $now);
     	$projectDao->update($projectEtt);
     	return array(
@@ -433,9 +430,7 @@ class Project extends ServiceBase
 	    	}
     	}
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
-    		$projectClipEtt->set('status', \constant\Common::DATA_DELETE);
-    		$projectClipEtt->set('updateTime', $now);
-    		$projectClipDao->update($projectClipEtt);
+    		$projectClipDao->remove($projectClipEtt);
     	}
     	return array(
     		'result' => 1,
