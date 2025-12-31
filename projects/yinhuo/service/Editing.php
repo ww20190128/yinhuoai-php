@@ -1399,6 +1399,10 @@ class Editing extends ServiceBase
     			$editingInfo['transitionSubType'] = implode(',', $editingInfo['transitionIds']);
     		}
     	}
+    	// 背景视频/图片
+    	if (!empty($editingInfo['background']['mediaList'])) {
+    		$editingInfo['background']['mediaInfo'] = $editingInfo['background']['mediaList'][array_rand($editingInfo['background']['mediaList'], 1)];
+    	}
     	$lensList = $editingInfo['lensList'];
     	$editingInfo['previewUrl'] = ''; // 预览视频的URL
     	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
@@ -1449,6 +1453,9 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['titleList'])) {
     		$editingInfo['titleInfo'] = $editingInfo['titleList'][array_rand($editingInfo['titleList'], 1)];
     	}
+    	$editingInfo['musicInfo'] = array(
+    		'url' => 'xxx',	
+    	);
     	if (!empty($editingInfo['musicList'])) {
     		$editingInfo['musicInfo'] = $editingInfo['musicList'][array_rand($editingInfo['musicList'], 1)];
     	}

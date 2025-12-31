@@ -103,37 +103,37 @@ class AliEditing extends ServiceBase
 			$effectFont['FontColorOpacity'] = 0;
 		}
 		if (!empty($captionRow['font'])) { // 字体
-			if (!empty($captionRow['text-align'])) { // 排版
-				$effectFont['Alignment'] = $captionRow['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+			if (!empty($captionRow['font']['text-align'])) { // 排版
+				$effectFont['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
 			}
-			if (!empty($captionRow['position'])) { // 位置
-				$effectFont['Y'] = $captionRow['position'];
+			if (!empty($captionRow['font']['position'])) { // 位置
+				$effectFont['Y'] = $captionRow['font']['position'];
 			}
-			if (!empty($captionRow['font-size'])) { // 字号
-				$effectFont['FontSize'] = $captionRow['font-size'];
+			if (!empty($captionRow['font']['font-size'])) { // 字号
+				$effectFont['FontSize'] = $captionRow['font']['font-size'];
 			}
-			if (!empty($captionRow['font-family'])) { // 字体
-				$effectFont['Font'] = $captionRow['font-family'];
+			if (!empty($captionRow['font']['font-family'])) { // 字体
+				$effectFont['Font'] = $captionRow['font']['font-family'];
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
-			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 2 && !empty($captionRow['EffectColorStyle'])) { // 花字
-				$effectFont['EffectColorStyle'] = $captionRow['EffectColorStyle'];
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['EffectColorStyle'])) { // 花字
+				$effectFont['EffectColorStyle'] = $captionRow['style']['EffectColorStyle'];
 			}
-			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
-				if (!empty($captionRow['color'])) { // 颜色
-					$effectFont['FontColor'] = $captionRow['color'];
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['style']['color'])) { // 颜色
+					$effectFont['FontColor'] = $captionRow['style']['color'];
 				}
-				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 2 && !empty($captionRow['background'])) { // 字幕背景
-					$effectFont['BackColour'] = $captionRow['background'];
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
+					$effectFont['BackColour'] = $captionRow['style']['background'];
 					$effectFont['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
 				}
-				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 3) { // 字幕边框
-					if (!empty($captionRow['border-size'])) { // 边框大小
-						$effectFont['Outline'] = $captionRow['border-size'];
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
+					if (!empty($captionRow['style']['border-size'])) { // 边框大小
+						$effectFont['Outline'] = $captionRow['style']['border-size'];
 					}
-					if (!empty($captionRow['border-color'])) { // 边框颜色
-						$effectFont['OutlineColour'] = $captionRow['border-color'];
+					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
+						$effectFont['OutlineColour'] = $captionRow['style']['border-color'];
 					}
 				}
 			}
@@ -170,36 +170,36 @@ class AliEditing extends ServiceBase
 			$subtitleTrackClip['TimelineOut'] = $titleInfo['end']; // 显示时长-结束
 		}
 		if (!empty($captionRow['font'])) { // 字体
-			if (!empty($captionRow['text-align'])) { // 排版
-				$subtitleTrackClip['Alignment'] = $captionRow['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+			if (!empty($captionRow['font']['text-align'])) { // 排版
+				$subtitleTrackClip['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
 			}
-			if (!empty($captionRow['position'])) { // 位置
-				$subtitleTrackClip['Y'] = $captionRow['position'];
+			if (!empty($captionRow['font']['position'])) { // 位置
+				$subtitleTrackClip['Y'] = $captionRow['font']['position'];
 			}
-			if (!empty($captionRow['font-size'])) { // 字号
-				$subtitleTrackClip['FontSize'] = $captionRow['font-size'];
+			if (!empty($captionRow['font']['font-size'])) { // 字号
+				$subtitleTrackClip['FontSize'] = $captionRow['font']['font-size'];
 			}
-			if (!empty($captionRow['font-family'])) { // 字体
-				$subtitleTrackClip['Font'] = $captionRow['font-family'];
+			if (!empty($captionRow['font']['font-family'])) { // 字体
+				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
-			if (!empty($captionRow['styleType']) && $captionRow['styleType'] == 2 && !empty($captionRow['EffectColorStyle'])) { // 花字
-				$subtitleTrackClip['EffectColorStyle'] = $captionRow['EffectColorStyle'];
-			} elseif (!empty($captionRow['styleType']) && $captionRow['styleType'] == 1) { // 普通样式
-				if (!empty($captionRow['color'])) { // 颜色
-					$subtitleTrackClip['FontColor'] = $captionRow['color'];
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['EffectColorStyle'])) { // 花字
+				$subtitleTrackClip['EffectColorStyle'] = $captionRow['style']['EffectColorStyle'];
+			} elseif (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['style']['color'])) { // 颜色
+					$subtitleTrackClip['FontColor'] = $captionRow['style']['color'];
 				}
-				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 2 && !empty($captionRow['background'])) { // 字幕背景
-					$subtitleTrackClip['BackColour'] = $captionRow['background'];
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
+					$subtitleTrackClip['BackColour'] = $captionRow['style']['background'];
 					$subtitleTrackClip['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
 				}
-				if (!empty($captionRow['fontType']) && $captionRow['fontType'] == 3) { // 字幕边框
-					if (!empty($captionRow['border-size'])) { // 边框大小
-						$subtitleTrackClip['Outline'] = $captionRow['border-size'];
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
+					if (!empty($captionRow['style']['border-size'])) { // 边框大小
+						$subtitleTrackClip['Outline'] = $captionRow['style']['border-size'];
 					}
-					if (!empty($captionRow['border-color'])) { // 边框颜色
-						$subtitleTrackClip['OutlineColour'] = $captionRow['border-color'];
+					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
+						$subtitleTrackClip['OutlineColour'] = $captionRow['style']['border-color'];
 					}
 				}
 			}
@@ -213,6 +213,102 @@ class AliEditing extends ServiceBase
 	 * @return array
 	 */
 	private function getTimeline($editingInfo)
+	{
+		$editingBackgroundColorEffect = array(); // 纯色背景色
+		$editingBackgroundVideoTrackClip = array(); // 背景图片或视频
+		if (!empty($editingInfo['background']) && !empty($editingInfo['background']['type'])) { // 背景
+			if ($editingInfo['background']['type'] == 1 && !empty($editingInfo['background']['color'])) { // 纯色
+				$editingBackgroundColorEffect = array(
+					'Type' 		=> 'Background',
+					'SubType' 	=> 'Color',
+					'Color'		=> $editingInfo['background']['color'],
+				);
+			} elseif ($editingInfo['background']['type'] == 2 && !empty($editingInfo['background']['mediaInfo'])) {
+				$editingBackgroundVideoTrackClip = array(
+					'MediaURL' 	=> $editingInfo['background']['mediaInfo']['url'],
+					'AdaptMode' => 'Cover',
+					'Effects'	=> array(
+						array(
+							'Type' => 'Volume',
+							'Gain' => 0,
+						),
+					),
+				);
+			} elseif ($editingInfo['background']['type'] == 3) { // 视频拉伸模糊
+				$editingBackgroundColorEffect = array(
+					'Type' 		=> 'Background',
+					'SubType' 	=> 'Blur',
+					'Radius'	=> 0.1,
+				);
+			} 
+		}
+		$VideoTracks = array();
+		if (!empty($editingBackgroundVideoTrackClip)) {
+			$VideoTracks[] = array(
+				'VideoTrackClips' => array(
+					$editingBackgroundVideoTrackClip
+				),
+			);
+		}
+		// 镜头
+		$lensMediaVideoTrack = $this->getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect);
+		$VideoTracks[] = $lensMediaVideoTrack;
+		
+		// 贴纸
+		$decalVideoTrack = $this->getDecalVideoTrack($editingInfo);
+		if (!empty($decalVideoTrack)) {
+			$VideoTracks[] = $lensMediaVideoTrack;
+		}
+		$AudioTracks = array();
+		// 全局配音
+		$editingDubAudioTrack = $this->getEditingDubAudioTrack($editingInfo);
+		if (!empty($editingDubAudioTrack)) {
+			$AudioTracks[] = $editingDubAudioTrack;
+		} else { // 镜头配音
+			$lensDubAudioTrack = $this->getLensDubAudioTrack($editingInfo);
+			if (!empty($lensDubAudioTrack)) {
+				$AudioTracks[] = $lensDubAudioTrack;
+			}
+		}
+		// 背景音乐
+		$musicAudioTrack = $this->getMusicAudioTrack($editingInfo);
+		if (!empty($musicAudioTrack)) {
+			$AudioTracks[] = $musicAudioTrack;
+		}
+		$SubtitleTracks = array();
+		// 标题
+		$subtitleTrack = $this->getSubtitleTrack($editingInfo);
+		if (!empty($subtitleTrack)) {
+			$SubtitleTracks[] = $subtitleTrack;
+		}
+		$EffectTrack = array();
+		// 特效
+		$effectTrack = $this->getEffectTrack($editingInfo);
+		if (!empty($effectTrack)) {
+			$EffectTrack[] = $effectTrack;
+		}
+		$result = array();
+		if (!empty($VideoTracks)) {
+			$result['VideoTracks'] = $VideoTracks;
+		}
+		if (!empty($AudioTracks)) {
+			$result['AudioTracks'] = $AudioTracks;
+		}
+		if (!empty($SubtitleTracks)) {
+			$result['SubtitleTracks'] = $SubtitleTracks;
+		}
+		if (!empty($EffectTrack)) {
+			$result['EffectTrack'] = $EffectTrack;
+		}
+		return $result;
+	}
+	
+	/**
+	 * 特效轨道
+	 *
+	 * @return EffectTrack
+	 */
+	private function getEffectTrack($editingInfo)
 	{
 		// 滤镜（针对全局画面添加滤镜）， 只加1种滤镜
 		$editingFilterEffectTrackItem = array();
@@ -254,11 +350,33 @@ class AliEditing extends ServiceBase
 				);
 			}
 		}
-		
-		$lensList = empty($editingInfo['lensList']) ? array() : $editingInfo['lensList'];
 
+		$effectTrackItems = array();
+		if (!empty($editingFilterEffectTrackItem)) { // 针对全局画面添加滤镜，只加1个滤镜
+			$effectTrackItems[] = $editingFilterEffectTrackItem;
+		}
+		if (!empty($editingFilterEffectTrackColorItem)) {
+			$effectTrackItems[] = $editingFilterEffectTrackColorItem;
+		}
+		$effectTrack = array();
+		if (!empty($effectTrackItems)) { // 针对全局画面添加滤镜，只加1个滤镜
+			$effectTrack = array(
+				'EffectTrackItems' => $effectTrackItems,
+			);
+		}
+		return $effectTrack;
+	}
+	
+	
+	/**
+	 * 标题轨道
+	 * 
+	 * @return SubtitleTrack
+	 */
+	private function getSubtitleTrack($editingInfo) 
+	{
 		// 标题
-		$subtitleTracks = array();
+		$subtitleTrack = array();
 		if (!empty($editingInfo['titleInfo']))  {
 			$titleInfo = $editingInfo['titleInfo'];
 			$subtitleTrackClips = array();
@@ -267,14 +385,22 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClips[] = $subtitleTrackClip;
 			}
 			if (!empty($subtitleTrackClips)) {
-				$subtitleTracks[] = array(
-					'subtitleTrackClips' => $subtitleTrackClips,
+				$subtitleTrack = array(
+					'SubtitleTrackClips' => $subtitleTrackClips,
 				);
 			}
 		}
-
-		// 背景音乐
-		$musicAudioTrackClips = array();
+		return $subtitleTrack;
+	}
+	
+	/**
+	 * 背景音乐轨道
+	 *
+	 * @return AudioTrack
+	 */
+	private function getMusicAudioTrack($editingInfo)
+	{
+		$audioTrack = array();
 		if (!empty($editingInfo['musicInfo'])) {
 			$audioTrackClip = array(
 				'MediaURL' => $editingInfo['musicInfo']['url'],
@@ -294,77 +420,31 @@ class AliEditing extends ServiceBase
 			if (!empty($effects)) {
 				$audioTrackClip['Effects'] = $effects;
 			}
-			$musicAudioTrackClips[] = $audioTrackClip;
+			$audioTrackClips[] = $audioTrackClip;
 		}
-
-		// 贴纸
-		$decalVideoTracks = array();
-		if (!empty($editingInfo['decalInfo'])) {
-			$decalInfo = $editingInfo['decalInfo'];
-			$useLensList = $decalInfo['useLensList']; // 适用的场景 
-			$clipIds = array(); // 适用的镜头ID
-			foreach ($useLensList as $useLensRow) {
-				if ($useLensRow['id'] == -1) {
-					$clipIds = array();
-					break;
-				} else {
-					$clipIds[] = $useLensRow['id'];
-				}
-			}
-			if (empty($decalInfo['useLensList'])) {
-				$clipIds = array();
-			}
-			$mediaList = array();
-			if (!empty($decalInfo['media1'])) {
-				$mediaList[] = $decalInfo['media1'];
-			}
-			if (!empty($decalInfo['media2'])) {
-				$mediaList[] = $decalInfo['media2'];
-			}
-			$decalVideoTrackClips = array();
-			foreach ($mediaList as $mediaInfo) {
-				$videoTrackClip = array( // 文案1
-					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
-					'MediaURL' => $mediaInfo['url'],
-				);
-				if (!empty($mediaInfo['size'])) { // 大小
-					$videoTrackClip['Width'] = 1;
-					$videoTrackClip['Height'] = $mediaInfo['size'] * 0.01;
-				}
-				if (!empty($mediaInfo['x']) && !empty($mediaInfo['y'])) { // 位置
-					$videoTrackClip['X'] = $mediaInfo['x'];
-					$videoTrackClip['Y'] = $mediaInfo['y'];
-				}
-				if (!empty($clipIds)) { // 适用的镜头
-					$videoTrackClip['ReferenceClipId'] = 'lens_' . reset($clipIds); // 镜头ID
-				}
-				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO) { // 视频静音
-					$effectVolume = array(
-						'Type' => 'Volume',
-						'Gain' => 0,
-					);
-					$effects = array();
-					$effects[] = $effectVolume;
-					$videoTrackClip['Effects'] = $effects;
-				}
-			
-				$decalVideoTrackClips[] = $videoTrackClip;
-			}
-			if (!empty($decalVideoTrackClips)) {
-				$decalVideoTracks[] = array(
-					'VideoTrackClips' => $decalVideoTrackClips,
-				);
-			}
+		if (!empty($audioTrackClips)) {
+			$audioTrack = array(
+				'AudioTrackClips' => $audioTrackClips,
+			);
 		}
+		return $audioTrack;
+	}
 	
-		// 全局配音，如果有剪辑全局配音 ，镜头配音就不生效
-		$editingAudioTrackClips = array(); // 全局配音
+	/**
+	 * 全局配音轨道
+	 * 如果有剪辑全局配音 ，镜头配音就不生效
+	 * 
+	 * @return AudioTrack
+	 */
+	private function getEditingDubAudioTrack($editingInfo)
+	{
+		$audioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubCaptionInfo'])) { // 手动配音
 			$audioTrackClip = self::captionToAudioTrackClip($editingInfo['dubCaptionInfo'], $editingInfo);
 			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 				$audioTrackClip['Main'] = true;
 			}
-			$editingAudioTrackClips[] = $audioTrackClip;
+			$audioTrackClips[] = $audioTrackClip;
 		} elseif (!empty($editingInfo['dubMediaInfo'])) { // 配音文件
 			$effectVolume = array(); // 音量效果
 			if (!empty($editingInfo['volume'])) {
@@ -393,82 +473,34 @@ class AliEditing extends ServiceBase
 			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 				$audioTrackClip['Main'] = true;
 			}
-			$editingAudioTrackClips[] = $audioTrackClip;	
+			$audioTrackClips[] = $audioTrackClip;	
 		}
-		$editingAudioTracks = array();
-		$musicAudioTracks = array(); // 背景音乐
-		// $decalVideoTracks
-		if (!empty($musicAudioTrackClips)) { // 音乐
-			$musicAudioTracks[] = array(
-				'VideoTrackClips' => $musicAudioTrackClips,
+		$audioTrack = array();
+		if (!empty($audioTrackClips)) {
+			$audioTrack = array(
+				'AudioTrackClips' => $audioTrackClips,
 			);
 		}
-		if (!empty($editingAudioTrackClips)) {
-			$editingAudioTracks[] = array(
-				'AudioTrackClips' => $editingAudioTrackClips,
-			);
-		}
-			
-		// 镜头
-		$lensVideoTracks = array(); // 视频轨列表（镜头）
-		$lensAudioTracks = array(); // 视频轨列表（配音）
-		/**
-		 * 一个镜头一个VideoTracks 元素array('VideoTrackClips'=> $lensVideoTrackClips)
-		 * 一个镜头一个AudioTracks 元素array('AudioTrackClips'=> $lensAudioTrackClips)
-		 */
+		return $audioTrack;
+	}
+	
+	/**
+	 * 镜头配音轨道
+	 *
+	 * @return AudioTrack
+	 */
+	private function getLensDubAudioTrack($editingInfo)
+	{
+		$lensAudioTrackClips = array();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
-			
-			$lensVideoTrackClips = array(); // 镜头的VideoTracks 视频/图片
-			// #关闭原声  #转场设置  #选择时长
-			$lensVolumeEffects = array(); // 镜头的效果-关闭原声
-			$lensTransitionEffects = array(); // 镜头的效果-转场 在素材间转场，1种效果
-			if (!empty($lensRow['transitionSubType']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
-				$lensTransitionEffects[] = array(
-					'Type' => 'Transition',
-					'SubType' => $lensRow['transitionSubType'],
-				);
-			}
-			if (!empty($lensRow['originalSound'])) { // #关闭原声
-				$lensVolumeEffects[] = array(
-					'Type' => 'Volume',
-					'Gain' => 0,
-				);
-			}
-			if (!empty($lensRow['mediaInfo']))  {
-				$mediaInfo = $lensRow['mediaInfo'];
-				$videoTrackClip = array(
-					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
-					'ClipId' => 'lens_' . $mediaInfo['id'],
-					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
-				);
-				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-					$videoTrackClip['Main'] = true;
-				}
-				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
-					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
-				}
-				// 素材特效列表
-				$effects = array();
-				if (!empty($lensVolumeEffects)) {
-					$effects = array_merge($effects, $lensVolumeEffects);
-				}
-				if (!empty($editingTransitionEffect)) { // 添加镜头间转场
-					$effects[] = $editingTransitionEffect;
-				}
-				if (!empty($effects)) {
-					$videoTrackClip['Effects'] = $effects;
-				}
-				$lensVideoTrackClips[] = $videoTrackClip;
-			}
-			$lensAudioTrackClips = array(); // 镜头的 AudioTracks 配音
 			// 配音 - 文本字幕
-			if (empty($editingAudioTrackClips) && !empty($lensRow['dubCaptionInfo'])) { // 手动配音
+			if (!empty($lensRow['dubCaptionInfo'])) { // 手动配音
 				$audioTrackClip = self::captionToAudioTrackClip($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 					$audioTrackClip['Main'] = true;
 				}
-				$audioTrackClips[] = $audioTrackClip;
-			} elseif (empty($editingAudioTrackClips) && !empty($lensRow['dubMediaInfo'])) { // 配音文件
+				$lensAudioTrackClips[] = $audioTrackClip;
+			} elseif (!empty($lensRow['dubMediaInfo'])) { // 配音文件
 				$effectVolume = array(); // 音量效果
 				if (!empty($editingInfo['volume'])) {
 					if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
@@ -489,6 +521,7 @@ class AliEditing extends ServiceBase
 				if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
 						
 				}
+				// 素材特效列表
 				$effects = array();
 				if (!empty($effectVolume)) {
 					$effects[] = $effectVolume;
@@ -500,49 +533,141 @@ class AliEditing extends ServiceBase
 					$audioTrackClip['Main'] = true;
 				}
 				$lensAudioTrackClips[] = $audioTrackClip;
-			
-			}
-			if (!empty($lensVideoTrackClips)) {
-				$lensVideoTracks[] = array(
-					'VideoTrackClips' => $lensVideoTrackClips,
-				);
-			}
-			if (!empty($lensAudioTrackClips)) {
-				$lensAudioTracks[] = array(
-					'AudioTrackClips' => $lensAudioTrackClips,
-				);
 			}
 		}
-		
-		$effectTracks = array();
-		$result = array();
-		$videoTracks = array_merge($lensVideoTracks, $decalVideoTracks);// 视频轨道
-		$audioTracks = array_merge($lensAudioTracks, $musicAudioTracks); // 音频轨道
-		if (!empty($videoTracks)) {
-			$result['VideoTracks'] = $videoTracks;
-		}
-		if (!empty($audioTracks)) {
-			$result['AudioTracks'] = $audioTracks;
-		}
-		$effectTrackItems = array();
-		if (!empty($editingFilterEffectTrackItem)) { // 针对全局画面添加滤镜，只加1个滤镜
-			$effectTrackItems[] = $editingFilterEffectTrackItem;
-		}
-		if (!empty($editingFilterEffectTrackColorItem)) {
-			$effectTrackItems[] = $editingFilterEffectTrackColorItem;
-		}
-
-		if (!empty($effectTrackItems)) { // 针对全局画面添加滤镜，只加1个滤镜
-			$result['EffectTracks'] = array(
-				array(
-					'EffectTrackItems' => $effectTrackItems,
-				)
+		$audioTrack = array();
+		if (!empty($lensAudioTrackClips)) {
+			$audioTrack = array(
+				'AudioTrackClips' => $lensAudioTrackClips,
 			);
 		}
-		if (!empty($subtitleTracks)) { // 标题
-			$result['SubtitleTracks'] = $subtitleTracks;
+		return $audioTrack;
+	}
+	
+	/**
+	 * 镜头素材轨道
+	 *
+	 * @return VideoTrack
+	 */
+	private function getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect = array())
+	{
+		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
+			// #关闭原声  #转场设置  #选择时长
+			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
+			$lensTransitionEffect = array(); // 镜头的效果-转场 在素材间转场，1种效果
+			if (!empty($lensRow['transitionSubType']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
+				$lensTransitionEffect = array(
+					'Type' => 'Transition',
+					'SubType' => $lensRow['transitionSubType'],
+				);
+			}
+			if (!empty($lensRow['originalSound'])) { // #关闭原声
+				$lensVolumeEffect = array(
+					'Type' => 'Volume',
+					'Gain' => 0,
+				);
+			}
+			if (!empty($lensRow['mediaInfo']))  {
+				$mediaInfo = $lensRow['mediaInfo'];
+				$videoTrackClip = array(
+					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
+					'ClipId' => 'lens_' . $mediaInfo['id'],
+					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
+				);
+				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+					$videoTrackClip['Main'] = true;
+				}
+				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
+					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
+				}
+				// 素材特效列表
+				$effects = array();
+				if (!empty($lensVolumeEffect)) {
+					$effects[] = $lensVolumeEffect;
+				}
+				if (!empty($lensTransitionEffect)) { // 添加镜头间转场
+					$effects[] = $lensTransitionEffect;
+				}
+				if (!empty($editingBackgroundColorEffect)) { // 添加镜头背景色
+					$effects[] = $editingBackgroundColorEffect;
+				}
+				if (!empty($effects)) {
+					$videoTrackClip['Effects'] = $effects;
+				}
+				$lensVideoTrackClips[] = $videoTrackClip;
+			}
 		}
-		return $result;
+		$videoTrack = array();
+		if (!empty($lensVideoTrackClips)) {
+			$videoTrack = array(
+				'VideoTrackClips' => $lensVideoTrackClips,
+			);
+		}
+		return $videoTrack;
+	}
+	
+	/**
+	 * 贴纸轨道
+	 *
+	 * @return VideoTrack
+	 */
+	private function getDecalVideoTrack($editingInfo)
+	{
+		$videoTrackClips = array();
+		if (!empty($editingInfo['decalInfo'])) {
+			$decalInfo = $editingInfo['decalInfo'];
+			$useLensList = $decalInfo['useLensList']; // 适用的场景 
+			$clipIds = array(); // 适用的镜头ID
+			foreach ($useLensList as $useLensRow) {
+				if ($useLensRow['id'] == -1) {
+					$clipIds = array();
+					break;
+				} else {
+					$clipIds[] = $useLensRow['id'];
+				}
+			}
+			$mediaList = array();
+			if (!empty($decalInfo['media1'])) {
+				$mediaList[] = $decalInfo['media1'];
+			}
+			if (!empty($decalInfo['media2'])) {
+				$mediaList[] = $decalInfo['media2'];
+			}
+			foreach ($mediaList as $mediaInfo) {
+				$videoTrackClip = array( // 文案1
+					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE ? 'Image' : 'Vido', // 类型
+					'MediaURL' => $mediaInfo['url'],
+				);
+				if (!empty($mediaInfo['size'])) { // 大小
+					$videoTrackClip['Width'] = 1;
+					$videoTrackClip['Height'] = $mediaInfo['size'] * 0.01;
+				}
+				if (!empty($mediaInfo['x']) && !empty($mediaInfo['y'])) { // 位置
+					$videoTrackClip['X'] = $mediaInfo['x'];
+					$videoTrackClip['Y'] = $mediaInfo['y'];
+				}
+				if (!empty($clipIds)) { // 适用的镜头
+					$videoTrackClip['ReferenceClipId'] = 'lens_' . reset($clipIds); // 镜头ID
+				}
+				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO) { // 视频静音
+					$effectVolume = array(
+						'Type' => 'Volume',
+						'Gain' => 0,
+					);
+					$effects = array();
+					$effects[] = $effectVolume;
+					$videoTrackClip['Effects'] = $effects;
+				}
+				$videoTrackClips[] = $videoTrackClip;
+			}
+			$videoTrack = array();
+			if (!empty($videoTrackClips)) {
+				$videoTrack = array(
+					'VideoTrackClips' => $videoTrackClips,
+				);
+			}
+			return $videoTrack;
+		}
 	}
 	
 	/**
@@ -590,6 +715,7 @@ class AliEditing extends ServiceBase
 	 */
 	public function submitMediaProducingJob($chipParam)
 	{
+		$timeline = $this->getTimeline($chipParam);
 		$orientation = '';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
@@ -619,7 +745,7 @@ class AliEditing extends ServiceBase
 		$userData = array(
 			'NotifyAddress' => $serve_url . 'op=Project.producingJobcallback', // 为任务完成的回调url
 		);
-		$timeline = $this->getTimeline($chipParam);
+		
 		try {
 		    $request = new SubmitMediaProducingJobRequest();
 		    $request->timeline = json_encode($timeline, JSON_UNESCAPED_UNICODE);
