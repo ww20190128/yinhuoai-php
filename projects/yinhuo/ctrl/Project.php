@@ -242,6 +242,9 @@ class Project extends CtrlBase
 		if (empty($num)) {
 			throw new $this->exception('请求参数错误');
 		}
+		if ($num > 200) {
+			throw new $this->exception('一次最多生成200个');
+		}
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProjectClipsByNum($this->userId, $id, $num);
 	}
