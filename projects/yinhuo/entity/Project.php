@@ -71,5 +71,12 @@ class Project extends EntityBase
      * @var int
      */
     public $numLimit = 0;
+    
+    /**
+     * 剪辑信息
+     *
+     * @var int
+     */
+    public $editingInfo = '';
 // 表结构end
 }

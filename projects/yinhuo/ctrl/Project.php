@@ -223,4 +223,27 @@ class Project extends CtrlBase
 		return $projectSv->createProjectClips($this->userId, $ids);
 	}
 
+	/**
+	 * 生成成片
+	 *
+	 * @return array
+	 */
+	public function createProjectClipsByNum()
+	{
+		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$id = $this->paramFilter('id', 'string');
+		if (empty($id)) {
+			throw new $this->exception('请求参数错误');
+		}
+		$num = $this->paramFilter('num', 'intval');
+		if (empty($num)) {
+			throw new $this->exception('请求参数错误');
+		}
+		$projectSv = \service\Project::singleton();
+		return $projectSv->createProjectClipsByNum($this->userId, $id, $num);
+	}
+	
 }

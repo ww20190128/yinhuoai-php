@@ -149,6 +149,7 @@ class Project extends ServiceBase
     		$projectEtt->name = empty($info['name']) ? $editingInfo['name'] : $info['name'];
     		$projectEtt->createTime = $now;
     		$projectEtt->updateTime = $now;
+    		$projectEtt->editingInfo = json_encode($editingInfo, JSON_UNESCAPED_UNICODE);
     		$projectDao->create($projectEtt);
     	}
     	$templateId = 0;
@@ -238,6 +239,9 @@ class Project extends ServiceBase
     			'mediaURL' 		=> $projectClipEtt->mediaURL,
     			'jobStatus' 	=> $projectClipEtt->jobStatus,
     			'previewUrl' 	=> $projectClipEtt->previewUrl,
+    			'duration' 		=> intval($projectClipEtt->duration),
+    			'createTime' 	=> intval($projectClipEtt->createTime),
+    			'updateTime' 	=> intval($projectClipEtt->updateTime),
     		);
     		if (!empty($projectClipEtt->mediaURL)) { // 已生成成片
     			$clipModels[$projectClipEtt->id] = $projectClipModel;
@@ -279,6 +283,9 @@ class Project extends ServiceBase
     				'mediaURL' 		=> $projectClipEtt->mediaURL,
     				'jobStatus' 	=> $projectClipEtt->jobStatus,
     				'previewUrl' 	=> $projectClipEtt->previewUrl,
+    				'duration' 		=> intval($projectClipEtt->duration),
+    				'createTime' 	=> intval($projectClipEtt->createTime),
+    				'updateTime' 	=> intval($projectClipEtt->updateTime),
     			);
     			$dataList[] = $projectClipModel;
     			$previewTotalNum++;
@@ -316,19 +323,36 @@ class Project extends ServiceBase
     	$projectClipEttList = $projectClipDao->readListByIndex(array(
     		'projectId' => $id,
     	));
+    	$aliEditingSv = \service\AliEditing::singleton();
     	$projectClipModels = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		if (empty($projectClipEtt->mediaURL)) { // 已生成成片
-    			continue;
+    		if (empty($projectClipEtt->mediaURL)) { // 未生成成片
+    			$tries = 3;
+    			do {
+    				$mediaProducingJob = $aliEditingSv->getMediaProducingJob($projectClipEtt->jobId);
+    			} while (empty($mediaProducingJob) && --$tries > 0);
+    			if (!empty($mediaProducingJob['duration'])) {
+    				$projectClipEtt->set('duration', ceil($mediaProducingJob['duration']));
+    			}
+    			if (!empty($mediaProducingJob['mediaURL'])) {
+    				$projectClipEtt->set('mediaURL', $mediaProducingJob['mediaURL']);
+    			}
+    			if (!empty($mediaProducingJob['status'])) {
+    				$projectClipEtt->set('jobStatus', $mediaProducingJob['status']);
+    			}
+    			$projectClipDao->update($projectClipEtt);
     		}
-    		$projectClipModels[$projectEtt->id] = array(
+    		$projectClipModels[$projectClipEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
     			'mediaURL' 		=> $projectClipEtt->mediaURL,
     			'jobStatus' 	=> $projectClipEtt->jobStatus,
     			'previewUrl' 	=> $projectClipEtt->previewUrl,
+    			'duration' 		=> intval($projectClipEtt->duration),
+    			'createTime' 	=> intval($projectClipEtt->createTime),
+    			'updateTime' 	=> intval($projectClipEtt->updateTime),
     		);
     	}
     	$commonSv = \service\Common::singleton();
@@ -487,6 +511,61 @@ class Project extends ServiceBase
 			$projectClipEtt->set('updateTime', $now);
 			$projectClipDao->update($projectClipEtt);
 			$clipNum++;
+    	}
+    	return array(
+    		'clipNum' => $clipNum,
+    	);
+    }
+    
+    /**
+     * 生成成品
+     *
+     * @return array
+     */
+    public function createProjectClipsByNum($userId, $id, $needCreateNum)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$projectDao = \dao\Project::singleton();
+    	$projectEtt = $projectDao->readByPrimary($id);
+    	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('剪辑工程已删除');
+    	}
+    	$now = $this->frame->now;
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$editingInfo = empty($projectEtt->editingInfo) ? array() : json_decode($projectEtt->editingInfo, true);
+    	if (empty($editingInfo)) {
+    		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    	}
+
+    	$chipParamList = array();
+    	for ($index = 1; $index <= $needCreateNum; $index++) {
+    		$chipParam = $editingSv->randomChipParam($editingInfo);
+    		$chipParamList[$index] = $chipParam;
+    	}
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$clipNum = 0;
+    	foreach ($chipParamList as $chipParam) {
+    		$projectClipEtt = $projectClipDao->getNewEntity();
+    		$projectClipEtt->projectId = $projectEtt->id;
+    		$projectClipEtt->chipParam = json_encode($chipParam, JSON_UNESCAPED_UNICODE);
+    		$projectClipEtt->previewUrl = $chipParam['previewUrl'];
+    		$projectClipEtt->createTime = $now;
+    		$projectClipEtt->updateTime = $now;
+    		$tries = 3;
+    		do {
+    			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+    		} while (empty($jobId) && --$tries > 0);
+    		if (empty($jobId)) {
+    			continue;
+    		}
+    		$projectClipEtt->jobId = $jobId;
+    		$projectClipEtt->jobStatus = 'Processing';
+    		$projectClipId = $projectClipDao->create($projectClipEtt);
+    		$clipNum++;
     	}
     	return array(
     		'clipNum' => $clipNum,
