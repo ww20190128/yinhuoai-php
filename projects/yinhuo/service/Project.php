@@ -477,7 +477,7 @@ class Project extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEttList = $projectClipDao->readByPrimary($ids);
+    	$projectClipEttList = $projectClipDao->readListByPrimary($ids);
    	 	$projectIds = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		$projectIds[] = $projectClipEtt->projectId;
