@@ -56,6 +56,7 @@ class Project extends ServiceBase
     		throw new $this->exception('剪辑已删除');
     	}
     	$editingSv = \service\Editing::singleton();
+    	// 预览信息
     	$preview = empty($editingEtt->preview) ? array() : json_decode($editingEtt->preview, true);
     	$now = $this->frame->now;
     	$aliEditingSv = \service\AliEditing::singleton();
@@ -90,7 +91,7 @@ class Project extends ServiceBase
 			}
 			$preview['jobStatus'] = $mediaProducingJob['status'];
 			$preview['mediaURL'] = empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL'];
-			$preview['duration'] = empty($mediaProducingJob['duration']) ? '' : $mediaProducingJob['duration'];
+			$preview['duration'] = empty($mediaProducingJob['duration']) ? 0 : ceil($mediaProducingJob['duration']);
 			$editingEtt->set('preview', json_encode($preview, JSON_UNESCAPED_UNICODE));
 			$editingEtt->set('updateTime', $now);
 			$editingDao->update($editingEtt);
@@ -325,6 +326,7 @@ class Project extends ServiceBase
     	));
     	$aliEditingSv = \service\AliEditing::singleton();
     	$projectClipModels = array();
+    	$now = $this->frame->now;
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
@@ -343,6 +345,7 @@ class Project extends ServiceBase
     			if (!empty($mediaProducingJob['status'])) {
     				$projectClipEtt->set('jobStatus', $mediaProducingJob['status']);
     			}
+    			$projectClipEtt->set('updateTime', $now);
     			$projectClipDao->update($projectClipEtt);
     		}
     		$projectClipModels[$projectClipEtt->id] = array(
@@ -537,6 +540,7 @@ class Project extends ServiceBase
     	$now = $this->frame->now;
     	$aliEditingSv = \service\AliEditing::singleton();
     	$editingInfo = empty($projectEtt->editingInfo) ? array() : json_decode($projectEtt->editingInfo, true);
+    	$editingSv = \service\Editing::singleton();
     	if (empty($editingInfo)) {
     		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
     	}
