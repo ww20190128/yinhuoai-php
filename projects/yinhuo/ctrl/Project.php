@@ -203,6 +203,7 @@ class Project extends CtrlBase
 		if (empty($ids)) {
 			throw new $this->exception('请求参数错误');
 		}
+
 		$projectSv = \service\Project::singleton();
 		return $projectSv->deleteProjectClips($this->userId, ids);
 	}

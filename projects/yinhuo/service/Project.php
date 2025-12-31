@@ -442,12 +442,13 @@ class Project extends ServiceBase
     	$now = $this->frame->now;
     	$projectClipDao = \dao\ProjectClip::singleton();
     	$projectClipEttList = $projectClipDao->readListByPrimary($ids);
+    
     	$projectIds = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		$projectIds[] = $projectClipEtt->projectId;
     	}
     	$projectDao = \dao\Project::singleton();
-    	$projectEttList = $projectClipDao->readByPrimary($projectIds);
+    	$projectEttList = $projectClipDao->readListByPrimary($projectIds);
     	if (!empty($projectEttList)) foreach ($projectEttList as $projectEtt) {
 	    	if ($projectEtt->status == \constant\Common::DATA_DELETE) {
 	    		throw new $this->exception('剪辑工程已删除');
@@ -483,7 +484,7 @@ class Project extends ServiceBase
     		$projectIds[] = $projectClipEtt->projectId;
     	}
     	$projectDao = \dao\Project::singleton();
-    	$projectEttList = $projectClipDao->readByPrimary($projectIds);
+    	$projectEttList = $projectClipDao->readListByPrimary($projectIds);
     	if (!empty($projectEttList)) foreach ($projectEttList as $projectEtt) {
 	    	if ($projectEtt->status == \constant\Common::DATA_DELETE) {
 	    		throw new $this->exception('剪辑工程已删除');
