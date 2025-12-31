@@ -575,7 +575,7 @@ class AliEditing extends ServiceBase
 		try {
     		$request = new DeleteEditingProjectsRequest();
    	 		$request->projectIds = is_array($projectIds) ? implode(',', $projectIds) : $projectIds;
-    		$response = $client->deleteEditingProjects($request);
+    		$response = self::$client->deleteEditingProjects($request);
     		$requestId = empty($response->body->requestId) ? array() : $response->body->requestId;
 		} catch (TeaUnableRetryError $e) {
 			return false;
