@@ -395,7 +395,7 @@ class Project extends ServiceBase
     		$projectEtt->set('name', $info['name']);
     	}
     	$now = $this->frame->now;
-    	$projectEtt->set('status', \constant\Common::DATA_DELETE);
+
     	$projectEtt->set('updateTime', $now);
     	$projectDao->update($projectEtt);
     	return array(
