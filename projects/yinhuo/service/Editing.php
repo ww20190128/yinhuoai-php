@@ -1453,9 +1453,6 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['titleList'])) {
     		$editingInfo['titleInfo'] = $editingInfo['titleList'][array_rand($editingInfo['titleList'], 1)];
     	}
-    	$editingInfo['musicInfo'] = array(
-    		'url' => 'xxx',	
-    	);
     	if (!empty($editingInfo['musicList'])) {
     		$editingInfo['musicInfo'] = $editingInfo['musicList'][array_rand($editingInfo['musicList'], 1)];
     	}
