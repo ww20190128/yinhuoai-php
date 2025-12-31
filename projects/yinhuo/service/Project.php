@@ -441,7 +441,7 @@ class Project extends ServiceBase
     	}
     	$now = $this->frame->now;
     	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEttList = $projectClipDao->readByPrimary($ids);
+    	$projectClipEttList = $projectClipDao->readListByPrimary($ids);
     	$projectIds = array();
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		$projectIds[] = $projectClipEtt->projectId;

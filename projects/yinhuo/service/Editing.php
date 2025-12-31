@@ -389,6 +389,7 @@ class Editing extends ServiceBase
     	$newEditingEtt = clone $editingEtt;
     	$newEditingEtt->id = null;
     	$newEditingEtt->preview = '';
+    	$newEditingEtt->dubCaptionIds = '';
     	$newEditingEtt->createTime = $now;
     	$newEditingEtt->updateTime = $now;
     	$newEditingId = $editingDao->create($newEditingEtt); // 新的剪辑Id
