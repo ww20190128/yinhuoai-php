@@ -163,10 +163,10 @@ class Folder extends ServiceBase
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
 
     		// 注册媒体资源
-    		$mediaId = $aliEditingSv->registerMediaInfo($url);
+    		$registerMediaId = $aliEditingSv->registerMediaInfo($url);
     		$mediaInfo = array();
-    		if (!empty($mediaId)) { // 获取资源信息
-    			$mediaInfo = $aliEditingSv->getMediaInfo($mediaId);
+    		if (!empty($registerMediaId)) { // 获取资源信息
+    			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
     		}
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
@@ -285,6 +285,7 @@ class Folder extends ServiceBase
     			'type'			=> $mediaEtt->type,
     			'url'			=> $mediaEtt->url,
     			'createTime'	=> intval($mediaEtt->createTime),
+    				
     			'coverURL'		=> empty($mediaInfo['coverURL']) ? '' : $mediaInfo['coverURL'], // 视频封面
     			'duration'		=> empty($mediaInfo['duration']) ? 0 : ceil($mediaInfo['duration']), // 时长
     			'size'			=> empty($mediaInfo['fileSize']) ? 0 : ceil($mediaInfo['fileSize']), // 文件大小
@@ -345,6 +346,7 @@ class Folder extends ServiceBase
     			'type'			=> $mediaEtt->type,
     			'url'			=> $mediaEtt->url,
     			'createTime'	=> intval($mediaEtt->createTime),
+    			'updateTime'	=> intval($mediaEtt->updateTime),
     			'coverURL'		=> empty($mediaInfo['coverURL']) ? '' : $mediaInfo['coverURL'], // 视频封面
     			'duration'		=> empty($mediaInfo['duration']) ? 0 : ceil($mediaInfo['duration']), // 时长
     			'size'			=> empty($mediaInfo['fileSize']) ? 0 : ceil($mediaInfo['fileSize']), // 文件大小

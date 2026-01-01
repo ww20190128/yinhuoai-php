@@ -817,8 +817,10 @@ class AliEditing extends ServiceBase
 			$request = new GetMediaInfoRequest();
 			if (!empty($mediaId)) {
 				$request->mediaId = $mediaId;
-			} else {
+			} elseif (!empty($inputURL)) {
 				$request->inputURL = $inputURL;
+			} else {
+				return false;
 			}
 			$response = self::$client->getMediaInfo($request);
 			$mediaInfo = empty($response->body->mediaInfo) ? array() : $response->body->mediaInfo;
@@ -832,11 +834,11 @@ class AliEditing extends ServiceBase
 			$duration = empty($fileBasicInfo->duration) ? '' : $fileBasicInfo->duration;
 			$fileSize = empty($fileBasicInfo->fileSize) ? '' : $fileBasicInfo->fileSize;
 			$info = array(
-				'mediaId' 	=> $mediaId,
-				'mediaType' => $mediaType,
-				'coverURL' 	=> $coverURL,
-				'duration'	=> $duration,
-				'fileSize'	=> $fileSize,
+				'mediaId' 	=> $mediaId, // 媒资Id
+				'mediaType' => $mediaType, // 媒资类型
+				'coverURL' 	=> $coverURL, // 封面
+				'duration'	=> $duration, // 时长
+				'fileSize'	=> $fileSize, // 文件大小
 			);
 		} catch (DaraUnableRetryException $e) {
 			return false;
