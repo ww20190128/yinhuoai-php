@@ -278,12 +278,16 @@ class Folder extends ServiceBase
     		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
+    		$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
     		$allMediaModels[$mediaEtt->id] = array(
     			'id' 			=> intval($mediaEtt->id),
     			'fileName'		=> $mediaEtt->name,
     			'type'			=> $mediaEtt->type,
     			'url'			=> $mediaEtt->url,
     			'createTime'	=> intval($mediaEtt->createTime),
+    			'coverURL'		=> empty($mediaInfo['coverURL']) ? '' : $mediaInfo['coverURL'], // 视频封面
+    			'duration'		=> empty($mediaInfo['duration']) ? 0 : ceil($mediaInfo['duration']), // 时长
+    			'size'			=> empty($mediaInfo['fileSize']) ? 0 : ceil($mediaInfo['fileSize']), // 文件大小
     		);
     	}
     	foreach ($folderModels as $folderId => $folderModel) {
@@ -334,14 +338,16 @@ class Folder extends ServiceBase
     		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
+    		$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
     		$mediaModels[] = array(
     			'id' 			=> intval($mediaEtt->id),
     			'name'			=> $mediaEtt->name,
     			'type'			=> $mediaEtt->type,
     			'url'			=> $mediaEtt->url,
-    			'size'			=> 100, // 大小
-    			'duration'		=> 100, // 播放时长
     			'createTime'	=> intval($mediaEtt->createTime),
+    			'coverURL'		=> empty($mediaInfo['coverURL']) ? '' : $mediaInfo['coverURL'], // 视频封面
+    			'duration'		=> empty($mediaInfo['duration']) ? 0 : ceil($mediaInfo['duration']), // 时长
+    			'size'			=> empty($mediaInfo['fileSize']) ? 0 : ceil($mediaInfo['fileSize']), // 文件大小
     		);
     	}
     	$subFolderEttList = $folderDao->readListByIndex(array(
