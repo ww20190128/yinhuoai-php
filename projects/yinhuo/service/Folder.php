@@ -162,11 +162,18 @@ class Folder extends ServiceBase
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
 
+    		// 注册媒体资源
+    		$mediaId = $aliEditingSv->registerMediaInfo($url);
+    		$mediaInfo = array();
+    		if (!empty($mediaId)) { // 获取资源信息
+    			$mediaInfo = $aliEditingSv->getMediaInfo($mediaId);
+    		}
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
     		$mediaEtt->type = $folderEtt->type;
     		$mediaEtt->size = $fileSize;
     		$mediaEtt->url = $url;
+    		$mediaEtt->mediaInfo = empty($mediaInfo) ? '' : json_encode($mediaInfo, JSON_UNESCAPED_UNICODE);
     		$mediaEtt->createTime = $now;
     		$mediaEtt->updateTime = $now;
     		$mediaId = $mediaDao->create($mediaEtt);

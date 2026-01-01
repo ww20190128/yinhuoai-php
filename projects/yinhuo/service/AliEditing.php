@@ -75,10 +75,12 @@ class AliEditing extends ServiceBase
 	 */
 	private static function captionToAudioTrackClip($captionRow, $editingInfo, $lensRow = array())
 	{
+		// 配音演员
+		$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
 		$audioTrackClip = array( // 文案1
 			'Type' => 'AI_TTS', // 类型
 			'Content' => $captionRow['text'], // 文案内容
-			'Voice' => 'zhiqing', // 配音   全局
+			'Voice' => empty($actorInfo) ? 'zhiqing' : $actorInfo['id'], // 配音   全局
 		);
 		// 字体效果
 		$effectFont = array(
@@ -212,7 +214,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private function getTimeline($editingInfo)
+	private static function getTimeline($editingInfo)
 	{
 		$editingBackgroundColorEffect = array(); // 纯色背景色
 		$editingBackgroundVideoTrackClip = array(); // 背景图片或视频
@@ -242,7 +244,7 @@ class AliEditing extends ServiceBase
 				);
 			} 
 		}
-		$VideoTracks = array();
+		$VideoTracks = array(); // 背景图片/视频，镜头，贴纸视频/图片
 		if (!empty($editingBackgroundVideoTrackClip)) {
 			$VideoTracks[] = array(
 				'VideoTrackClips' => array(
@@ -251,39 +253,42 @@ class AliEditing extends ServiceBase
 			);
 		}
 		// 镜头
-		$lensMediaVideoTrack = $this->getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect);
-		$VideoTracks[] = $lensMediaVideoTrack;
-		
+		$lensMediaVideoTrack = self::getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect);
+		if (!empty($lensMediaVideoTrack)) {
+			$VideoTracks[] = $lensMediaVideoTrack;
+		}
+	
 		// 贴纸
-		$decalVideoTrack = $this->getDecalVideoTrack($editingInfo);
+		$decalVideoTrack = self::getDecalVideoTrack($editingInfo);
 		if (!empty($decalVideoTrack)) {
 			$VideoTracks[] = $lensMediaVideoTrack;
 		}
 		$AudioTracks = array();
+		// 背景音乐
+		$musicAudioTrack = self::getMusicAudioTrack($editingInfo);
+		if (!empty($musicAudioTrack)) {
+			$AudioTracks[] = $musicAudioTrack;
+		}
 		// 全局配音
-		$editingDubAudioTrack = $this->getEditingDubAudioTrack($editingInfo);
+		$editingDubAudioTrack = self::getEditingDubAudioTrack($editingInfo);
 		if (!empty($editingDubAudioTrack)) {
 			$AudioTracks[] = $editingDubAudioTrack;
 		} else { // 镜头配音
-			$lensDubAudioTrack = $this->getLensDubAudioTrack($editingInfo);
+			$lensDubAudioTrack = self::getLensDubAudioTrack($editingInfo);
 			if (!empty($lensDubAudioTrack)) {
 				$AudioTracks[] = $lensDubAudioTrack;
 			}
 		}
-		// 背景音乐
-		$musicAudioTrack = $this->getMusicAudioTrack($editingInfo);
-		if (!empty($musicAudioTrack)) {
-			$AudioTracks[] = $musicAudioTrack;
-		}
+		
 		$SubtitleTracks = array();
 		// 标题
-		$subtitleTrack = $this->getSubtitleTrack($editingInfo);
+		$subtitleTrack = self::getSubtitleTrack($editingInfo);
 		if (!empty($subtitleTrack)) {
 			$SubtitleTracks[] = $subtitleTrack;
 		}
 		$EffectTrack = array();
 		// 特效
-		$effectTrack = $this->getEffectTrack($editingInfo);
+		$effectTrack = self::getEffectTrack($editingInfo);
 		if (!empty($effectTrack)) {
 			$EffectTrack[] = $effectTrack;
 		}
@@ -308,7 +313,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return EffectTrack
 	 */
-	private function getEffectTrack($editingInfo)
+	private static function getEffectTrack($editingInfo)
 	{
 		// 滤镜（针对全局画面添加滤镜）， 只加1种滤镜
 		$editingFilterEffectTrackItem = array();
@@ -367,13 +372,12 @@ class AliEditing extends ServiceBase
 		return $effectTrack;
 	}
 	
-	
 	/**
 	 * 标题轨道
 	 * 
 	 * @return SubtitleTrack
 	 */
-	private function getSubtitleTrack($editingInfo) 
+	private static function getSubtitleTrack($editingInfo) 
 	{
 		// 标题
 		$subtitleTrack = array();
@@ -398,9 +402,10 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return AudioTrack
 	 */
-	private function getMusicAudioTrack($editingInfo)
+	private static function getMusicAudioTrack($editingInfo)
 	{
 		$audioTrack = array();
+		$audioTrackClips = array();
 		if (!empty($editingInfo['musicInfo'])) {
 			$audioTrackClip = array(
 				'MediaURL' => $editingInfo['musicInfo']['url'],
@@ -436,7 +441,7 @@ class AliEditing extends ServiceBase
 	 * 
 	 * @return AudioTrack
 	 */
-	private function getEditingDubAudioTrack($editingInfo)
+	private static function getEditingDubAudioTrack($editingInfo)
 	{
 		$audioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubCaptionInfo'])) { // 手动配音
@@ -489,7 +494,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return AudioTrack
 	 */
-	private function getLensDubAudioTrack($editingInfo)
+	private static function getLensDubAudioTrack($editingInfo)
 	{
 		$lensAudioTrackClips = array();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
@@ -549,7 +554,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return VideoTrack
 	 */
-	private function getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect = array())
+	private static function getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect = array())
 	{
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
 			// #关闭原声  #转场设置  #选择时长
@@ -561,7 +566,7 @@ class AliEditing extends ServiceBase
 					'SubType' => $lensRow['transitionSubType'],
 				);
 			}
-			if (!empty($lensRow['originalSound'])) { // #关闭原声
+			if (empty($lensRow['originalSound'])) { // #关闭原声
 				$lensVolumeEffect = array(
 					'Type' => 'Volume',
 					'Gain' => 0,
@@ -611,7 +616,7 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return VideoTrack
 	 */
-	private function getDecalVideoTrack($editingInfo)
+	private static function getDecalVideoTrack($editingInfo)
 	{
 		$videoTrackClips = array();
 		if (!empty($editingInfo['decalInfo'])) {
@@ -715,7 +720,7 @@ class AliEditing extends ServiceBase
 	 */
 	public function submitMediaProducingJob($chipParam)
 	{
-		$timeline = $this->getTimeline($chipParam);
+		$timeline = self::getTimeline($chipParam);
 		$orientation = '';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
@@ -779,6 +784,66 @@ class AliEditing extends ServiceBase
 			return false;
 		}
 		return (array)$mediaProducingJob;
+	}
+
+	/**
+	 * 注册单个资源
+	 *
+	 * @return array
+	 */
+	public function registerMediaInfo($inputURL)
+	{
+		try {
+			$request = new RegisterMediaInfoRequest();
+    		$request->inputURL = $inputURL;
+    		$response = self::$client->registerMediaInfo($request);
+    		$mediaId = empty($response->body->mediaId) ? '' : $response->body->mediaId;
+		} catch (DaraUnableRetryException $e) {
+			return false;
+		} catch (TeaUnableRetryError $e) {
+			return false;
+		}
+		return $mediaId;
+	}
+	
+	/**
+	 * 获取单个资源的信息
+	 *
+	 * @return array
+	 */
+	public function getMediaInfo($mediaId, $inputURL = '')
+	{
+		try {
+			$request = new GetMediaInfoRequest();
+			if (!empty($mediaId)) {
+				$request->mediaId = $mediaId;
+			} else {
+				$request->inputURL = $inputURL;
+			}
+			$response = self::$client->getMediaInfo($request);
+			$mediaInfo = empty($response->body->mediaInfo) ? array() : $response->body->mediaInfo;
+			$mediaBasicInfo = empty($mediaInfo->mediaBasicInfo) ? array() : $mediaInfo->mediaBasicInfo;
+			$mediaId = empty($mediaBasicInfo->mediaId) ? '' : $mediaBasicInfo->mediaId;
+			$mediaType = empty($mediaBasicInfo->mediaType) ? '' : $mediaBasicInfo->mediaType;
+			$coverURL = empty($mediaBasicInfo->coverURL) ? '' : $mediaBasicInfo->coverURL;
+			$fileInfo = empty($mediaInfo->fileInfoList) ? array() : reset($mediaInfo->fileInfoList);
+			$fileBasicInfo = empty($fileInfo->fileBasicInfo) ? array() : $fileInfo->fileBasicInfo;
+			
+			$duration = empty($fileBasicInfo->duration) ? '' : $fileBasicInfo->duration;
+			$fileSize = empty($fileBasicInfo->fileSize) ? '' : $fileBasicInfo->fileSize;
+			$info = array(
+				'mediaId' 	=> $mediaId,
+				'mediaType' => $mediaType,
+				'coverURL' 	=> $coverURL,
+				'duration'	=> $duration,
+				'fileSize'	=> $fileSize,
+			);
+		} catch (DaraUnableRetryException $e) {
+			return false;
+		} catch (TeaUnableRetryError $e) {
+			return false;
+		}
+		return $info;
 	}
 	
 }

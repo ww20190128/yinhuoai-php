@@ -57,6 +57,13 @@ class Media extends EntityBase
      * @var varchar
      */
     public $url = '';
+    
+    /**
+     * 媒体的信息
+     *
+     * @var varchar
+     */
+    public $mediaInfo = '';
 
     /**
      * 文件大小

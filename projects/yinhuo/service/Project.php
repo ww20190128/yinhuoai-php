@@ -37,7 +37,7 @@ class Project extends ServiceBase
   
     /**
      * 获取预览
-     *
+     * 
      * @return array
      */
     public function getPreview($userId, $editingId)
