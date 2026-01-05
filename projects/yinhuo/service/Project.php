@@ -231,15 +231,38 @@ class Project extends ServiceBase
     	$canCreateTotalNum = $numLimit - count($projectClipEttList);
     	$previewModels = array(); // 预览列表
     	$clipModels = array(); // 成品列表
+    	$previewMediaIds = array(); // 预览封面id
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) { // 已删除
     			continue;
     		}
+    		$chipParam = empty($projectClipEtt->chipParam) ? array() : json_decode($projectClipEtt->chipParam, true);
+    		if (!empty($chipParam['previewMediaId'])) {
+    			$previewMediaIds[$chipParam['previewMediaId']] = $chipParam['previewMediaId'];
+    		}
+    	}
+    	$mediaDao = \dao\Media::singleton();
+    	$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
+    	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    	$folderSv = \service\Folder::singleton();
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) { // 已删除
+    			continue;
+    		}
+    		$previewUrl = ''; // 预览封面
+    		$chipParam = empty($projectClipEtt->chipParam) ? array() : json_decode($projectClipEtt->chipParam, true);
+    		if (!empty($chipParam['previewMediaId']) && !empty($mediaEttList[$chipParam['previewMediaId']])) {
+    			$mediaInfo = $folderSv->getMediaInfo($mediaEttList[$chipParam['previewMediaId']]);
+    			if (!empty($mediaInfo['coverURL'])) {
+    				$previewUrl = $mediaInfo['coverURL'];
+    			}
+    		}
+    		
     		$projectClipModel = array(
     			'id' 			=> intval($projectClipEtt->id),
     			'mediaURL' 		=> $projectClipEtt->mediaURL,
     			'jobStatus' 	=> $projectClipEtt->jobStatus,
-    			'previewUrl' 	=> $projectClipEtt->previewUrl,
+    			'previewUrl' 	=> $previewUrl,
     			'duration' 		=> intval($projectClipEtt->duration),
     			'createTime' 	=> intval($projectClipEtt->createTime),
     			'updateTime' 	=> intval($projectClipEtt->updateTime),
@@ -267,23 +290,40 @@ class Project extends ServiceBase
     	if ($needCreateNum > 0) { // 创建
     		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
     		$chipParamList = array();
+    		$previewMediaIds = array();
     		for ($index = 1; $index <= $needCreateNum; $index++) {
     			$chipParam = $editingSv->randomChipParam($editingInfo);
     			$chipParamList[$index] = $chipParam;
+    			if (!empty($chipParam['previewMediaId'])) {
+    				$previewMediaIds[$chipParam['previewMediaId']] = $chipParam['previewMediaId'];
+    			}
     		}
+    		$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
+    		$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    		
+    		
+    		
+    		
     		foreach ($chipParamList as $chipParam) {
     			$projectClipEtt = $projectClipDao->getNewEntity();
     			$projectClipEtt->projectId = $projectEtt->id;
     			$projectClipEtt->chipParam = json_encode($chipParam, true);
-    			$projectClipEtt->previewUrl = $chipParam['previewUrl'];
     			$projectClipEtt->createTime = $now;
     			$projectClipEtt->updateTime = $now;
     			$projectClipId = $projectClipDao->create($projectClipEtt);
+    			
+    			$previewUrl = ''; // 预览封面
+    			if (!empty($chipParam['previewMediaId']) && !empty($mediaEttList[$chipParam['previewMediaId']])) {
+    				$mediaInfo = $folderSv->getMediaInfo($mediaEttList[$chipParam['previewMediaId']]);
+    				if (!empty($mediaInfo['coverURL'])) {
+    					$previewUrl = $mediaInfo['coverURL'];
+    				}
+    			}
     			$projectClipModel = array(
     				'id' 			=> intval($projectClipId),
     				'mediaURL' 		=> $projectClipEtt->mediaURL,
     				'jobStatus' 	=> $projectClipEtt->jobStatus,
-    				'previewUrl' 	=> $projectClipEtt->previewUrl,
+    				'previewUrl' 	=> $previewUrl,
     				'duration' 		=> intval($projectClipEtt->duration),
     				'createTime' 	=> intval($projectClipEtt->createTime),
     				'updateTime' 	=> intval($projectClipEtt->updateTime),
@@ -327,6 +367,23 @@ class Project extends ServiceBase
     	$aliEditingSv = \service\AliEditing::singleton();
     	$projectClipModels = array();
     	$now = $this->frame->now;
+    	
+    	$previewMediaIds = array();
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		$chipParam = empty($projectClipEtt->chipParam) ? array() : json_decode($projectClipEtt->chipParam, true);
+    		if (!empty($chipParam['previewMediaId'])) {
+    			$previewMediaIds[$chipParam['previewMediaId']] = $chipParam['previewMediaId'];
+    		}
+    	}
+    	$mediaDao = \dao\Media::singleton();
+    	$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
+    	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
+    	$folderSv = \service\Folder::singleton();
+    	
+    	
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
@@ -353,11 +410,19 @@ class Project extends ServiceBase
     				$projectClipDao->update($projectClipEtt);
     			}
     		}
+    		$chipParam = json_decode($projectClipEtt->chipParam, true);
+    		$previewUrl = ''; // 预览封面
+    		if (!empty($chipParam['previewMediaId']) && !empty($mediaEttList[$chipParam['previewMediaId']])) {
+    			$mediaInfo = $folderSv->getMediaInfo($mediaEttList[$chipParam['previewMediaId']]);
+    			if (!empty($mediaInfo['coverURL'])) {
+    				$previewUrl = $mediaInfo['coverURL'];
+    			}
+    		}
     		$projectClipModels[$projectClipEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
     			'mediaURL' 		=> $projectClipEtt->mediaURL,
     			'jobStatus' 	=> $projectClipEtt->jobStatus,
-    			'previewUrl' 	=> $projectClipEtt->previewUrl,
+    			'previewUrl' 	=> $previewUrl,
     			'duration' 		=> intval($projectClipEtt->duration),
     			'createTime' 	=> intval($projectClipEtt->createTime),
     			'updateTime' 	=> intval($projectClipEtt->updateTime),
@@ -562,7 +627,6 @@ class Project extends ServiceBase
     		$projectClipEtt = $projectClipDao->getNewEntity();
     		$projectClipEtt->projectId = $projectEtt->id;
     		$projectClipEtt->chipParam = json_encode($chipParam, JSON_UNESCAPED_UNICODE);
-    		$projectClipEtt->previewUrl = $chipParam['previewUrl'];
     		$projectClipEtt->createTime = $now;
     		$projectClipEtt->updateTime = $now;
     		$tries = 3;

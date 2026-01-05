@@ -1407,13 +1407,13 @@ class Editing extends ServiceBase
     		$editingInfo['background']['mediaInfo'] = $editingInfo['background']['mediaList'][array_rand($editingInfo['background']['mediaList'], 1)];
     	}
     	$lensList = $editingInfo['lensList'];
-    	$editingInfo['previewUrl'] = ''; // 预览视频的URL
+    	$editingInfo['previewMediaId'] = 0; // 预览视频的媒体id
     	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
     		// 媒体
     		if (!empty($lensRow['mediaList'])) {
     			$lensRow['mediaInfo'] = $lensRow['mediaList'][array_rand($lensRow['mediaList'], 1)];
-    			if (empty($editingInfo['previewUrl'])) {
-    				$editingInfo['previewUrl'] = $lensRow['mediaInfo']['url'];
+    			if (empty($editingInfo['previewMediaId'])) {
+    				$editingInfo['previewMediaId'] = $lensRow['mediaInfo']['id'];
     			}
     		}
     		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 优先全局手动配音
