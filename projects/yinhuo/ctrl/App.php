@@ -75,12 +75,8 @@ EOT;
 	public function getActorClassifys()
 	{
 		$params = $this->params;
-		$id = $this->paramFilter('id', 'intval'); // 分类Id
-		if (empty($id)) {
-			throw new $this->exception('请求参数错误');
-		}
 		$appSv = \service\App::singleton();
-		$list = $appSv->getActorClassifys($id);
+		$list = $appSv->getActorClassifys();
 		return array(
 			'list' => array_values($list),
 		);

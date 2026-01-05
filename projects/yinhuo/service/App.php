@@ -18,7 +18,7 @@ class App extends ServiceBase
     /**
      * 单例模式
      *
-     * @return Index
+     * @return App
      */
     public static function singleton()
     {
