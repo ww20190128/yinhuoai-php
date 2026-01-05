@@ -73,13 +73,27 @@ class Folder extends ServiceBase
     	$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
     	$aliEditingSv = \service\AliEditing::singleton();
     	$mediaDao = \dao\Media::singleton();
-    	if (empty($mediaInfo)) {
-    		// 注册媒体资源
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	if (empty($mediaInfo) || ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO && empty($mediaInfo['coverURL']))) { // 注册媒体资源
     		$registerMediaId = $aliEditingSv->registerMediaInfo($mediaEtt->url);
     		if (!empty($registerMediaId)) { // 获取资源信息
     			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
     		} else {
     			$mediaInfo = $aliEditingSv->getMediaInfo('', $mediaEtt->url);
+    		}
+    		if (!empty($mediaInfo['coverURL'])) { // 上传封面
+    			$coverContent = @file_get_contents($mediaInfo['coverURL']);
+    			if (!empty($coverContent) && strlen($coverContent) > 0) {
+    				$fileName = md5($mediaInfo['coverURL']);
+    				$profileKey = "resources/cover/{$fileName}.jpg"; // 上传的目录
+    				$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    				$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $coverContent);
+    				if (!empty($ossResult)) {
+    					$coverURL = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    					$mediaInfo['coverURL'] = $coverURL;
+    				}
+    			}
     		}
     		if (!empty($mediaInfo)) {
     			$mediaEtt->set('mediaInfo', json_encode($mediaInfo, JSON_UNESCAPED_UNICODE));
@@ -183,30 +197,22 @@ class Folder extends ServiceBase
     		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
     		$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, file_get_contents($file));
-
     		if (empty($ossResult)) {
     			continue;
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-
-    		// 注册媒体资源
-    		$registerMediaId = $aliEditingSv->registerMediaInfo($url);
-    		
-    		$mediaInfo = array();
-    		if (!empty($registerMediaId)) { // 获取资源信息
-    			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
-    		} else {
-    			$mediaInfo = $aliEditingSv->getMediaInfo('', $url);
-    		}
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
     		$mediaEtt->type = $folderEtt->type;
     		$mediaEtt->size = $fileSize;
     		$mediaEtt->url = $url;
-    		$mediaEtt->mediaInfo = empty($mediaInfo) ? '' : json_encode($mediaInfo, JSON_UNESCAPED_UNICODE);
+    		$mediaEtt->mediaInfo = '';
     		$mediaEtt->createTime = $now;
     		$mediaEtt->updateTime = $now;
     		$mediaId = $mediaDao->create($mediaEtt);
+    		$mediaEtt = $mediaDao->readByPrimary($mediaId);
+    		$this->getMediaInfo($mediaEtt);
+    		
     		$folderMediaIds[] = $mediaId;
     	}
     	$folderEtt->set('mediaIds', implode(',', $folderMediaIds));
