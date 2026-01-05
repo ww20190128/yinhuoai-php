@@ -347,6 +347,11 @@ class Project extends ServiceBase
     			}
     			$projectClipEtt->set('updateTime', $now);
     			$projectClipDao->update($projectClipEtt);
+    		} else {
+    			if ($projectClipEtt->jobStatus != 'Success') {
+    				$projectClipEtt->set('jobStatus', 'Success');
+    				$projectClipDao->update($projectClipEtt);
+    			}
     		}
     		$projectClipModels[$projectClipEtt->id] = array(
     			'id' 			=> intval($projectClipEtt->id),
