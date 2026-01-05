@@ -124,7 +124,12 @@ class Project extends ServiceBase
     	}
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userEtt, $editingEtt);
-    	
+    	// 检查素材
+    	if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensRow) {
+    		if (empty($lensRow['mediaList'])) {
+    			throw new $this->exception("请给镜头【{$lensRow['name']}】添加素材");
+    		}
+    	}
     	$templateDao = \dao\Template::singleton();
     	$now = $this->frame->now;
     	$projectId = '';
@@ -141,6 +146,8 @@ class Project extends ServiceBase
     		if (empty($info['numLimit']) || $info['numLimit'] <= 0) {
     			throw new $this->exception('请输入生成数量');
     		}
+    		
+    		
     		$projectDao = \dao\Project::singleton();
     		$projectEtt = $projectDao->getNewEntity();
     		$projectEtt->id = $projectId;

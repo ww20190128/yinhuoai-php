@@ -158,6 +158,7 @@ class Editing extends ServiceBase
 	    		continue;
 	    	}
  			$mediaIds = empty($editingLensEtt->mediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->mediaIds)); // 素材
+
  			$transitionIds = empty($editingLensEtt->transitionIds) ? array() : array_map('string', explode(',', $editingLensEtt->transitionIds)); // 自选转场选中的ID
  			$dubCaptionIds = empty($editingLensEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubCaptionIds)); // 配音-手动设置-字幕
  			$dubMediaIds = empty($editingLensEtt->dubMediaIds) ? array() : array_map('intval', explode(',', $editingLensEtt->dubMediaIds)); // 配音-文件-素材(旁白配音)
