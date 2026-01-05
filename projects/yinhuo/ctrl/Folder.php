@@ -84,6 +84,7 @@ class Folder extends CtrlBase
 	 */
 	public function uploadMedias()
 	{
+	
 		$params = $this->params;
 		$id = $this->paramFilter('id', 'intval', 0); // 文件夹id
 		if (empty($id)) {

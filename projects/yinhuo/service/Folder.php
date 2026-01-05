@@ -62,6 +62,32 @@ class Folder extends ServiceBase
     	$folderId = $folderDao->create($folderEtt);
     	return $this->info($folderEtt, $userEtt);
     }
+    
+    /**
+     * 获取媒体信息
+     *
+     * @return array
+     */
+    public function getMediaInfo($mediaEtt)
+    {
+    	$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$mediaDao = \dao\Media::singleton();
+    	if (empty($mediaInfo)) {
+    		// 注册媒体资源
+    		$registerMediaId = $aliEditingSv->registerMediaInfo($mediaEtt->url);
+    		if (!empty($registerMediaId)) { // 获取资源信息
+    			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
+    		} else {
+    			$mediaInfo = $aliEditingSv->getMediaInfo('', $mediaEtt->url);
+    		}
+    		if (!empty($mediaInfo)) {
+    			$mediaEtt->set('mediaInfo', json_encode($mediaInfo, JSON_UNESCAPED_UNICODE));
+    			$mediaDao->update($mediaEtt);
+    		}
+    	}
+    	return $mediaInfo;
+    }
 
     /**
      * 修改文件夹名称
@@ -157,6 +183,7 @@ class Folder extends ServiceBase
     		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
     		$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, file_get_contents($file));
+
     		if (empty($ossResult)) {
     			continue;
     		}
@@ -164,9 +191,12 @@ class Folder extends ServiceBase
 
     		// 注册媒体资源
     		$registerMediaId = $aliEditingSv->registerMediaInfo($url);
+    		
     		$mediaInfo = array();
     		if (!empty($registerMediaId)) { // 获取资源信息
     			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
+    		} else {
+    			$mediaInfo = $aliEditingSv->getMediaInfo('', $url);
     		}
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
@@ -274,11 +304,12 @@ class Folder extends ServiceBase
     	$mediaDao = \dao\Media::singleton();
     	$mediaEttList = $mediaDao->readListByPrimary($allMediaIds);
     	$allMediaModels = array();
+    	$aliEditingSv = \service\AliEditing::singleton();
     	if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaEtt) {
     		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
+    		$mediaInfo = $this->getMediaInfo($mediaEtt);
     		$allMediaModels[$mediaEtt->id] = array(
     			'id' 			=> intval($mediaEtt->id),
     			'fileName'		=> $mediaEtt->name,

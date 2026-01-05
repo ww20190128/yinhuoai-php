@@ -1104,11 +1104,12 @@ class Editing extends ServiceBase
     private function getMediaModels($mediaEttList)
     {
     	$mediaModels = array();
+    	$folderSv = \service\Folder::singleton();
     	if (!empty($mediaEttList)) foreach ($mediaEttList as $mediaEtt) {
     		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
+    		$mediaInfo = $folderSv->getMediaInfo($mediaEtt);
     		$mediaModels[$mediaEtt->id] = array(
     			'id' 			=> intval($mediaEtt->id),
     			'name'			=> $mediaEtt->name,
