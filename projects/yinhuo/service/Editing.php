@@ -1416,6 +1416,9 @@ class Editing extends ServiceBase
     			if (empty($editingInfo['previewMediaId'])) {
     				$editingInfo['previewMediaId'] = $lensRow['mediaInfo']['id'];
     			}
+    		} else { // 没有设置媒体
+    			unset($editingInfo['lensList'][$lensKey]);
+    			continue;
     		}
     		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 优先全局手动配音
     			$lensDub = array(); // 镜头配音

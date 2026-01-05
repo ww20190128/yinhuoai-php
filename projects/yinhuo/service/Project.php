@@ -621,6 +621,8 @@ class Project extends ServiceBase
     	$editingSv = \service\Editing::singleton();
     	if (empty($editingInfo)) {
     		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    		$projectEtt->set('editingInfo', json_encode($editingInfo, JSON_UNESCAPED_UNICODE));
+    		$projectDao->update($projectEtt);
     	}
 
     	$chipParamList = array();
