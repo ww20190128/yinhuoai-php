@@ -370,7 +370,7 @@ class Folder extends ServiceBase
     		if ($mediaEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
-    		$mediaInfo = empty($mediaEtt->mediaInfo) ? array() : json_decode($mediaEtt->mediaInfo, true);
+    		$mediaInfo = $this->getMediaInfo($mediaEtt);
     		$mediaModels[] = array(
     			'id' 			=> intval($mediaEtt->id),
     			'name'			=> $mediaEtt->name,
