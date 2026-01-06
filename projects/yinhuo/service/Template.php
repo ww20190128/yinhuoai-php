@@ -110,7 +110,6 @@ class Template extends ServiceBase
     		$templateEtt->set('name', $info['name']);
     	}
     	$now = $this->frame->now;
-    	$templateEtt->set('status', \constant\Common::DATA_DELETE);
     	$templateEtt->set('updateTime', $now);
     	$templateDao->update($templateEtt);
     	return array(
