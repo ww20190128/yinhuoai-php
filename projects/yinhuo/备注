@@ -1,1 +1,90 @@
-ALTER TABLE `media` ADD `mediaInfo` VARCHAR( 256 ) NOT NULL DEFAULT '' COMMENT '媒体信息' AFTER `url`
+-- phpMyAdmin SQL Dump
+-- version 3.5.3
+-- http://www.phpmyadmin.net
+--
+-- 主机: 127.0.0.1
+-- 生成日期: 2026 年 01 月 06 日 21:48
+-- 服务器版本: 5.6.40-log
+-- PHP 版本: 7.4.20
+
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+--
+-- 数据库: `yinhuo`
+--
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `backstagePrivilege`
+--
+
+CREATE TABLE IF NOT EXISTS `backstagePrivilege` (
+  `id` smallint(6) NOT NULL AUTO_INCREMENT COMMENT '权限类型',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `treeId` int(11) NOT NULL DEFAULT '0' COMMENT '树id',
+  `parentId` int(11) NOT NULL DEFAULT '0' COMMENT '父id',
+  `index` int(11) NOT NULL DEFAULT '0' COMMENT '次序',
+  `level` int(11) NOT NULL DEFAULT '0' COMMENT '层级',
+  `defaultOpen` int(11) NOT NULL DEFAULT '1' COMMENT '是否默认开启',
+  `type` int(11) NOT NULL DEFAULT '1' COMMENT '类型 1 控制显示 2 控制操作',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='权限' AUTO_INCREMENT=8012 ;
+
+--
+-- 转存表中的数据 `backstagePrivilege`
+--
+
+REPLACE INTO `backstagePrivilege` (`id`, `name`, `status`, `treeId`, `parentId`, `index`, `level`, `defaultOpen`, `type`) VALUES
+(1, '剪辑管理', 0, 0, 0, 1, 1, 0, 1),
+(2, '分销信息', 0, 0, 0, 2, 1, 0, 1),
+(80, '系统账号', 0, 0, 0, 3, 1, 1, 1),
+(101, '测评列表', 0, 0, 1, 1, 2, 0, 1),
+(102, '维护分类', 0, 0, 1, 2, 2, 0, 1),
+(201, '付费订单', 0, 0, 2, 1, 1, 0, 1),
+(202, '推广角色', 0, 0, 2, 2, 2, 0, 1),
+(801, '账号列表', 0, 0, 80, 1, 2, 0, 1),
+(8011, '账号管理', 0, 0, 801, 1, 3, 0, 2);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `backstageUser`
+--
+
+CREATE TABLE IF NOT EXISTS `backstageUser` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
+  `userName` varchar(32) NOT NULL DEFAULT '' COMMENT '用户名',
+  `startTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '有效开始时间',
+  `endTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '有效期结束时间',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态 -1､删除 0､正常 1､禁用',
+  `type` int(11) NOT NULL DEFAULT '0' COMMENT '联系  666 超级管理员 1 管理员  0 普通推广',
+  `icon` varchar(256) NOT NULL DEFAULT '' COMMENT '头像',
+  `phone` varchar(32) NOT NULL DEFAULT '' COMMENT '手机号',
+  `password` varchar(128) NOT NULL DEFAULT '' COMMENT '密码',
+  `createUserId` int(11) NOT NULL DEFAULT '0' COMMENT '创建者用户id',
+  `showPrivileges` varchar(256) NOT NULL DEFAULT '' COMMENT '权限-可显示模块',
+  `opPrivileges` varchar(256) NOT NULL DEFAULT '' COMMENT '权限-可操作内容',
+  `loginKey` varchar(128) NOT NULL DEFAULT '' COMMENT '最近一次登录的key',
+  `lastLoginTime` int(11) NOT NULL DEFAULT '0' COMMENT '最近一次登录时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '上次更新的时间',
+  `shareUserIds` varchar(256) NOT NULL DEFAULT '' COMMENT '分享账号Id',
+  PRIMARY KEY (`userId`) USING BTREE,
+  KEY `userName` (`userName`) USING BTREE,
+  KEY `status` (`status`) USING BTREE,
+  KEY `phone` (`phone`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='管理后台-用户' AUTO_INCREMENT=10 ;
+
+--
+-- 转存表中的数据 `backstageUser`
+--
+
+REPLACE INTO `backstageUser` (`userId`, `userName`, `startTime`, `endTime`, `status`, `type`, `icon`, `phone`, `password`, `createUserId`, `showPrivileges`, `opPrivileges`, `loginKey`, `lastLoginTime`, `createTime`, `updateTime`, `shareUserIds`) VALUES
+(1, '智乐心理', 0, 0, 0, 666, '', '13718693103', 'e10adc3949ba59abbe56e057f20f883e', 0, '80,801,1,2', '8011', 'MS14eHg=.b1e83fb1caf123d21767746578695dac12', 1767703378, 0, 1744639726, '1,2'),
+(2, '魏芳', 1744358666, 1775462666, 0, 0, '', '17707235264', '0697eca2dca0ed2ddf2433566f663096', 0, '2,201,202', '', 'Mi14eHg=.96a9c9b5552b2885174468312067fdc070', 1744639920, 1744358690, 1744639900, '2'),
+(7, 'ww', 1744639791, 1775743791, 0, 0, '', '13296648967', '7e16af296eef8a9b3390ba2add7ecaa4', 1, '', '', 'Ny14eHg=.a1737274b73e6cdc174468304767fdc027', 1744639847, 1744639810, 1744639845, '1'),
+(8, 'test', 1744687883, 1775791883, 0, 0, '', '13296648961', 'e10adc3949ba59abbe56e057f20f883e', 1, '', '', 'OC14eHg=.c6677a5f4f95030c174473225067fe805a', 1744689050, 1744689039, 0, '1'),
+(9, '汪洋', 1744697385, 1775801385, 0, 0, '', '13164671700', 'f2ba1c3dabcb651217acfc474a132569', 1, '', '', 'OS14eHg=.bf96fbbed1d66099174474076767fea19f', 1744697567, 1744697398, 1744697491, '6');
