@@ -205,7 +205,7 @@ class Project extends CtrlBase
 		}
 
 		$projectSv = \service\Project::singleton();
-		return $projectSv->deleteProjectClips($this->userId, ids);
+		return $projectSv->deleteProjectClips($this->userId, $ids);
 	}
 	
 	/**
