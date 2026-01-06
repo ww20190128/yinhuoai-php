@@ -38,18 +38,6 @@ class Backstage extends ServiceBase
 	 */
 	public function getSelectItems()
 	{
-		// 获取账号
-		$userDao = \dao\User::singleton();
-		$userEttList = $userDao->readListByWhere("`type` = 1");
-		$userModelList = array();
-		foreach ($userEttList as $userEtt) {
-			$userModelList[] = $userEtt->getModel();
-		}
-		
-		$classifySv = \service\Classify::singleton();
-		// 可分享的测评
-		$testPaperList = $classifySv->getListByClassify(888, array(), 1, 200);
-		$testPaperList = empty($testPaperList['list']) ? array() : $testPaperList['list'];
 		// 佣金状态
     	$brokerageStatusArr = array(
     		\constant\Order::BROKERAGE_STATUS_NOT_APPLY => array(
@@ -75,8 +63,6 @@ class Backstage extends ServiceBase
     	);
 		return array(
 			'brokerageStatusList' => array_values($brokerageStatusArr),
-			'userList' => array_values($userModelList),
-			'testPaperList' => array_values($testPaperList),
 		);
 	}
 	

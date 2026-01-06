@@ -594,51 +594,19 @@ class BackstageUser extends ServiceBase
 
     	$userOpPrivileges = $backstageUserModel['opControl'];
     	$userShowPrivileges = $backstageUserModel['showControl'];
-    	$shareUserIds = $backstageUserModel['shareUserIds']; // 绑定的分享账号
+
     	$backstageSv = \service\Backstage::singleton();
     	$selectItems = $backstageSv->getSelectItems();
 
     	if ($backstageUserEtt->type == 666) { // 超级管理员
-    		$shareUsers = empty($selectItems['userList']) ? array() : array_column($selectItems['userList'], null, 'userId');
-    		$addShareUserIds = array_keys($shareUsers);
-    		$shareUserIds = array_merge($addShareUserIds, $shareUserIds);
-    		$shareUserIds = array_unique($shareUserIds);
+    	
+  
     	} elseif ($backstageUserEtt->type == 1) { // 管理员
     		// 获取创建的账户
     		$where = "`createUserId` = {$backstageUserEtt->userId}";
-    		$backstageUserEttList = $backstageUserDao->readListByWhere($where);
-    		$shareUsers = empty($backstageUserEttList) ? array() : array_column($backstageUserEttList, null, 'userId');
-    		$addShareUserIds = array_keys($shareUsers);
-    		$shareUserIds = array_merge($addShareUserIds, $shareUserIds);
-    		$shareUserIds = array_unique($shareUserIds);
+    	
     	}
-    	$shareUsers = array();
-    	if (!empty($shareUserIds)) {
-    		$userDao = \dao\User::singleton();
-    		$shareUserEttList = $userDao->readListByPrimary($shareUserIds);
-    		if (is_iteratable($shareUserEttList)) foreach ($shareUserEttList as $shareUserEtt) {
-    			$shareUserModel = $shareUserEtt->getModel();
-    			$commissionRate = 30;
-    			if (!empty($shareUserEtt->type)) {
-    				$commissionRate = number_format($shareUserEtt->commissionRate, 0);
-    			}
-    			$shareYield = $shareUserEtt->shareYield; // 累积分享收益
-    			$withdrawAmount = $shareUserEtt->withdrawAmount; // 累积提现金额
-    			$residueAmount = max(0, $shareYield - $withdrawAmount); // 可提现金额
-    			$shareInfo = array(
-    				'type' => intval($shareUserEtt->type),
-    				'commissionRate' => $commissionRate,
-    				'shareYield' => number_format($shareYield, 2), // 累积分享收益
-    				'withdrawAmount' => number_format($withdrawAmount, 2), // 累积提现金额
-    				'residueAmount' => number_format($residueAmount, 2), // 可提现金额
-    			);
-    			$shareUserModel = array_merge($shareUserModel, $shareInfo);
 
-    			$shareUsers[] = $shareUserModel;
-    		}
-    	}
-    	$backstageUserModel['shareUsers'] = $shareUsers;
-    
     	// 获取权限信息
     	$backstageSv = \service\Backstage::singleton();
     	$privilegeTree = $backstageSv->privilegeTree();
