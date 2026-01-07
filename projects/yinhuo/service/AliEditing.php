@@ -417,6 +417,11 @@ class AliEditing extends ServiceBase
 					'Type' => 'Volume',
 					'Gain' => $editingInfo['volume']['backgroundVolume'],
 				);
+			} else {
+				$effectVolume = array(
+					'Type' => 'Volume',
+					'Gain' => 0.3,
+				);
 			}
 			$effects = array();
 			if (!empty($effectVolume)) {
@@ -584,6 +589,9 @@ class AliEditing extends ServiceBase
 				}
 				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
+				}
+				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE && empty($videoTrackClip['Duration'])) {
+					$videoTrackClip['Duration'] = 5; // 图片默认停留5秒
 				}
 				// 素材特效列表
 				$effects = array();

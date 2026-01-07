@@ -75,7 +75,7 @@ class Folder extends ServiceBase
     	$mediaDao = \dao\Media::singleton();
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
-    	if (empty($mediaInfo) || ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO && empty($mediaInfo['coverURL']))) { // 注册媒体资源
+    	if ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO && empty($mediaInfo['coverURL'])) { // 注册媒体资源
     		$registerMediaId = $aliEditingSv->registerMediaInfo($mediaEtt->url);
     		if (!empty($registerMediaId)) { // 获取资源信息
     			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
