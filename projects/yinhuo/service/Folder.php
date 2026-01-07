@@ -385,8 +385,8 @@ class Folder extends ServiceBase
     			'createTime'	=> intval($mediaEtt->createTime),
     			'updateTime'	=> intval($mediaEtt->updateTime),
     			'coverURL'		=> empty($mediaInfo['coverURL']) ? '' : $mediaInfo['coverURL'], // 视频封面
-    			'duration'		=> empty($mediaInfo['duration']) ? 0 : ceil($mediaInfo['duration']), // 时长
-    			'size'			=> empty($mediaInfo['fileSize']) ? 0 : ceil($mediaInfo['fileSize']), // 文件大小
+    			'duration'		=> empty($mediaInfo['duration']) ? 0 : intval($mediaInfo['duration']), // 时长
+    			'size'			=> empty($mediaInfo['fileSize']) ? 0 : intval($mediaInfo['fileSize']), // 文件大小
     		);
     	}
     	$subFolderEttList = $folderDao->readListByIndex(array(
