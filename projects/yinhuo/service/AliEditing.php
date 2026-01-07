@@ -420,7 +420,7 @@ class AliEditing extends ServiceBase
 			} else {
 				$effectVolume = array(
 					'Type' => 'Volume',
-					'Gain' => 0.3,
+					'Gain' => 0.2,
 				);
 			}
 			$effects = array();
@@ -523,7 +523,7 @@ class AliEditing extends ServiceBase
 				$dubMediaInfo = $lensRow['dubMediaInfo'];
 				$audioTrackClip = array(
 					'MediaURL' => $dubMediaInfo['url'], // 播放链接，视频/图片
-					'ReferenceClipId' => 'lens_' . $dubMediaInfo['id'], // 镜头标记，用于对齐
+					'ReferenceClipId' => 'lens_' . $lensRow['id'], // 镜头标记，用于对齐
 				);
 				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
 					$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
@@ -581,7 +581,7 @@ class AliEditing extends ServiceBase
 				$mediaInfo = $lensRow['mediaInfo'];
 				$videoTrackClip = array(
 					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
-					'ClipId' => 'lens_' . $mediaInfo['id'],
+					'ClipId' => 'lens_' . $lensRow['id'],
 					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长

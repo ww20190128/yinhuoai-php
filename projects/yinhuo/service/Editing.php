@@ -1402,6 +1402,8 @@ class Editing extends ServiceBase
     		} else { // 自选转场
     			$editingInfo['transitionSubType'] = implode(',', $editingInfo['transitionIds']);
     		}
+    	} else { // 默认随机转场
+    		$editingInfo['transitionSubType'] = 'random';
     	}
     	// 背景视频/图片
     	if (!empty($editingInfo['background']['mediaList'])) {
