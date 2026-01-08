@@ -87,7 +87,7 @@ class AliEditing extends ServiceBase
 			'type' => 'AI_ASR',
 		);
 		if (!empty($lensRow)) {
-			$effectFont['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+			$audioTrackClip['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
 		}
 		$effectVolume = array(); // 音量效果
 		if (!empty($editingInfo['volume'])) {
@@ -420,7 +420,7 @@ class AliEditing extends ServiceBase
 			} else {
 				$effectVolume = array(
 					'Type' => 'Volume',
-					'Gain' => 0.2,
+					'Gain' => 0.05,
 				);
 			}
 			$effects = array();
@@ -525,8 +525,11 @@ class AliEditing extends ServiceBase
 					'MediaURL' => $dubMediaInfo['url'], // 播放链接，视频/图片
 					'ReferenceClipId' => 'lens_' . $lensRow['id'], // 镜头标记，用于对齐
 				);
+				
 				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
 					$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
+				} else { // 默认播放速度
+					$audioTrackClip['Speed'] = 1;
 				}
 				if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
 						
@@ -590,8 +593,11 @@ class AliEditing extends ServiceBase
 				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
-				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE && empty($videoTrackClip['Duration'])) {
-					$videoTrackClip['Duration'] = 5; // 图片默认停留5秒
+				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE) {
+					if (empty($videoTrackClip['Duration'])) {
+						$videoTrackClip['Duration'] = 8; // 图片默认停留8秒
+					}
+					$videoTrackClip['AdaptMode'] = 'Cover'; // 被替换的内容在保持其宽高比的同时填充整个目标区域。如果对象的宽高比与内容框不相匹配，该对象将被剪裁以适应目标区域。
 				}
 				// 素材特效列表
 				$effects = array();
@@ -729,13 +735,13 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-		$orientation = '';
+		$orientation = 'Horizontal';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
 			$orientation = 'Horizontal';
 		} elseif ($chipParam['ratio'] == '16:9') {
 			$orientation = 'Vertical';
-		} else {
+		} elseif ($chipParam['ratio'] == '1:1') {
 			$width = 900;
 			$height = 900;
 		}

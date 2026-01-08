@@ -574,7 +574,7 @@ class Project extends ServiceBase
     	$aliEditingSv = \service\AliEditing::singleton();
     	$clipNum = 0;
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
-    		$chipParam = json_decode($projectClipEtt->chipParam, true);
+    		$chipParam = empty($projectClipEtt->chipParam) ? array() : json_decode($projectClipEtt->chipParam, true);
 			if (empty($chipParam) || empty($projectClipEtt->projectId)) {
 				continue;
 			}
@@ -588,6 +588,7 @@ class Project extends ServiceBase
 			if (empty($jobId)) {
 				continue;
 			}
+
 			$projectClipEtt->set('jobId', $jobId);
 			$projectClipEtt->set('updateTime', $now);
 			$projectClipDao->update($projectClipEtt);
