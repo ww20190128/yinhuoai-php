@@ -106,13 +106,13 @@ class AliEditing extends ServiceBase
 		}
 		if (!empty($captionRow['font'])) { // 字体
 			if (!empty($captionRow['font']['text-align'])) { // 排版
-				$effectFont['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+				$effectFont['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
 			}
-			if (!empty($captionRow['font']['position'])) { // 位置
-				$effectFont['Y'] = $captionRow['font']['position'];
+			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
+				$effectFont['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
-			if (!empty($captionRow['font']['font-size'])) { // 字号
-				$effectFont['FontSize'] = $captionRow['font']['font-size'];
+			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
+				$effectFont['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$effectFont['Font'] = $captionRow['font']['font-family'];
@@ -173,13 +173,13 @@ class AliEditing extends ServiceBase
 		}
 		if (!empty($captionRow['font'])) { // 字体
 			if (!empty($captionRow['font']['text-align'])) { // 排版
-				$subtitleTrackClip['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'CenterCenter' : 'CenterLeft';
+				$subtitleTrackClip['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
 			}
-			if (!empty($captionRow['font']['position'])) { // 位置
-				$subtitleTrackClip['Y'] = $captionRow['font']['position'];
+			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
+				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
-			if (!empty($captionRow['font']['font-size'])) { // 字号
-				$subtitleTrackClip['FontSize'] = $captionRow['font']['font-size'];
+			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48 
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
@@ -760,11 +760,10 @@ class AliEditing extends ServiceBase
 			$outputMediaConfig['Width'] = $width;
 			$outputMediaConfig['Height'] = $height;
 		}
-		$serve_url = $aliEditingConf = self::$instance->frame->conf['serve_url'];
+		$serveUrl = $aliEditingConf = self::$instance->frame->conf['serve_url'];
 		$userData = array(
-			'NotifyAddress' => $serve_url . 'op=Project.producingJobcallback', // 为任务完成的回调url
+			'NotifyAddress' => $serveUrl . '?op=Project.producingJobcallback', // 为任务完成的回调url
 		);
-		
 		try {
 		    $request = new SubmitMediaProducingJobRequest();
 		    $request->timeline = json_encode($timeline, JSON_UNESCAPED_UNICODE);
