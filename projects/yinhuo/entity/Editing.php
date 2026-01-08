@@ -84,7 +84,7 @@ class Editing extends EntityBase
      *
      * @var varchar
      */
-    public $durationType = 1;
+    public $durationType = 2;
 
     /**
      * 视频帧率 取值：25/30/60
