@@ -108,8 +108,7 @@ class AliEditing extends ServiceBase
 				);
 			}
 		}
-		
-		$effectBackground = array(); // 背景效果
+
 		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
 			$effectAI_ASR['FontColorOpacity'] = 0;
 		}
@@ -136,15 +135,15 @@ class AliEditing extends ServiceBase
 					$effectAI_ASR['FontColor'] = $captionRow['style']['color'];
 				}
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
-					$effectAI_ASR['BackColour'] = $captionRow['style']['background'];
-					$effectAI_ASR['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
-					
-// 					$effectAI_ASR['SubtitleEffects'] = array(
-// 						array(
-							
-// 						)
-// 					);
+					$effectAI_ASR['SubtitleEffects'] = array(
+						array(
+							'Type' => 'Box',
+							'Color' => $captionRow['style']['background'],
+							'Opacity' => 0.9,
+						),
+					);
 				}
+
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
 					if (!empty($captionRow['style']['border-size'])) { // 边框大小
 						$effectAI_ASR['Outline'] = $captionRow['style']['border-size'];
@@ -152,7 +151,7 @@ class AliEditing extends ServiceBase
 					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
 						$effectAI_ASR['OutlineColour'] = $captionRow['style']['border-color'];
 					}
-				}
+				}	
 			}
 		}
 		$effects = array();
@@ -210,6 +209,7 @@ class AliEditing extends ServiceBase
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
 					$subtitleTrackClip['BackColour'] = $captionRow['style']['background'];
 					$subtitleTrackClip['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
+					
 				}
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
 					if (!empty($captionRow['style']['border-size'])) { // 边框大小

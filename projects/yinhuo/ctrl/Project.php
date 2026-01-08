@@ -306,8 +306,6 @@ EOT;
 		$tries = 3;
 		do {
 			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($jobId);
-			
-		
 		} while (empty($mediaProducingJob) && --$tries > 0);
 		$preview = array();
 		$preview['jobStatus'] = $mediaProducingJob['status'];
