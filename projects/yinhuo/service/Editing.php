@@ -1069,8 +1069,8 @@ class Editing extends ServiceBase
     			'id' 			=> intval($editingTitleEtt->id),
     			'updateTime' 	=> intval($editingTitleEtt->updateTime),
     			'createTime' 	=> intval($editingTitleEtt->createTime),
-    				'start' 	=> intval($editingTitleEtt->start),
-    				'end' 	=> intval($editingTitleEtt->end),
+    			'start' 		=> intval($editingTitleEtt->start),
+    			'end' 			=> intval($editingTitleEtt->end),
     			'captionIds'	=> $captionIds,
     		);
     		$allCaptionIds = array_merge($allCaptionIds, $captionIds);
@@ -1082,7 +1082,7 @@ class Editing extends ServiceBase
     	foreach ($editingTitleModels as $key => $editingTitleModel) {
     		$captionList = array();
     		foreach ($editingTitleModel['captionIds'] as $captionId) {
-    			if (empty($editingCaptionModels[$captionId])) {
+    			if (empty($editingCaptionModels[$captionId]) || empty($editingCaptionModels[$captionId]['text'])) {
     				continue;
     			}
     			$captionList[] = $editingCaptionModels[$captionId];
@@ -1090,6 +1090,10 @@ class Editing extends ServiceBase
     		uasort($captionList, array($commonSv, 'sortByCreateTime'));
     		$editingTitleModel['title'] = empty($captionList) ? 0 : reset($captionList)['text'];
     		$editingTitleModel['captionList'] = array_values($captionList);
+    		if (empty($captionList)) {
+    			unset($editingTitleModels[$key]);
+    			continue;
+    		}
     		$editingTitleModels[$key] = $editingTitleModel;
     	}
     	$commonSv = \service\Common::singleton();

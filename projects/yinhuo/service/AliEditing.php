@@ -82,9 +82,12 @@ class AliEditing extends ServiceBase
 			'Content' => $captionRow['text'], // 文案内容
 			'Voice' => empty($actorInfo) ? 'zhiqing' : $actorInfo['id'], // 配音   全局
 		);
+		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
+			$audioTrackClip['SpeechRate'] = $editingInfo['volume']['dubSpeed'];
+		}
 		// 字体效果
 		$effectFont = array(
-			'type' => 'AI_ASR',
+			'Type' => 'AI_ASR',
 		);
 		if (!empty($lensRow)) {
 			$audioTrackClip['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
@@ -96,9 +99,6 @@ class AliEditing extends ServiceBase
 					'Type' => 'Volume',
 					'Gain' => $editingInfo['volume']['dubVolume'],
 				);
-			}
-			if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
-				$effectFont['SpeechRate'] = $editingInfo['volume']['dubSpeed'];
 			}
 		}
 		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
@@ -216,7 +216,11 @@ class AliEditing extends ServiceBase
 	 */
 	private static function getTimeline($editingInfo)
 	{
-		$editingBackgroundColorEffect = array(); // 纯色背景色
+		$editingBackgroundColorEffect = array(
+			'Type' 		=> 'Background',
+			'SubType' 	=> 'Blur',
+			'Radius'	=> 0.1,
+		);
 		$editingBackgroundVideoTrackClip = array(); // 背景图片或视频
 		if (!empty($editingInfo['background']) && !empty($editingInfo['background']['type'])) { // 背景
 			if ($editingInfo['background']['type'] == 1 && !empty($editingInfo['background']['color'])) { // 纯色
@@ -420,7 +424,7 @@ class AliEditing extends ServiceBase
 			} else {
 				$effectVolume = array(
 					'Type' => 'Volume',
-					'Gain' => 0.05,
+					'Gain' => 0.1,
 				);
 			}
 			$effects = array();
@@ -528,8 +532,6 @@ class AliEditing extends ServiceBase
 				
 				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
 					$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
-				} else { // 默认播放速度
-					$audioTrackClip['Speed'] = 1;
 				}
 				if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示,  在配音中无效
 						
@@ -735,6 +737,8 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
+		
+//print_r($timeline);exit;
 		$orientation = 'Horizontal';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
