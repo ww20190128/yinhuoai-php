@@ -29,12 +29,49 @@ class App extends ServiceBase
     }
     
     /**
+     * 
+     *
+     * @return array
+     */
+    public function uploadMusic()
+    {
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$musicDao = \dao\Music::singleton();
+    	$musicEttList = $musicDao->readListByWhere("url = ''");
+    	$now = $this->frame->now;
+    	foreach ($musicEttList as $musicEtt) {
+    		$publishUrl = $musicEtt->publishUrl;
+    		$publishUrlContent = @file_get_contents($publishUrl);
+    		$publishUrlSize = strlen($publishUrlContent);
+    		if ($publishUrlSize > 0) {
+    			$fileName = md5($publishUrl);
+    			$profileKey = "resources/music/{$fileName}.mp3"; // 上传的目录
+    			$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    			$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $publishUrlContent);
+    			if (empty($ossResult)) {
+    				continue;
+    			}
+    			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    			$musicEtt->set('url', $url);
+    			$musicDao->update($musicEtt);
+    			echo $url . "\n";
+    		}
+    	}
+    	exit;
+	
+    }
+    
+    /**
      * 同步音乐数据
      *
      * @return array
      */
     public function sysnMusic($authorization)
     {
+    	$this->uploadMusic();exit;
     	$musicDao = \dao\Music::singleton();
 		$musicClassifyDao = \dao\MusicClassify::singleton();
     	$url = "https://api.pyp.canzan.com/company/material/hot_music_cate";

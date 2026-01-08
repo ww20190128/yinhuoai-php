@@ -57,6 +57,13 @@ class Music extends EntityBase
      * @var varchar
      */
     public $playUrl = '';
+    
+    /**
+     * 本地地址
+     *
+     * @var varchar
+     */
+    public $url = '';
 
     /**
      * 分类ID
