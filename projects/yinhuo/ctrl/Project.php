@@ -10,17 +10,40 @@ class Project extends CtrlBase
 {
 	/**
 	 * 为任务完成的回调url
-	 *
+	 * 
 	 * @return array
 	 */
 	public function producingJobcallback()
 	{
-		   	$params = $this->params;
+		$params = $this->params;
     	$body = file_get_contents('php://input');
-    
-$file = CACHE_PATH . 'producingJobcallback.txt';
-@file_put_contents($file, $body);
-		print_r($file);exit;
+    	$body = empty($body) ? array() : json_decode($body, true);
+    	$body = empty($body['MessageBody']) ? array() : $body['MessageBody'];
+    	if (!empty($body['JobId']) && !empty($body['MediaURL']) && !empty($body['MediaId'])) {
+    		$projectClipDao = \dao\ProjectClip::singleton();
+    		$aliEditingSv = \service\AliEditing::singleton();
+	    	$projectClipEttList = $projectClipDao->readListByIndex(array(
+	    		'jobId' => $body['JobId'],
+	    	));
+	    	$now = $this->frame->now;
+	    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+	    		if (empty($projectClipEtt->mediaURL)) { // 未生成成片
+	    			$mediaInfo = $aliEditingSv->getMediaInfo($body['MediaId']); // 媒体信息
+	    			$projectClipEtt->set('mediaURL', $body['MediaURL']);
+	    			$projectClipEtt->set('mediaId', $body['MediaId']);
+	    			$projectClipEtt->set('jobStatus', 'Success');
+	    			$projectClipEtt->set('duration', empty($mediaInfo['duration']) ? 0 : intval($mediaInfo['duration']));
+	    			$projectClipEtt->set('updateTime', $now);
+	    			$projectClipDao->update($projectClipEtt);
+	    		} else {
+	    			if ($projectClipEtt->jobStatus != 'Success') {
+	    				$projectClipEtt->set('jobStatus', 'Success');
+	    				$projectClipDao->update($projectClipEtt);
+	    			}
+	    		}
+	    	}
+    	}
+		return true;
 	}
 	
 	/**
