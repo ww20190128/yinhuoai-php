@@ -471,7 +471,7 @@ class AliEditing extends ServiceBase
 		if (!empty($editingInfo['dubCaptionInfo'])) { // 手动配音
 			$audioTrackClip = self::captionToAudioTrackClip($editingInfo['dubCaptionInfo'], $editingInfo);
 			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-				$audioTrackClip['Main'] = true;
+				$audioTrackClip['MainTrack'] = true;
 			}
 			$audioTrackClips[] = $audioTrackClip;
 		} elseif (!empty($editingInfo['dubMediaInfo'])) { // 配音文件
@@ -526,7 +526,7 @@ class AliEditing extends ServiceBase
 			if (!empty($lensRow['dubCaptionInfo'])) { // 手动配音
 				$audioTrackClip = self::captionToAudioTrackClip($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-					$audioTrackClip['Main'] = true;
+					$audioTrackClip['MainTrack'] = true;
 				}
 				$lensAudioTrackClips[] = $audioTrackClip;
 			} elseif (!empty($lensRow['dubMediaInfo'])) { // 配音文件
@@ -560,7 +560,7 @@ class AliEditing extends ServiceBase
 					$audioTrackClip['Effects'] = $effects;
 				}
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-					$audioTrackClip['Main'] = true;
+					$audioTrackClip['MainTrack'] = true;
 				}
 				$lensAudioTrackClips[] = $audioTrackClip;
 			}
@@ -605,7 +605,7 @@ class AliEditing extends ServiceBase
 					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-					$videoTrackClip['Main'] = true;
+					$videoTrackClip['MainTrack'] = true;
 				}
 				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
