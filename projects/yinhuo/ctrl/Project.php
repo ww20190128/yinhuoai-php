@@ -20,6 +20,7 @@ class Project extends CtrlBase
     
 $file = CACHE_PATH . 'producingJobcallback.txt';
 @file_put_contents($file, $body);
+		print_r($file);exit;
 	}
 	
 	/**
@@ -259,7 +260,7 @@ $file = CACHE_PATH . 'producingJobcallback.txt';
 	
 	/**
 	 * 生成成片
-	 *
+	 *ac33f7841bf84a5f8288505a260c5d49
 	 * @return array
 	 */
 	public function test()
@@ -269,18 +270,21 @@ $file = CACHE_PATH . 'producingJobcallback.txt';
 {"id":8,"name":"20260105-剪辑","topic":"说话,一有空","title":"咖喱鸡块","ratio":"9:16","durationType":2,"fps":25,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":2,"updateTime":1767773878,"createTime":1767773878,"lensList":[{"id":22,"name":"片头","index":-1,"type":1,"createTime":1767773878,"updateTime":1767860705,"mediaIds":[7,6,14],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[21,22],"dubMediaIds":[],"mediaInfo":{"id":7,"name":"q8c2OsRlkYHHd574652057c263bf6c323b7d8bb621fc.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/1\/d574652057c263bf6c323b7d8bb621fc.mp4","updateTime":1767586327,"createTime":1767586327,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/78753b25e158ffd6db7f0298e969a743.jpg","duration":3,"size":336831},"dubCaptionInfo":{"id":21,"editingId":8,"text":"123","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZShuSong-Z01S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1767773878,"updateTime":1767773878},"transitionSubType":"random"},{"id":23,"name":"片中1","index":1,"type":2,"createTime":1767773878,"updateTime":1767861350,"mediaIds":[3,4],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[430],"dubMediaIds":[],"mediaInfo":{"id":3,"name":"B6Q6MRzYOdwMd58d2eb6a31f98b739880b8f01a60308.png","type":"image","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/image\/1\/d58d2eb6a31f98b739880b8f01a60308.png","updateTime":1767581829,"createTime":1767581829,"coverURL":"","duration":0,"size":102780},"dubCaptionInfo":{"id":430,"editingId":8,"text":"新的字幕内容不知道不知道不知道不知道hhdhdhdhdhdjdjd","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1767861350,"updateTime":1767861350},"transitionSubType":"random"},{"id":24,"name":"片尾","index":100,"type":3,"createTime":1767773878,"updateTime":1767773878,"mediaIds":[1,2],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[],"dubMediaIds":[],"mediaInfo":{"id":2,"name":"UTf5p9FwibLY255493c6d5fddec5a93f4e621a9e6eba.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/255493c6d5fddec5a93f4e621a9e6eba.mp4","updateTime":1767581796,"createTime":1767581796,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/e4baa9f8bbcfcc0b729e9c95869477be.jpg","duration":46,"size":2719547},"transitionSubType":"random"}],"transitionSubType":"random","previewMediaId":7,"titleInfo":{"id":35,"updateTime":1767860981,"createTime":1767860981,"start":0,"end":5,"captionIds":[429],"title":"新的字幕内容77546","captionList":[{"id":429,"editingId":8,"text":"新的字幕内容77546","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1767860981,"updateTime":1767860981}]},"musicInfo":{"id":29,"conId":958,"type":1,"url":"https:\/\/pyp-xmt.oss-cn-beijing.aliyuncs.com\/hot_music\/2\/765731720671535.mp3","name":"小孩（反盗版）","duration":23,"updateTime":1767773878,"createTime":1767773878},"actorInfo":{"name":"知小白","id":"zhixiaobai","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/audio_ai\/zhixiaobai.wav"}}
 EOT;
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true);
-	print_r($chipParam);exit;	
+	
 		
 		$aliEditingSv = \service\AliEditing::singleton();
-		$tries = 3;
-		do {
-			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
-		} while (empty($jobId) && --$tries > 0);
-		sleep(10);
-			
+// 		$tries = 3;
+// 		do {
+// 			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+// 		} while (empty($jobId) && --$tries > 0);
+// 		sleep(10);
+
+		$jobId = 'ac33f7841bf84a5f8288505a260c5d49';
 		$tries = 3;
 		do {
 			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($jobId);
+			
+			print_r($mediaProducingJob);exit;
 		} while (empty($mediaProducingJob) && --$tries > 0);
 		$preview = array();
 		$preview['jobStatus'] = $mediaProducingJob['status'];
