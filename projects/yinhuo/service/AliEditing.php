@@ -127,8 +127,8 @@ class AliEditing extends ServiceBase
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
-			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['EffectColorStyle'])) { // 花字
-				$effectAI_ASR['EffectColorStyle'] = $captionRow['style']['EffectColorStyle'];
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
+				$effectAI_ASR['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
 			}
 			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
 				if (!empty($captionRow['style']['color'])) { // 颜色
@@ -200,16 +200,20 @@ class AliEditing extends ServiceBase
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
-			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['EffectColorStyle'])) { // 花字
-				$subtitleTrackClip['EffectColorStyle'] = $captionRow['style']['EffectColorStyle'];
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
+				$subtitleTrackClip['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
 			} elseif (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
 				if (!empty($captionRow['style']['color'])) { // 颜色
 					$subtitleTrackClip['FontColor'] = $captionRow['style']['color'];
 				}
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
-					$subtitleTrackClip['BackColour'] = $captionRow['style']['background'];
-					$subtitleTrackClip['BoderStyle'] = 3; // 不透明背景必须设置 BoderStyle = 3
-					
+					$subtitleTrackClip['SubtitleEffects'] = array(
+						array(
+							'Type' => 'Box',
+							'Color' => $captionRow['style']['background'],
+							'Opacity' => 0.9,
+						),
+					);
 				}
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
 					if (!empty($captionRow['style']['border-size'])) { // 边框大小
@@ -751,9 +755,9 @@ class AliEditing extends ServiceBase
 	 */
 	public function submitMediaProducingJob($chipParam)
 	{
-		$timeline = self::getTimeline($chipParam);
-		
-// print_r($timeline);
+		$timeline = self::getTimeline($chipParam);	
+ //print_r($timeline);
+ //exit;
 		$orientation = 'Horizontal';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
