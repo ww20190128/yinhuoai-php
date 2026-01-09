@@ -216,7 +216,7 @@ class Folder extends ServiceBase
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     		$mediaInfo = array();
-    		if ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO) { // 注册媒体资源
+    		if ($folderEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO) { // 注册媒体资源
     			$mediaInfo = $this->getMediaInfoByUrl($url);
     		}
     		$mediaEtt = $mediaDao->getNewEntity();
