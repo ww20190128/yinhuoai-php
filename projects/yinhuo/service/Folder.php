@@ -76,25 +76,7 @@ class Folder extends ServiceBase
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     	if ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO && empty($mediaInfo['coverURL'])) { // 注册媒体资源
-    		$registerMediaId = $aliEditingSv->registerMediaInfo($mediaEtt->url);
-    		if (!empty($registerMediaId)) { // 获取资源信息
-    			$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
-    		} else {
-    			$mediaInfo = $aliEditingSv->getMediaInfo('', $mediaEtt->url);
-    		}
-    		if (!empty($mediaInfo['coverURL'])) { // 上传封面
-    			$coverContent = @file_get_contents($mediaInfo['coverURL']);
-    			if (!empty($coverContent) && strlen($coverContent) > 0) {
-    				$fileName = md5($mediaInfo['coverURL']);
-    				$profileKey = "resources/cover/{$fileName}.jpg"; // 上传的目录
-    				$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
-    				$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $coverContent);
-    				if (!empty($ossResult)) {
-    					$coverURL = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-    					$mediaInfo['coverURL'] = $coverURL;
-    				}
-    			}
-    		}
+    		$mediaInfo = $this->getMediaInfoByUrl($mediaEtt->url);
     		if (!empty($mediaInfo)) {
     			$mediaEtt->set('mediaInfo', json_encode($mediaInfo, JSON_UNESCAPED_UNICODE));
     			$mediaDao->update($mediaEtt);
@@ -103,6 +85,38 @@ class Folder extends ServiceBase
     	return $mediaInfo;
     }
 
+    /**
+     * 获取媒体信息
+     *
+     * @return array
+     */
+    private function getMediaInfoByUrl($url)
+    {
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$registerMediaId = $aliEditingSv->registerMediaInfo($url);
+    	if (!empty($registerMediaId)) { // 获取资源信息
+    		$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
+    	} else {
+    		$mediaInfo = $aliEditingSv->getMediaInfo('', $url);
+    	}
+    	if (!empty($mediaInfo['coverURL'])) { // 上传封面
+    		$coverContent = @file_get_contents($mediaInfo['coverURL']);
+    		if (!empty($coverContent) && strlen($coverContent) > 0) {
+    			$fileName = md5($mediaInfo['coverURL']);
+    			$profileKey = "resources/cover/{$fileName}.jpg"; // 上传的目录
+    			$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    			$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $coverContent);
+    			if (!empty($ossResult)) {
+    				$coverURL = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    				$mediaInfo['coverURL'] = $coverURL;
+    			}
+    		}
+    	}
+    	return $mediaInfo;
+    }
+    
     /**
      * 修改文件夹名称
      *
@@ -201,19 +215,20 @@ class Folder extends ServiceBase
     			continue;
     		}
     		$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    		$mediaInfo = array();
+    		if ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO) { // 注册媒体资源
+    			$mediaInfo = $this->getMediaInfoByUrl($url);
+    		}
     		$mediaEtt = $mediaDao->getNewEntity();
     		$mediaEtt->name = $uploadFile['name'];
     		$mediaEtt->type = $folderEtt->type;
     		$mediaEtt->size = $fileSize;
     		$mediaEtt->url = $url;
-    		$mediaEtt->mediaInfo = '';
+    		$mediaEtt->mediaInfo = empty($mediaInfo) ? '' : json_encode($mediaInfo, JSON_UNESCAPED_UNICODE);
     		$mediaEtt->createTime = $now;
     		$mediaEtt->updateTime = $now;
     		$mediaId = $mediaDao->create($mediaEtt);
-    		$mediaEtt = $mediaDao->readByPrimary($mediaId);
-    		$this->getMediaInfo($mediaEtt);
-    		
-    		$folderMediaIds[] = $mediaId;
+    		$folderMediaIds[] = intval($mediaId);
     	}
     	$folderEtt->set('mediaIds', implode(',', $folderMediaIds));
     	$folderEtt->set('updateTime', $now);
