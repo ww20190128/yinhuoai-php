@@ -1061,7 +1061,8 @@ class Editing extends ServiceBase
     				continue;
     			}
     			if (empty($editingCaptionEtt->text)) {
-    				throw new $this->exception("请编辑文案的内容");
+    				unset($editingCaptionEttList[$captionId]);
+    				continue;
     			}
     		}
     		$editingTitleEtt->set('captionIds', empty($editingCaptionEttList) ? '' : implode(',', array_keys($editingCaptionEttList)));
