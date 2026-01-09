@@ -753,7 +753,7 @@ class AliEditing extends ServiceBase
 	{
 		$timeline = self::getTimeline($chipParam);
 		
-print_r($timeline);
+// print_r($timeline);
 		$orientation = 'Horizontal';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
