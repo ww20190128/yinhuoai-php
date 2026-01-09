@@ -797,6 +797,9 @@ class Editing extends ServiceBase
     				unset($editingCaptionEttList[$captionId]);
     				continue;
     			}
+    			if (empty($editingCaptionEtt->text)) {
+    				throw new $this->exception('请编辑配音的内容');
+    			}
     		}
     		if (empty($editingCaptionEttList)) {
     			throw new $this->exception('请选择配音');
@@ -905,9 +908,24 @@ class Editing extends ServiceBase
     		$editingEtt->set('dubType', $info['dubType']);
     	}
     	$dubCaptionIds = empty($editingEtt->dubCaptionIds) ? array() : array_map('intval', explode(',', $editingEtt->dubCaptionIds));
-
+    	$editingCaptionDao = \dao\EditingCaption::singleton();
     	if (isset($info['addDubCaptionIds'])) { // 添加字幕
-    		$dubCaptionIds = array_merge($dubCaptionIds, $info['addDubCaptionIds']);
+    		$editingCaptionEttList = $editingCaptionDao->readListByPrimary($info['addDubCaptionIds']);
+    		$editingCaptionEttList = $editingCaptionDao->refactorListByKey($editingCaptionEttList);
+    		if (!empty($editingCaptionEttList)) foreach ($editingCaptionEttList as $captionId => $editingCaptionEtt) {
+    			if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
+    				unset($editingCaptionEttList[$captionId]);
+    				continue;
+    			}
+    			if (empty($editingCaptionEtt->text)) {
+    				throw new $this->exception('请编辑字幕的内容');
+    			}
+    		}
+    		if (empty($editingCaptionEttList)) {
+    			throw new $this->exception('请选择添加的字幕');
+    		}
+
+    		$dubCaptionIds = array_merge($dubCaptionIds, array_keys($editingCaptionEttList));
     		$dubCaptionIds = array_unique($dubCaptionIds);
     		$editingEtt->set('dubCaptionIds', implode(',', $dubCaptionIds));
     	}
@@ -1041,6 +1059,9 @@ class Editing extends ServiceBase
     			if ($editingCaptionEtt->status == \constant\Common::DATA_DELETE) {
     				unset($editingCaptionEttList[$captionId]);
     				continue;
+    			}
+    			if (empty($editingCaptionEtt->text)) {
+    				throw new $this->exception("请编辑文案的内容");
     			}
     		}
     		$editingTitleEtt->set('captionIds', empty($editingCaptionEttList) ? '' : implode(',', array_keys($editingCaptionEttList)));
