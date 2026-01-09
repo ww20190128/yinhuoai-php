@@ -295,12 +295,14 @@ EOT;
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true);
 	
 		
-		$url = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/20_1767935929.mp4';
-		$folderSv = \service\Folder::singleton();
-		$a = $folderSv->getMediaInfoByUrl($url);
 		
 		
-		print_r($a);exit;
+// 		$url = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/20_1767935929.mp4';
+// 		$folderSv = \service\Folder::singleton();
+// 		$a = $folderSv->getMediaInfoByUrl($url);
+		
+		
+// 		print_r($a);exit;
 		
 	//print_r($chipParam);
 		$aliEditingSv = \service\AliEditing::singleton();
