@@ -758,10 +758,10 @@ class AliEditing extends ServiceBase
 		$timeline = self::getTimeline($chipParam);	
 		
 		
-		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
-第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。
-因此，选择D选项。';
-		$timeline['SubtitleTracks']['0']['SubtitleTrackClips']['0']['Content'] = '潘多拉行测-题目ID：46811546';
+// 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
+// 第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。
+// 因此，选择D选项。';
+// 		$timeline['SubtitleTracks']['0']['SubtitleTrackClips']['0']['Content'] = '潘多拉行测-题目ID：46811546';
 		
 
 		$orientation = 'Horizontal';

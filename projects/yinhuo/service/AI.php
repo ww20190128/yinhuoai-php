@@ -54,7 +54,21 @@ class AI extends ServiceBase
      */
     public function test()
     {
-    	// 
+    	 $text = "这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。";
+    $options = [
+        "voice_type" => "zh_female_shuangkuaisisi_moon_bigtts", // 青年男声
+        "audio_config" => [
+            "speed" => 1.5,                    // 1.5倍速（V3支持0.3~5.0）
+            "emotion" => "happy",               // 欢快情感
+            "sample_rate" => 48000              // 更高采样率
+        ]
+    ];
+    
+    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
+    	$a = $volcTTSSv->synthesize($text, $options);
+    	
+    	
+    	print_r($a);exit;
         return ;
     }
 
