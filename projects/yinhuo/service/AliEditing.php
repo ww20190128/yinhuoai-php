@@ -95,10 +95,6 @@ class AliEditing extends ServiceBase
 				'Underline' => false,
 			),
 		);
-		
-		if (!empty($lensRow)) {
-			$audioTrackClipAI_TTS['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
-		}
 		$effectVolume = array(); // 音量效果
 		if (!empty($editingInfo['volume'])) {
 			if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
@@ -505,6 +501,8 @@ class AliEditing extends ServiceBase
 			}
 			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 				$audioTrackClip['Main'] = true;
+			} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+				
 			}
 			$audioTrackClips[] = $audioTrackClip;	
 		}
@@ -513,6 +511,11 @@ class AliEditing extends ServiceBase
 			$audioTrack = array(
 				'AudioTrackClips' => $audioTrackClips,
 			);
+			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
+				$audioTrack['TrackMode'] = 'TimeBase'; // 设为时间基准轨道
+			} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+				
+			}
 		}
 		return $audioTrack;
 	}
@@ -531,6 +534,12 @@ class AliEditing extends ServiceBase
 				$audioTrackClip = self::captionToAudioTrackClip($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 					$audioTrackClip['MainTrack'] = true;
+					$audioTrackClip['ClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+				} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+					if ($lensKey != 0) { // 第一个音频不需要对齐
+						$audioTrackClip['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+						$audioTrackClip['ClipMode'] = 'Auto';
+					}
 				}
 				$lensAudioTrackClips[] = $audioTrackClip;
 			} elseif (!empty($lensRow['dubMediaInfo'])) { // 配音文件
@@ -546,7 +555,6 @@ class AliEditing extends ServiceBase
 				$dubMediaInfo = $lensRow['dubMediaInfo'];
 				$audioTrackClip = array(
 					'MediaURL' => $dubMediaInfo['url'], // 播放链接，视频/图片
-					'ReferenceClipId' => 'lens_' . $lensRow['id'], // 镜头标记，用于对齐
 				);
 				
 				if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速
@@ -565,6 +573,12 @@ class AliEditing extends ServiceBase
 				}
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 					$audioTrackClip['MainTrack'] = true;
+					$audioTrackClip['ClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+				} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+					if ($lensKey != 0) { // 第一个音频不需要对齐
+						$audioTrackClip['ReferenceClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
+						$audioTrackClip['ClipMode'] = 'Auto';
+					}
 				}
 				$lensAudioTrackClips[] = $audioTrackClip;
 			}
@@ -574,6 +588,11 @@ class AliEditing extends ServiceBase
 			$audioTrack = array(
 				'AudioTrackClips' => $lensAudioTrackClips,
 			);
+			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
+				$audioTrack['TrackMode'] = 'TimeBase'; // 设为时间基准轨道
+			} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+				
+			}
 		}
 		return $audioTrack;
 	}
@@ -593,6 +612,7 @@ class AliEditing extends ServiceBase
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
 					'SubType' => $lensRow['transitionSubType'],
+					'Duration' => 0.5,
 				);
 			}
 			if (empty($lensRow['originalSound'])) { // #关闭原声
@@ -605,12 +625,8 @@ class AliEditing extends ServiceBase
 				$mediaInfo = $lensRow['mediaInfo'];
 				$videoTrackClip = array(
 					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
-					'ClipId' => 'lens_' . $lensRow['id'],
 					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
-				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-					$videoTrackClip['MainTrack'] = true;
-				}
 				if (!empty($mediaInfo['duration'])) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['Duration'] = $mediaInfo['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
@@ -634,6 +650,13 @@ class AliEditing extends ServiceBase
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
 				}
+				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
+					$videoTrackClip['ReferenceClipId'] = 'lens_' . $lensRow['id'];
+					$videoTrackClip['ClipMode'] = 'Auto';
+				} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+					$videoTrackClip['ClipId'] = 'lens_' . $lensRow['id'];
+					$videoTrackClip['MainTrack'] = true;
+				}
 				$lensVideoTrackClips[] = $videoTrackClip;
 			}
 		}
@@ -642,6 +665,11 @@ class AliEditing extends ServiceBase
 			$videoTrack = array(
 				'VideoTrackClips' => $lensVideoTrackClips,
 			);
+			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
+				$videoTrack['TrackMode'] = 'TimeFollowAudio';
+			}else if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+				$videoTrack['TrackMode'] = 'TimeBase';
+			}
 		}
 		return $videoTrack;
 	}
@@ -757,7 +785,10 @@ class AliEditing extends ServiceBase
 	{
 		$timeline = self::getTimeline($chipParam);	
 		
-		
+//print_r($timeline);
+
+//echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
+	
 // 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
 // 第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。
 // 因此，选择D选项。';
