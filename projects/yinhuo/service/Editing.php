@@ -391,6 +391,7 @@ class Editing extends ServiceBase
     	$newEditingEtt->id = null;
     	$newEditingEtt->preview = '';
     	$newEditingEtt->dubCaptionIds = '';
+    
     	$newEditingEtt->createTime = $now;
     	$newEditingEtt->updateTime = $now;
     	$newEditingId = $editingDao->create($newEditingEtt); // 新的剪辑Id
@@ -414,8 +415,8 @@ class Editing extends ServiceBase
     		'editingId' => $editingEtt->id,
     	));
     	foreach ($editingTitleEttList as $editingTitleEtt) {
-    		if (!empty($editingTitleEtt->dubCaptionIds)) {
-    			$allCaptionIds = array_merge($allCaptionIds, explode(',', $editingTitleEtt->dubCaptionIds));
+    		if (!empty($editingTitleEtt->captionIds)) {
+    			$allCaptionIds = array_merge($allCaptionIds, explode(',', $editingTitleEtt->captionIds));
     		}
     	}
     	$allCaptionIds = array_unique($allCaptionIds);
