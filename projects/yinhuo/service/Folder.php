@@ -419,6 +419,7 @@ class Folder extends ServiceBase
     			'type'			=> $subFolderEtt->type,
     			'mediaNum'		=> count($subMediaIds),
     			'createTime'	=> intval($subFolderEtt->createTime),
+    			'createTimeStr'	=> date('Y-m-d H:i:s', $subFolderEtt->createTime),
     		);
     	}
     	$commonSv = \service\Common::singleton();
