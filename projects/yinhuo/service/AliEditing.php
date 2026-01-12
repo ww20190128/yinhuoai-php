@@ -311,6 +311,49 @@ class AliEditing extends ServiceBase
 		if (!empty($effectTrack)) {
 			$EffectTrack[] = $effectTrack;
 		}
+		
+		// 处理无效的引用
+		if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
+			$clipMap = array();
+			if (!empty($AudioTracks)) foreach ($AudioTracks as $AudioTrack) {
+				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $AudioTrackClip) {
+					if (!empty($AudioTrackClip['ClipId'])) {
+						$clipMap[$AudioTrackClip['ClipId']] = $AudioTrackClip['ClipId'];
+					}
+				}
+			}
+			if (!empty($VideoTracks)) foreach ($VideoTracks as $videoTrackKey => $VideoTrack) {
+				if (!empty($VideoTrack['VideoTrackClips'])) foreach ($VideoTrack['VideoTrackClips'] as $clipKey => $VideoTrackClip) {
+					if (!empty($VideoTrackClip['ReferenceClipId'])) {
+						if (empty($clipMap[$VideoTrackClip['ReferenceClipId']])) {
+							unset($VideoTrackClip['ReferenceClipId']);
+						}
+					}
+					$VideoTrack['VideoTrackClips'][$clipKey] = $VideoTrackClip;
+				}
+				$VideoTracks[$videoTrackKey] = $VideoTrack;
+			}
+		} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
+			$clipMap = array();
+			if (!empty($VideoTracks)) foreach ($VideoTracks as $VideoTrack) {
+				if (!empty($VideoTrack['VideoTrackClips'])) foreach ($VideoTrack['VideoTrackClips'] as $VideoTrackClip) {
+					if (!empty($VideoTrackClip['ClipId'])) {
+						$clipMap[$VideoTrackClip['ClipId']] = $VideoTrackClip['ClipId'];
+					}
+				}
+			}
+			if (!empty($AudioTracks)) foreach ($AudioTracks as $audioTrackKey => $AudioTrack) {
+				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
+					if (!empty($AudioTrackClip['ReferenceClipId'])) {
+						if (empty($clipMap[$AudioTrackClip['ReferenceClipId']])) {
+							unset($AudioTrackClip['ReferenceClipId']);
+						}
+					}
+					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
+				}
+				$AudioTracks[$audioTrackKey] = $AudioTrack;
+			}
+		}
 		$result = array();
 		if (!empty($VideoTracks)) {
 			$result['VideoTracks'] = $VideoTracks;
@@ -785,7 +828,7 @@ class AliEditing extends ServiceBase
 	{
 		$timeline = self::getTimeline($chipParam);	
 		
-//print_r($timeline);
+//print_r($timeline);exit;
 //echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
 // 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
 // 第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。
