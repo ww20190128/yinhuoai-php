@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "80c55461516944e06d5673f4d4648ed6",
+    "content-hash": "cbfac721473dbfef23c67d2747035b1a",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -2463,6 +2463,54 @@
                 "source": "https://github.com/volcengine/volc-sdk-php/tree/v1.0.163"
             },
             "time": "2025-11-20T11:51:51+00:00"
+        },
+        {
+            "name": "volcengine/volcengine-php-sdk",
+            "version": "v1.0.89",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/volcengine/volcengine-php-sdk.git",
+                "reference": "bc00a5fcd4a063ca43179bb07d004f9d0598d5a4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/volcengine/volcengine-php-sdk/zipball/bc00a5fcd4a063ca43179bb07d004f9d0598d5a4",
+                "reference": "bc00a5fcd4a063ca43179bb07d004f9d0598d5a4",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^6.2 || ^7.0",
+                "php": ">=5.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Volcengine\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "bytedance"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/volcengine/volcengine-php-sdk/issues",
+                "source": "https://github.com/volcengine/volcengine-php-sdk/tree/v1.0.89"
+            },
+            "time": "2025-12-05T04:00:37+00:00"
         },
         {
             "name": "wechatpay/wechatpay",

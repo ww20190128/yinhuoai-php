@@ -2538,6 +2538,57 @@
             "install-path": "../volcengine/volc-sdk-php"
         },
         {
+            "name": "volcengine/volcengine-php-sdk",
+            "version": "v1.0.89",
+            "version_normalized": "1.0.89.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/volcengine/volcengine-php-sdk.git",
+                "reference": "bc00a5fcd4a063ca43179bb07d004f9d0598d5a4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/volcengine/volcengine-php-sdk/zipball/bc00a5fcd4a063ca43179bb07d004f9d0598d5a4",
+                "reference": "bc00a5fcd4a063ca43179bb07d004f9d0598d5a4",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^6.2 || ^7.0",
+                "php": ">=5.5"
+            },
+            "time": "2025-12-05T04:00:37+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Volcengine\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "bytedance"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/volcengine/volcengine-php-sdk/issues",
+                "source": "https://github.com/volcengine/volcengine-php-sdk/tree/v1.0.89"
+            },
+            "install-path": "../volcengine/volcengine-php-sdk"
+        },
+        {
             "name": "wechatpay/wechatpay",
             "version": "1.4.12",
             "version_normalized": "1.4.12.0",

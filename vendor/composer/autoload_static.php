@@ -27,6 +27,7 @@ class ComposerStaticInitb05a36ed6c301c1cb5133a2e47abd828
         ),
         'V' => 
         array (
+            'Volcengine\\' => 11,
             'Volc\\' => 5,
         ),
         'S' => 
@@ -96,6 +97,10 @@ class ComposerStaticInitb05a36ed6c301c1cb5133a2e47abd828
         'WeChatPay\\' => 
         array (
             0 => __DIR__ . '/..' . '/wechatpay/wechatpay/src',
+        ),
+        'Volcengine\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/volcengine/volcengine-php-sdk/src',
         ),
         'Volc\\' => 
         array (

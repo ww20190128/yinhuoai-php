@@ -9,6 +9,7 @@ return array(
     'chillerlan\\Settings\\' => array($vendorDir . '/chillerlan/php-settings-container/src'),
     'chillerlan\\QRCode\\' => array($vendorDir . '/chillerlan/php-qrcode/src'),
     'WeChatPay\\' => array($vendorDir . '/wechatpay/wechatpay/src'),
+    'Volcengine\\' => array($vendorDir . '/volcengine/volcengine-php-sdk/src'),
     'Volc\\' => array($vendorDir . '/volcengine/volc-sdk-php/src'),
     'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
