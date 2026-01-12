@@ -424,7 +424,7 @@ class Folder extends ServiceBase
     	}
     	$commonSv = \service\Common::singleton();
     	uasort($subList, array($commonSv, 'sortByCreateTime'));
-    	$subList = array_reverse($subList);
+    	//$subList = array_reverse($subList);
     	uasort($mediaModels, array($commonSv, 'sortByCreateTime'));
     	
     	// 符合条件的总条数
