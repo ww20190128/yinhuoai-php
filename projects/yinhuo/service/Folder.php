@@ -423,6 +423,7 @@ class Folder extends ServiceBase
     	}
     	$commonSv = \service\Common::singleton();
     	uasort($subList, array($commonSv, 'sortByCreateTime'));
+    	$subList = array_reverse($subList);
     	uasort($mediaModels, array($commonSv, 'sortByCreateTime'));
     	
     	// 符合条件的总条数
@@ -434,8 +435,8 @@ class Folder extends ServiceBase
     		'id' 		=> intval($folderEtt->id),
     		'name'		=> $folderEtt->name,
     		'type'		=> $folderEtt->type,
-    		'subList'	=> $subList,
-    		'mediaList'	=> $mediaModels,
+    		'subList'	=> array_values($subList),
+    		'mediaList'	=> array_values($mediaModels),
     		'mediaNum'  => $mediaTotalNum,
     	);
     }

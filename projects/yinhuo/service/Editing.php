@@ -462,7 +462,7 @@ class Editing extends ServiceBase
     	}
     	foreach ($editingTitleEttList as $editingTitleEtt) {
     		$newCaptionIds = array();
-    		$captionIds = empty($editingLensEtt->captionIds) ? array() : explode(',', $editingLensEtt->captionIds);
+    		$captionIds = empty($editingTitleEtt->captionIds) ? array() : explode(',', $editingTitleEtt->captionIds);
     		foreach ($captionIds as $captionId) {
     			if (empty($captionMap[$captionId])) {
     				continue;
