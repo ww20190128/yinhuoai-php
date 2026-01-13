@@ -60,20 +60,14 @@ class AI extends ServiceBase
      */
     public function test()
     {
-
-    	$text = "这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。";
-    	$options = [
-        	
-        	'compression_rate' => 1, 
-        	'encoding' => 'mp3',          // 音频格式
-        	'voice_type' => 'BV700_streaming',
-    	];
-    
+    	$text = "这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。";
+    	$speaker = 'zh_female_shuangkuaisisi_moon_bigtts';
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
-    	$a = $volcTTSSv->run($text, $options);
+    	$ttsResult = $volcTTSSv->runByV1($text, $speaker);
     	
+    	_e();exit;
     	
-    	print_r($a);exit;
+    	print_r($ttsResult);exit;
         return ;
     }
 
