@@ -118,6 +118,20 @@ class App extends ServiceBase
     }
     
     /**
+     * 同步配音数据
+     *
+     * @return array
+     */
+    public function sysnActor($authorization)
+    {
+    	$url = "https://api.pyp.canzan.com/company/product/preset/voices";
+    	$response = httpGetContents($url, null, 5, ["authorization: {$authorization}"]);
+    	$response = empty($response) ? array() : json_decode($response, true);
+    	$response = empty($response) ? array() : $response['data'];
+    	var_export($response);exit;
+    }
+    
+    /**
      * 获取热门音乐分类
      *
      * @return array
@@ -143,6 +157,25 @@ class App extends ServiceBase
      */
     public function getActorClassifys()
     {
+    	$actorArr = cfg('actorDoubao');
+    	$classifyList = array();
+    	foreach ($actorArr as $key => $actorList) {
+    		$list = array();
+    		foreach ($actorList as $rowArr) {
+    			$list[] = array(
+    				'name' 	=> $rowArr['name'],
+    				'id' 	=> $rowArr['tag'],
+    				'url'	=> $rowArr['link'],
+    			);
+    		}
+    		$classifyList[md5($key)] = array(
+    			'id' 	=> md5($key),
+    			'name'	=> $key,
+    			'list'	=> array_values($list),
+    		);
+    	}
+    	return $classifyList;
+    	
     	$actorArr = cfg('actorAil');
     	$map = array();
     	if (!empty($actorArr)) foreach ($actorArr as $key => $value) {

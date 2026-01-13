@@ -53,6 +53,20 @@ EOT;
 	}
 	
 	/**
+	 * 同步配音数据
+	 *
+	 * @return array
+	 */
+	public function sysnActor()
+	{
+		$authorization = <<<EOT
+Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYXBpLnB5cC5jYW56YW4uY29tL2NvbXBhbnkvbG9naW4iLCJpYXQiOjE3NjcwMDY5OTUsImV4cCI6MTc2OTU5ODk5NSwibmJmIjoxNzY3MDA2OTk1LCJqdGkiOiIwTFJmbzFHOUVyWFBXVXNQIiwic3ViIjoiNjk2IiwicHJ2IjoiZGYxMGExN2YwNWM2ZjEwNDAxYjdmZGIyNTFkZGY1NzcwZjYyNTZhYSJ9.rEGtMR6gTENuNlxz3vcDV7qskFFQ-5kLzMRBau9QABU
+EOT;
+		$appSv = \service\App::singleton();
+		$appSv->sysnActor($authorization);
+	}
+	
+	/**
 	 * 获取热门音乐分类列表
 	 *
 	 * @return array
