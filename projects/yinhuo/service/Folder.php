@@ -237,6 +237,27 @@ class Folder extends ServiceBase
     }
     
     /**
+     * 创建音频
+     *
+     * @return array
+     */
+    public function createAudio($content, $duration, $fileName)
+    {
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$extension = 'mp3';
+    	$profileKey = "resources/dubAudio/{$fileName}.{$extension}"; // 上传的目录
+    	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		return false;
+    	}
+    	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    	return $url;
+    }
+    
+    /**
      * 删除文件夹的素材
      *
      * @return array

@@ -290,10 +290,59 @@ class Project extends CtrlBase
 	{
 		$params = $this->params;
 		$chipParam = <<<EOT
-{"id":42,"name":"20260110-剪辑","topic":"脸部清洁,补水美白","title":"秋冬深层润养！轩和堂肌肤超水润","ratio":"9:16","durationType":2,"fps":25,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1768107643,"createTime":1768107599,"lensList":[{"id":132,"name":"片头","index":-1,"type":1,"createTime":1768107599,"updateTime":1768107599,"mediaIds":[89,90],"originalSound":1,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[],"dubMediaIds":[],"mediaInfo":{"id":90,"name":"tmp_181250809459bcd0805984701b0a126d.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/3\/303f59d66c12598e75b7af75efe9f7c0.mp4","updateTime":1768104037,"createTime":1768104037,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/58f19ffaf1ed7db49e36285d73317eb5.jpg","duration":5,"size":267142},"transitionSubType":"random"},{"id":133,"name":"片中1","index":1,"type":2,"createTime":1768107599,"updateTime":1768107599,"mediaIds":[86,87,88],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[599],"dubMediaIds":[],"mediaInfo":{"id":87,"name":"tmp_fadd6cf544f1eee79b616f9f6e6fbe56.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/6\/2d47dcf64d3665a434d17330fb8291a8.mp4","updateTime":1768104032,"createTime":1768104032,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/af7445ad60a3053b8ab813b79a1d9550.jpg","duration":4,"size":340878},"dubCaptionInfo":{"id":599,"editingId":42,"text":"29.9体验70分钟，深层清洁补水","font":{"text-align":"center","position":80,"font-size":37,"font-family":"FZHei-B01S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768107599,"updateTime":1768107599},"transitionSubType":"random"},{"id":134,"name":"片尾","index":100,"type":3,"createTime":1768107599,"updateTime":1768107599,"mediaIds":[82,83,84,85],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[598],"dubMediaIds":[],"mediaInfo":{"id":85,"name":"tmp_b4f298c249d3ad7e694d5807056651b5.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/b32a874fb5c68b900f57036dc8c251f7.mp4","updateTime":1768104026,"createTime":1768104026,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7197b126ba458f12d7eb117183829d00.jpg","duration":18,"size":1551763},"dubCaptionInfo":{"id":598,"editingId":42,"text":"舒服到灵魂出窍的放松 找回自己的完美肌肤状态","font":{"text-align":"center","position":80,"font-size":36,"font-family":"FZHei-B01S"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":""},"createTime":1768107599,"updateTime":1768107599},"transitionSubType":"random"}],"transitionSubType":"random","previewMediaId":90,"titleInfo":{"id":232,"updateTime":1768107630,"createTime":1768107630,"start":0,"end":5,"captionIds":[601],"title":"懒人必囤！轩和堂毛孔清洁超绝","captionList":[{"id":601,"editingId":42,"text":"懒人必囤！轩和堂毛孔清洁超绝","font":{"text-align":"center","position":24,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768107630,"updateTime":1768107630}]},"musicInfo":{"id":336,"conId":910,"type":1,"url":"https:\/\/pyp-xmt.oss-cn-beijing.aliyuncs.com\/hot_music\/1\/765731148165310.mp3","name":"Fantasy","duration":60,"updateTime":1768107599,"createTime":1768107599},"actorInfo":{"name":"知妙","id":"zhimiao_emo","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/audio_ai\/zhimiao_emo.wav"}}
+{"id":51,"name":"20260107-剪辑","topic":"xxxc,在学校吃饭,休息休息地方,吃吃吃吃吃吃吃","title":"模拟面试","ratio":"9:16","durationType":2,"fps":25,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":2,"updateTime":1768304464,"createTime":1768193462,"lensList":[{"id":159,"name":"片头","index":-1,"type":1,"createTime":1768193462,"updateTime":1768193462,"mediaIds":[92],"originalSound":1,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[689],"dubMediaIds":[],"mediaInfo":{"id":92,"name":"入场.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/e8e915335017b622f9fb3ff0f6e5c218.mp4","updateTime":1768139695,"createTime":1768139695,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/3ac933175c6931d3a408f314c20df18f.jpg","duration":6,"size":8901923},"dubCaptionInfo":{"id":689,"editingId":51,"text":"入场","font":{"text-align":"center","position":88,"font-size":30,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768193462,"updateTime":1768193462},"transitionSubType":"random"},{"id":160,"name":"片中1","index":1,"type":2,"createTime":1768193462,"updateTime":1768193462,"mediaIds":[97],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[690],"dubMediaIds":[],"mediaInfo":{"id":97,"name":"答题","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/d39bbfef96dbd7a97e0f33959d22db01.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/058312b090943122736783722e66af2a.jpg","duration":100,"size":49026064},"dubCaptionInfo":{"id":690,"editingId":51,"text":"自我介绍","font":{"text-align":"center","position":86,"font-size":24,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768193462,"updateTime":1768193462},"transitionSubType":"random"},{"id":162,"name":"片中2","index":2,"type":2,"createTime":1768193462,"updateTime":1768193462,"mediaIds":[97],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[691],"dubMediaIds":[],"mediaInfo":{"id":97,"name":"答题","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/d39bbfef96dbd7a97e0f33959d22db01.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/058312b090943122736783722e66af2a.jpg","duration":100,"size":49026064},"dubCaptionInfo":{"id":691,"editingId":51,"text":"读题","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768193462,"updateTime":1768193462},"transitionSubType":"random"},{"id":163,"name":"片中3","index":3,"type":2,"createTime":1768193462,"updateTime":1768193462,"mediaIds":[95],"originalSound":1,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[688],"dubMediaIds":[],"mediaInfo":{"id":95,"name":"自我介绍.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/6785bec3c9b1af42a5d5909030c8e939.mp4","updateTime":1768139772,"createTime":1768139772,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7bf2e2ddbb7fe740a46772fedafdc303.jpg","duration":12,"size":15491008},"dubCaptionInfo":{"id":688,"editingId":51,"text":"答题","font":{"text-align":"center","position":88,"font-size":25,"font-family":"FZFangSong-Z02S"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":""},"createTime":1768193462,"updateTime":1768193462},"transitionSubType":"random"},{"id":161,"name":"片尾","index":100,"type":3,"createTime":1768193462,"updateTime":1768193462,"mediaIds":[97],"originalSound":1,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[692],"dubMediaIds":[],"mediaInfo":{"id":97,"name":"答题","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/d39bbfef96dbd7a97e0f33959d22db01.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/058312b090943122736783722e66af2a.jpg","duration":100,"size":49026064},"dubCaptionInfo":{"id":692,"editingId":51,"text":"退场","font":{"text-align":"center","position":84,"font-size":26,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768193462,"updateTime":1768193462},"transitionSubType":"random"}],"transitionSubType":"random","previewMediaId":92,"musicInfo":{"id":416,"conId":916,"type":1,"url":"https:\/\/pyp-xmt.oss-cn-beijing.aliyuncs.com\/hot_music\/1\/765731198455882.mp3","name":"青丝（创业进行曲）","duration":68,"updateTime":1768193462,"createTime":1768193462},"actorInfo":{"name":"妹坨洁儿","id":"zh_female_meituojieer_moon_bigtts","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/portal\/bigtts\/妹坨洁儿.mp3"}}
 EOT;
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true);
+		$volcTTSSv = \service\reuse\VolcTTS::singleton();
+		
+		$folderSv = \service\Folder::singleton();
+		$dubFileDao = \dao\DubFile::singleton();
+		if (!empty($chipParam['actorInfo'])) { // 有配音
+			$actorInfo = $chipParam['actorInfo'];
+			$lensList = $chipParam['lensList'];
 
+			foreach ($lensList as $key => $lensRow) {
+				$dubCaptionInfo = $lensRow['dubCaptionInfo'];
+		
+				
+				
+				$audioParams = array();
+
+    			$dubId = md5($actorInfo['id'] . $dubCaptionInfo['text']);
+    			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $audioParams);
+    			$dubFileUrl = $folderSv->createAudio($ttsResult['content'], $ttsResult['duration'], $dubId);
+    			
+    			
+    			print_r($ttsResult);exit;
+    			
+    			
+    			
+    			
+    			
+    			
+    			
+    			
+    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    			if (empty($dubFileEtt)) {
+    				$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $audioParams);
+    				$dubFileUrl = $folderSv->createAudio($ttsResult['content'], $ttsResult['duration'], $dubId);
+    				$now = $this->frame->now;
+    				$dubFileEtt = $dubFileDao->getNewEntity();
+    				$dubFileEtt->id = $dubId;
+    				$dubFileEtt->duration = ceil($ttsResult['duration']);
+    				$dubFileEtt->content = base64_encode($ttsResult['content']);
+    				$dubFileEtt->url = $dubFileUrl;
+    				$dubFileEtt->createTime = $now;
+    				$dubFileEtt->updateTime = $now;
+    				$dubFileDao->create($dubFileEtt);
+    			} else {
+    				$dubFileUrl = $dubFileEtt->url;
+    			}
+				print_r($dubFileUrl);exit;
+			}
+			
+		}
+		print_r($chipParam);exit;
 // 		$chipParam['lensList']['0']['mediaInfo']['url'] = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/video/5/e8e915335017b622f9fb3ff0f6e5c218.mp4';
 // 		$chipParam['lensList']['1']['mediaInfo']['url'] = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/video/5/6785bec3c9b1af42a5d5909030c8e939.mp4';
 // 		$chipParam['lensList']['2']['mediaInfo']['url'] = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/video/4/578cc2985fea45b8f87c23ee84ab191c.mp4';

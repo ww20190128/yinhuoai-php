@@ -170,7 +170,7 @@ print_r($response);exit;
      *
      * @return string
      */
-    public function runByV3($text, $speaker, $params = array())
+    public function runByV3($text, $speaker, $resourceId = 'seed-tts-1.0')
     {
     	$additions = array(
     		'silence_duration' => 0, // 设置该参数可在句尾增加静音时长，范围0~30000ms。
@@ -188,22 +188,23 @@ print_r($response);exit;
     		'sample_rate'	=> 24000,
     		'enable_timestamp' => true,
     	);
-    	if (!empty($params['speechRate'])) { // 语速，取值范围[-50,100]，100代表2.0倍速，-50代表0.5倍数
-    		$audioParams['speech_rate'] = $params['speechRate'];
-    	}
-    	if (!empty($params['loudnessRate'])) { // 音量，取值范围[-50,100]，100代表2.0倍音量，-50代表0.5倍音量（mix音色暂不支持）
-    		$audioParams['loudness_rate'] = $params['loudnessRate'];
-    	}
+//     	if (!empty($params['speechRate'])) { // 语速，取值范围[-50,100]，100代表2.0倍速，-50代表0.5倍数
+//     		$audioParams['speech_rate'] = $params['speechRate'];
+//     	}
+//     	if (!empty($params['loudnessRate'])) { // 音量，取值范围[-50,100]，100代表2.0倍音量，-50代表0.5倍音量（mix音色暂不支持）
+//     		$audioParams['loudness_rate'] = $params['loudnessRate'];
+//     	}
     	$postParams = array(
     		'text' => $text,
     		'speaker' => $speaker,
     		'additions' => json_encode($additions),
     		'audio_params' => $audioParams,
     	);
+    	
     	$postParams = array(
     		'req_params' => $postParams,
     	);
-    	$resourceId = 'volc.service_type.10029';
+
     	$appId = 'd294de9a-a197-42e4-8a00-e29eaa05a0df';
     	$url = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
     	$ch = curl_init();

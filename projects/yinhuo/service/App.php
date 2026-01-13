@@ -159,18 +159,64 @@ class App extends ServiceBase
     {
     	$actorArr = cfg('actorDoubao');
     	$classifyList = array();
-    	foreach ($actorArr as $key => $actorList) {
+    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
+    	
+    	$folderSv = \service\Folder::singleton();
+    	$dubFileDao = \dao\DubFile::singleton();
+    	$now = $this->frame->now;
+    	$text = "欢迎使用因火AI配音";
+    	foreach ($actorArr as $actorClassify => $actorList) {
+    		if ($actorClassify == '1.0音色') {
+    			continue;
+    		}
     		$list = array();
     		foreach ($actorList as $rowArr) {
     			$list[] = array(
-    				'name' 	=> $rowArr['name'],
-    				'id' 	=> $rowArr['tag'],
-    				'url'	=> $rowArr['link'],
+    				'name' 			=> $rowArr['name'],
+    				'id' 			=> $rowArr['tag'],
+    				'url'			=> $rowArr['link'],
+    				'classify'		=> $actorClassify,
+    				'resourceId'	=> 'seed-tts-1.0',
+    				'language'		=> $rowArr['language'],
     			);
+    			continue;
+    			$dubId = md5($rowArr['tag'] . $text);
+    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    			if (empty($dubFileEtt)) {
+    				$dubFileEtt = $dubFileDao->getNewEntity();
+    				$dubFileEtt->id = $dubId;
+    				$dubFileEtt->duration = 0;
+    				$dubFileEtt->content = '';
+    				$dubFileEtt->actorSpeaker = $rowArr['tag'];
+    				$dubFileEtt->actorName = $rowArr['name'];
+    				$dubFileEtt->actorClassify = $actorClassify;
+    				$dubFileEtt->resourceId = '';
+    				$dubFileEtt->text = $text;
+    				$dubFileEtt->url = '';
+    				$dubFileEtt->createTime = $now;
+    				$dubFileEtt->updateTime = $now;
+    				$dubFileDao->create($dubFileEtt);
+    			}
+    			$resourceIds = array('seed-tts-1.0', 'seed-tts-2.0'); // 默认都用的seed-tts-1.0
+    			if (empty($dubFileEtt->url)) foreach ($resourceIds as $resourceId) {
+    				$ttsResult = $volcTTSSv->runByV3($text, $rowArr['tag'], $resourceId);
+    				if (!empty($ttsResult['content'])) {
+    					$dubFileEtt->set('content', base64_encode($ttsResult['content']));
+    					$dubFileEtt->set('duration', ceil($ttsResult['duration']));
+    					$dubFileEtt->set('resourceId', $resourceId);
+    					$dubFileDao->update($dubFileEtt);
+    					$dubFileUrl = $folderSv->createAudio($ttsResult['content'], $ttsResult['duration'], $dubId);
+    					if (!empty($dubFileUrl)) {
+    						$dubFileEtt->set('url', $dubFileUrl);
+    						$dubFileDao->update($dubFileEtt);
+    						break;
+    					}
+    				}
+    			}
     		}
-    		$classifyList[md5($key)] = array(
-    			'id' 	=> md5($key),
-    			'name'	=> $key,
+    		$classifyList[md5($actorClassify)] = array(
+    			'id' 	=> md5($actorClassify),
+    			'name'	=> $actorClassify,
     			'list'	=> array_values($list),
     		);
     	}
