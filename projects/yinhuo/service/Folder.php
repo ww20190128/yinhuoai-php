@@ -477,10 +477,16 @@ class Folder extends ServiceBase
     	$dubId = md5($actorInfo['id'] . $dubCaptionInfo['text']); // 字幕唯一标识
     	$dubFileDao = \dao\DubFile::singleton();
     	$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    	if (empty($dubFileEtt->duration) || $dubFileEtt->duration <= 0) {
+    		$dubFileDao->remove($dubFileEtt);
+    		$dubFileEtt = null;
+    	}
+
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
     	$now = $this->frame->now;
     	if (empty($dubFileEtt)) {
     		$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
+
     		if (!empty($ttsResult['content'])) { // 配音成功
 				$dubFileEtt = $dubFileDao->getNewEntity();
     			$dubFileEtt->id = $dubId;

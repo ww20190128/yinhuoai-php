@@ -95,9 +95,10 @@ class AliEditing extends ServiceBase
 		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速 -500～500，默认值：0  0.2~3
 			$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 		}
-		// 字体效果AI_ASR 语音转文字
-		$effectAI_ASR = array(
-			'Type' => 'AI_ASR',
+		// 字幕
+		$effectText = array(
+			'Type' 		=> 'Text',
+			'Content'	=> $captionRow['text'],
 			'AdaptMode' => 'AutoWrap', // 字段换行
 			'FontFace' => array(
 				'Bold' => true,
@@ -115,32 +116,32 @@ class AliEditing extends ServiceBase
 			}
 		}
 		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
-			$effectAI_ASR['FontColorOpacity'] = 0;
+			$effectText['FontColorOpacity'] = 0;
 		}
 		if (!empty($captionRow['font'])) { // 字体
 			if (!empty($captionRow['font']['text-align'])) { // 排版
-				$effectAI_ASR['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
+				$effectText['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
 			}
 			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
-				$effectAI_ASR['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
+				$effectText['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+				$effectText['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
-				$effectAI_ASR['Font'] = $captionRow['font']['font-family'];
+				$effectText['Font'] = $captionRow['font']['font-family'];
 			}
 		}
 		if (!empty($captionRow['style'])) { // 样式
 			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
-				$effectAI_ASR['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
+				$effectText['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
 			}
 			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
 				if (!empty($captionRow['style']['color'])) { // 颜色
-					$effectAI_ASR['FontColor'] = $captionRow['style']['color'];
+					$effectText['FontColor'] = $captionRow['style']['color'];
 				}
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
-					$effectAI_ASR['SubtitleEffects'] = array(
+					$effectText['SubtitleEffects'] = array(
 						array(
 							'Type' => 'Box',
 							'Color' => $captionRow['style']['background'],
@@ -151,17 +152,17 @@ class AliEditing extends ServiceBase
 
 				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
 					if (!empty($captionRow['style']['border-size'])) { // 边框大小
-						$effectAI_ASR['Outline'] = $captionRow['style']['border-size'];
+						$effectText['Outline'] = $captionRow['style']['border-size'];
 					}
 					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
-						$effectAI_ASR['OutlineColour'] = $captionRow['style']['border-color'];
+						$effectText['OutlineColour'] = $captionRow['style']['border-color'];
 					}
 				}	
 			}
 		}
 		$effects = array();
-		if (!empty($effectAI_ASR)) {
-			$effects[] = $effectAI_ASR;
+		if (!empty($effectText)) {
+			$effects[] = $effectText;
 		}
 		if (!empty($effectVolume)) {
 			$effects[] = $effectVolume;
@@ -366,80 +367,146 @@ class AliEditing extends ServiceBase
 				);
 			} 
 		}
-		$VideoTracks = array(); // 背景图片/视频，镜头，贴纸视频/图片
-		if (!empty($editingBackgroundVideoTrackClip)) {
-			$VideoTracks[] = array(
-				'VideoTrackClips' => array(
-					$editingBackgroundVideoTrackClip
-				),
-			);
-		}
+// 		$VideoTracks = array(); // 背景图片/视频，镜头，贴纸视频/图片
+// 		if (!empty($editingBackgroundVideoTrackClip)) {
+// 			$VideoTracks[] = array(
+// 				'VideoTrackClips' => array(
+// 					$editingBackgroundVideoTrackClip
+// 				),
+// 			);
+// 		}
 		// 镜头
 		$lensDurationMap = array(); // 视频时长汇总
-		$lensMediaVideoTrack = self::getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect, $lensDurationMap);
-		if (!empty($lensMediaVideoTrack)) {
-			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 以视频时长为主
-				$lensMediaVideoTrack['MainTrack'] = true;
-			}
-			$VideoTracks[] = $lensMediaVideoTrack;
-		}
-	
+		$lensMediaVideoTrackClips = self::getLensMediaVideoTrackClips($editingInfo, $editingBackgroundColorEffect, $lensDurationMap);
 		// 贴纸
-		$decalVideoTrack = self::getDecalVideoTrack($editingInfo);
-		if (!empty($decalVideoTrack)) {
-			$VideoTracks[] = $lensMediaVideoTrack;
-		}
-		$AudioTracks = array();
+		$decalVideoTrackClips = self::getDecalVideoTrackClips($editingInfo);
 		// 背景音乐
-		$musicAudioTrack = self::getMusicAudioTrack($editingInfo);
-		if (!empty($musicAudioTrack)) {
-			$AudioTracks[] = $musicAudioTrack;
-		}
+		$musicAudioTrackClips = self::getMusicAudioTrackClips($editingInfo);
 		$dubDurationMap = array(); // 配音时长汇总
 		// 全局配音
-		$editingDubAudioTrack = self::getEditingDubAudioTrack($editingInfo, $dubDurationMap);
-		if (!empty($editingDubAudioTrack)) { // 全局配音
-			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 以配音时长为主
-				$editingDubAudioTrack['MainTrack'] = true;
-			}
-			$AudioTracks[] = $editingDubAudioTrack;
-		} else { // 镜头配音
-			$lensDubAudioTrack = self::getLensDubAudioTrack($editingInfo, $dubDurationMap);
-			if (!empty($lensDubAudioTrack)) {
-				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 以配音时长为主
-					$lensDubAudioTrack['MainTrack'] = true;
-				}
-				$AudioTracks[] = $lensDubAudioTrack;
-			}
+		$editingDubAudioTrackClips = self::getEditingDubAudioTrackClips($editingInfo, $dubDurationMap);
+		$lensDubAudioTrackClips = array();
+		if (empty($editingDubAudioTrackClips)) { // 全局配音
+			$lensDubAudioTrackClips = self::getLensDubAudioTrackClips($editingInfo, $dubDurationMap);
 		}
-
-		
-		$SubtitleTracks = array();
 		// 标题
-		$subtitleTrack = self::getSubtitleTrack($editingInfo);
-		if (!empty($subtitleTrack)) {
-			$SubtitleTracks[] = $subtitleTrack;
-		}
-		$EffectTrack = array();
+		$subtitleTrackClips = self::getSubtitleTrackClips($editingInfo);
 		// 特效
-		$effectTrack = self::getEffectTrack($editingInfo);
-		if (!empty($effectTrack)) {
-			$EffectTrack[] = $effectTrack;
-		}
+		$effectTrackItems = self::getEffectTrackItems($editingInfo);
+		$clipPrefix = 'lens_';
+		// 组织主轨道
 		if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 以配音时长为主
-			$totalDuration = array_sum($dubDurationMap); // 总时长
-			
-			$clipMap = array();
-			if (!empty($AudioTracks)) foreach ($AudioTracks as $AudioTrack) {
-				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $AudioTrackClip) {
+			if (!empty($editingDubAudioTrackClips)) { // 有全局配音
+				foreach ($lensMediaVideoTrackClips as $clipKey => $lensMediaVideoTrackClip) {
+					unset($lensMediaVideoTrackClips[$clipKey]['ReferenceClipId']); // 去除引用
+					// TODO 去除超出的时长
+				}
+			} elseif (!empty($lensDubAudioTrackClips)) { // 镜头配音
+				$clipMap = array(); // 有效的引用
+				foreach ($lensDubAudioTrackClips as $clipKey => $AudioTrackClip) {
 					if (!empty($AudioTrackClip['ClipId'])) {
 						// 镜头ID => 播放时长
 						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
+						$AudioTrackClip['ClipId'] = $clipPrefix . $AudioTrackClip['ClipId'];
+					}
+					$lensDubAudioTrackClips[$clipKey] = $AudioTrackClip;
+				}
+				$mainTrackTimeMap = array(); // 主轴时间
+				$timeIn = 0;
+				foreach ($lensMediaVideoTrackClips as $clipKey => $VideoTrackClip) {
+					$lensId = 0; // 镜头ID
+					if (!empty($VideoTrackClip['ReferenceClipId'])) {
+						$lensId = $VideoTrackClip['ReferenceClipId'];
+						if (empty($clipMap[$VideoTrackClip['ReferenceClipId']])) { // 这段视频没有配音
+							unset($VideoTrackClip['ReferenceClipId']);
+							$VideoTrackClip['Duration'] = 7; // 设置7秒
+							// 主轨道插入7秒
+						} else { // 视频有配音
+							if (!empty($VideoTrackClip['Duration']) && $VideoTrackClip['Duration'] > $clipMap[$VideoTrackClip['ReferenceClipId']]) { // 视频时长 大于 配音时长
+								$VideoTrackClip['Duration'] = $clipMap[$VideoTrackClip['ReferenceClipId']]; // 截取为配音时长
+							}
+						}
+						if (!empty($VideoTrackClip['ReferenceClipId'])) {
+							$VideoTrackClip['ReferenceClipId'] = $clipPrefix . $VideoTrackClip['ReferenceClipId'];
+						}
+						$mainTrackTimeMap[$clipPrefix . $lensId] = array(
+							'timeIn'	=> $timeIn, // 开始时间
+							'timeOut'	=> $timeIn + $VideoTrackClip['Duration'], // 结束时间
+						);
+						$timeIn = $mainTrackTimeMap[$lensId]['timeOut'];
+						$transitionDuration = 0; // 转场时间
+						if (!empty($VideoTrackClip['Effects'])) {
+							foreach ($VideoTrackClip['Effects'] as $effect) {
+								if ($effect['Type'] == 'Transition') {
+									$transitionDuration += $effect['Duration'];
+								}
+							}
+						}
+						$timeIn += $transitionDuration;
+						// 如果有转场，添加转场时间
+					}
+					$lensMediaVideoTrackClips[$clipKey] = $VideoTrackClip;
+				}
+				foreach ($lensDubAudioTrackClips as $clipKey => $AudioTrackClip) {
+					if (!empty($AudioTrackClip['ClipId']) && empty($mainTrackTimeMap[$AudioTrackClip['ClipId']])) {
+						$AudioTrackClip['timeIn'] = $mainTrackTimeMap[$AudioTrackClip['ClipId']]['timeIn'];
 					}
 				}
+				print_r($mainTrackTimeMap);exit;
+			} else { // 没有配音，只播放视频
+				foreach ($lensMediaVideoTrackClips as $clipKey => $lensMediaVideoTrackClip) {
+					unset($lensMediaVideoTrackClips[$clipKey]['ReferenceClipId']); // 去除引用
+				}
+			}
+			print_r($lensMediaVideoTrackClips);exit;
+			
+			
+			
+			if (!empty($AudioTracks)) foreach ($AudioTracks as $trackKey => $AudioTrack) {
+				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
+					if (!empty($AudioTrackClip['ClipId'])) {
+						// 镜头ID => 播放时长
+						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
+			
+						$AudioTrackClip['ClipId'] = 'lens_' . $AudioTrackClip['ClipId'];
+					}
+					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
+				}
+				$AudioTracks[$trackKey] = $AudioTrack;
+			}
+		}
+		
+// 		if (!empty($effectTrack)) {
+// 			$EffectTrack[] = $effectTrack;
+// 		}
+		$mainMap = array(); // 主轴信息
+		if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 以配音时长为主
+			$totalDuration = array_sum($dubDurationMap); // 总时长
+			
+			
+			
+			
+			
+			
+			$clipMap = array();
+			if (!empty($AudioTracks)) foreach ($AudioTracks as $trackKey => $AudioTrack) {
+				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
+					if (!empty($AudioTrackClip['ClipId'])) {
+						// 镜头ID => 播放时长
+						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
+						
+						$AudioTrackClip['ClipId'] = 'lens_' . $AudioTrackClip['ClipId'];
+					}
+					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
+				}
+				$AudioTracks[$trackKey] = $AudioTrack;
 			}
 			
-			if (!empty($VideoTracks)) foreach ($VideoTracks as $videoTrackKey => $VideoTrack) {
+			print_r($AudioTracks);exit;
+			
+			
+			
+			if (!empty($VideoTracks)) foreach ($VideoTracks as $trackKey => $VideoTrack) {
 				if (!empty($VideoTrack['VideoTrackClips'])) foreach ($VideoTrack['VideoTrackClips'] as $clipKey => $VideoTrackClip) {
 					if (!empty($VideoTrackClip['ReferenceClipId'])) {
 						if (empty($clipMap[$VideoTrackClip['ReferenceClipId']])) { // 这段视频没有配音
@@ -450,10 +517,14 @@ class AliEditing extends ServiceBase
 								$VideoTrackClip['Duration'] = $clipMap[$VideoTrackClip['ReferenceClipId']]; // 截取为配音时长
 							}
 						}
+						if (!empty($VideoTrackClip['ReferenceClipId'])) {
+							$VideoTrackClip['ReferenceClipId'] = 'lens_' . $VideoTrackClip['ReferenceClipId'];
+						}
+						
 					}	
 					$VideoTrack['VideoTrackClips'][$clipKey] = $VideoTrackClip;
 				}
-				$VideoTracks[$videoTrackKey] = $VideoTrack;
+				$VideoTracks[$trackKey] = $VideoTrack;
 			}
 		} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
 			$clipMap = array();
@@ -499,9 +570,9 @@ class AliEditing extends ServiceBase
 	/**
 	 * 特效轨道
 	 *
-	 * @return EffectTrack
+	 * @return EffectTrackItems
 	 */
-	private static function getEffectTrack($editingInfo)
+	private static function getEffectTrackItems($editingInfo)
 	{
 		// 滤镜（针对全局画面添加滤镜）， 只加1种滤镜
 		$editingFilterEffectTrackItem = array();
@@ -551,46 +622,41 @@ class AliEditing extends ServiceBase
 		if (!empty($editingFilterEffectTrackColorItem)) {
 			$effectTrackItems[] = $editingFilterEffectTrackColorItem;
 		}
-		$effectTrack = array();
-		if (!empty($effectTrackItems)) { // 针对全局画面添加滤镜，只加1个滤镜
-			$effectTrack = array(
-				'EffectTrackItems' => $effectTrackItems,
-			);
-		}
-		return $effectTrack;
+// 		$effectTrack = array();
+// 		if (!empty($effectTrackItems)) { // 针对全局画面添加滤镜，只加1个滤镜
+// 			$effectTrack = array(
+// 				'EffectTrackItems' => $effectTrackItems,
+// 			);
+// 		}
+		return $effectTrackItems;
 	}
 	
 	/**
-	 * 标题轨道
+	 * 标题
 	 * 
-	 * @return SubtitleTrack
+	 * @return SubtitleTrackClips
 	 */
-	private static function getSubtitleTrack($editingInfo) 
+	private static function getSubtitleTrackClips($editingInfo) 
 	{
-		// 标题
-		$subtitleTrack = array();
+		$subtitleTrackClips = array();
 		if (!empty($editingInfo['titleInfo']))  {
 			$titleInfo = $editingInfo['titleInfo'];
-			$subtitleTrackClips = array();
 			if (!empty($titleInfo['captionList'])) foreach ($titleInfo['captionList'] as $captionRow) {
 				$subtitleTrackClip = self::captionToSubtitleTrack($captionRow, $titleInfo);
-				$subtitleTrackClips[] = $subtitleTrackClip;
-			}
-			if (!empty($subtitleTrackClips)) {
-				$subtitleTrack = array(
-					'SubtitleTrackClips' => $subtitleTrackClips,
-				);
+				if (!empty($subtitleTrackClip)) {
+					$subtitleTrackClips[] = $subtitleTrackClip;
+				}
 			}
 		}
-		return $subtitleTrack;
+		return $subtitleTrackClips;
 	}
 	
 	/**
-	 * 背景音乐轨道
+	 * 背景音乐
 	 *
-	 * @return AudioTrack
+	 * @return AudioTrackClips
 	 */
-	private static function getMusicAudioTrack($editingInfo)
+	private static function getMusicAudioTrackClips($editingInfo)
 	{
 		$audioTrack = array();
 		$audioTrackClips = array();
@@ -620,21 +686,16 @@ class AliEditing extends ServiceBase
 			}
 			$audioTrackClips[] = $audioTrackClip;
 		}
-		if (!empty($audioTrackClips)) {
-			$audioTrack = array(
-				'AudioTrackClips' => $audioTrackClips,
-			);
-		}
-		return $audioTrack;
+		return $audioTrackClips;
 	}
 	
 	/**
-	 * 全局配音轨道
+	 * 全局配音
 	 * 如果有剪辑全局配音 ，镜头配音就不生效
 	 * 
-	 * @return AudioTrack
+	 * @return AudioTrackClips
 	 */
-	private static function getEditingDubAudioTrack($editingInfo, &$dubDurationMap)
+	private static function getEditingDubAudioTrackClips($editingInfo, &$dubDurationMap)
 	{
 		$audioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubCaptionInfo'])) { // 手动配音
@@ -671,21 +732,15 @@ class AliEditing extends ServiceBase
 			}
 			$audioTrackClips[] = $audioTrackClip;	
 		}
-		$audioTrack = array();
-		if (!empty($audioTrackClips)) {
-			$audioTrack = array(
-				'AudioTrackClips' => $audioTrackClips,
-			);
-		}
-		return $audioTrack;
+		return $audioTrackClips;
 	}
 	
 	/**
-	 * 镜头配音轨道
+	 * 镜头配音
 	 *
-	 * @return AudioTrack
+	 * @return AudioTrackClips
 	 */
-	private static function getLensDubAudioTrack($editingInfo, &$dubDurationMap)
+	private static function getLensDubAudioTrackClips($editingInfo, &$dubDurationMap)
 	{
 		$lensAudioTrackClips = array();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
@@ -738,22 +793,17 @@ class AliEditing extends ServiceBase
 				$lensAudioTrackClips[] = $audioTrackClip;
 			}
 		}
-		$audioTrack = array();
-		if (!empty($lensAudioTrackClips)) {
-			$audioTrack = array(
-				'AudioTrackClips' => $lensAudioTrackClips,
-			);
-		}
-		return $audioTrack;
+		return $lensAudioTrackClips;
 	}
 	
 	/**
-	 * 镜头素材轨道
+	 * 镜头素材
 	 *
-	 * @return VideoTrack
+	 * @return VideoTrackClips
 	 */
-	private static function getLensMediaVideoTrack($editingInfo, $editingBackgroundColorEffect = array(), &$lensDurationMap = array())
+	private static function getLensMediaVideoTrackClips($editingInfo, $editingBackgroundColorEffect = array(), &$lensDurationMap = array())
 	{
+		$lensVideoTrackClips = array();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
@@ -811,21 +861,15 @@ class AliEditing extends ServiceBase
 				$lensVideoTrackClips[] = $videoTrackClip;
 			}
 		}
-		$videoTrack = array();
-		if (!empty($lensVideoTrackClips)) {
-			$videoTrack = array(
-				'VideoTrackClips' => $lensVideoTrackClips,
-			);
-		}
-		return $videoTrack;
+		return $lensVideoTrackClips;
 	}
 	
 	/**
-	 * 贴纸轨道
+	 * 贴纸
 	 *
-	 * @return VideoTrack
+	 * @return VideoTrackClips
 	 */
-	private static function getDecalVideoTrack($editingInfo)
+	private static function getDecalVideoTrackClips($editingInfo)
 	{
 		$videoTrackClips = array();
 		if (!empty($editingInfo['decalInfo'])) {
@@ -874,13 +918,7 @@ class AliEditing extends ServiceBase
 				}
 				$videoTrackClips[] = $videoTrackClip;
 			}
-			$videoTrack = array();
-			if (!empty($videoTrackClips)) {
-				$videoTrack = array(
-					'VideoTrackClips' => $videoTrackClips,
-				);
-			}
-			return $videoTrack;
+			return $videoTrackClips;
 		}
 	}
 	
@@ -932,9 +970,10 @@ class AliEditing extends ServiceBase
 		$timeline = self::getTimeline($chipParam);
 		
 		
-// print_r($timeline);
+print_r($timeline);
+exit;
 
-// echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
+echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
 // 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
 // 第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。
 // 因此，选择D选项。';
@@ -997,7 +1036,7 @@ class AliEditing extends ServiceBase
    	 		$request->jobId = $jobId;
     		$response = self::$client->getMediaProducingJob($request);
 			$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
-
+print_r($mediaProducingJob);exit;
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {
