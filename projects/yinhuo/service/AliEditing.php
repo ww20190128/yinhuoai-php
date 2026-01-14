@@ -73,17 +73,25 @@ class AliEditing extends ServiceBase
 	 * 
 	 * @return array
 	 */
-	private static function captionToAudioTrackClip($captionRow, $editingInfo, $lensRow = array())
+	private static function captionToAudioTrackClipByUrl($captionRow, $editingInfo, $lensRow = array())
 	{
-		// 配音演员
-		$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
-		$audioTrackClipAI_TTS = array( // 文案1
-			'Type' => 'AI_TTS', // 类型
-			'Content' => $captionRow['text'], // 文案内容
-			'Voice' => empty($actorInfo) ? 'zhiqing' : $actorInfo['id'], // 配音   全局
+		$folderSv = \service\Folder::singleton();
+		if (empty($captionRow['url'])) {
+			// 配音演员
+			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
+			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
+			if (!empty($ttsResult['url'])) {
+				$captionRow['url'] = $ttsResult['url'];
+			}
+		}
+		if (empty($captionRow['url'])) {
+			return false;
+		}
+		$audioTrackClip = array( // 文案1
+			'MediaURL' => $captionRow['url'],
 		);
 		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速 -500～500，默认值：0
-			$audioTrackClipAI_TTS['SpeechRate'] = $editingInfo['volume']['dubSpeed'];
+			$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 		}
 		// 字体效果AI_ASR 语音转文字
 		$effectAI_ASR = array(
@@ -104,7 +112,6 @@ class AliEditing extends ServiceBase
 				);
 			}
 		}
-
 		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
 			$effectAI_ASR['FontColorOpacity'] = 0;
 		}
@@ -158,11 +165,105 @@ class AliEditing extends ServiceBase
 			$effects[] = $effectVolume;
 		}
 		if (!empty($effects)) {
+			$audioTrackClip['Effects'] = $effects;
+		}
+		return $audioTrackClip;
+	}
+	
+	/**
+	 * 将文本组织成AudioTrackClip（文本字幕）【未使用】
+	 *
+	 * @return array
+	 */
+	private static function captionToAudioTrackClipByAI($captionRow, $editingInfo, $lensRow = array())
+	{
+		// 配音演员
+		$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
+		$audioTrackClipAI_TTS = array( // 文案1
+				'Type' => 'AI_TTS', // 类型
+				'Content' => $captionRow['text'], // 文案内容
+				'Voice' => empty($actorInfo) ? 'zhiqing' : $actorInfo['id'], // 配音   全局
+		);
+		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速 -500～500，默认值：0
+			$audioTrackClipAI_TTS['SpeechRate'] = $editingInfo['volume']['dubSpeed'];
+		}
+		// 字体效果AI_ASR 语音转文字
+		$effectAI_ASR = array(
+				'Type' => 'AI_ASR',
+				'AdaptMode' => 'AutoWrap', // 字段换行
+				'FontFace' => array(
+						'Bold' => true,
+						'Italic' => false,
+						'Underline' => false,
+				),
+		);
+		$effectVolume = array(); // 音量效果
+		if (!empty($editingInfo['volume'])) {
+			if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量
+				$effectVolume = array(
+						'Type' => 'Volume',
+						'Gain' => $editingInfo['volume']['dubVolume'],
+				);
+			}
+		}
+	
+		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
+			$effectAI_ASR['FontColorOpacity'] = 0;
+		}
+		if (!empty($captionRow['font'])) { // 字体
+			if (!empty($captionRow['font']['text-align'])) { // 排版
+				$effectAI_ASR['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
+			}
+			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
+				$effectAI_ASR['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
+			}
+			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
+				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+			}
+			if (!empty($captionRow['font']['font-family'])) { // 字体
+				$effectAI_ASR['Font'] = $captionRow['font']['font-family'];
+			}
+		}
+		if (!empty($captionRow['style'])) { // 样式
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
+				$effectAI_ASR['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
+			}
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['style']['color'])) { // 颜色
+					$effectAI_ASR['FontColor'] = $captionRow['style']['color'];
+				}
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
+					$effectAI_ASR['SubtitleEffects'] = array(
+							array(
+									'Type' => 'Box',
+									'Color' => $captionRow['style']['background'],
+									'Opacity' => 0.9,
+							),
+					);
+				}
+	
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
+					if (!empty($captionRow['style']['border-size'])) { // 边框大小
+						$effectAI_ASR['Outline'] = $captionRow['style']['border-size'];
+					}
+					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
+						$effectAI_ASR['OutlineColour'] = $captionRow['style']['border-color'];
+					}
+				}
+			}
+		}
+		$effects = array();
+		if (!empty($effectAI_ASR)) {
+			$effects[] = $effectAI_ASR;
+		}
+		if (!empty($effectVolume)) {
+			$effects[] = $effectVolume;
+		}
+		if (!empty($effects)) {
 			$audioTrackClipAI_TTS['Effects'] = $effects;
 		}
 		return $audioTrackClipAI_TTS;
 	}
-	
 	/**
 	 * 将文本组织成SubtitleTrack （标题）
 	 * 
@@ -288,6 +389,7 @@ class AliEditing extends ServiceBase
 		if (!empty($musicAudioTrack)) {
 			$AudioTracks[] = $musicAudioTrack;
 		}
+
 		// 全局配音
 		$editingDubAudioTrack = self::getEditingDubAudioTrack($editingInfo);
 		if (!empty($editingDubAudioTrack)) {
@@ -512,7 +614,7 @@ class AliEditing extends ServiceBase
 	{
 		$audioTrackClips = array(); // 全局配音
 		if (!empty($editingInfo['dubCaptionInfo'])) { // 手动配音
-			$audioTrackClip = self::captionToAudioTrackClip($editingInfo['dubCaptionInfo'], $editingInfo);
+			$audioTrackClip = self::captionToAudioTrackClipByUrl($editingInfo['dubCaptionInfo'], $editingInfo);
 			if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 				$audioTrackClip['MainTrack'] = true;
 			}
@@ -570,11 +672,13 @@ class AliEditing extends ServiceBase
 	 */
 	private static function getLensDubAudioTrack($editingInfo)
 	{
+	
 		$lensAudioTrackClips = array();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
 			// 配音 - 文本字幕
+
 			if (!empty($lensRow['dubCaptionInfo'])) { // 手动配音
-				$audioTrackClip = self::captionToAudioTrackClip($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
+				$audioTrackClip = self::captionToAudioTrackClipByUrl($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
 				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
 					$audioTrackClip['MainTrack'] = true;
 					$audioTrackClip['ClipId'] = 'lens_' . $lensRow['id']; // 镜头标记，用于对齐
@@ -826,10 +930,11 @@ class AliEditing extends ServiceBase
 	 */
 	public function submitMediaProducingJob($chipParam)
 	{
-		$timeline = self::getTimeline($chipParam);	
+		$timeline = self::getTimeline($chipParam);
 		
-//print_r($timeline);
-//exit;
+		
+print_r($chipParam);
+
 //echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
 // 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
 // 第二步，D项：出自清代郑燮的《新竹》，意思是：新生的竹子能够赶超旧有的竹子，完全是凭仗老竹的催生与滋养。体现了唯物辩证法的发展观，即发展的实质是新事物的产生和旧事物的灭亡。要求我们树立创新意识。“新竹” 属于新事物（对应 “创新、发展”），“老干” 属于旧事物（对应 “守正、继承”），新事物的成长壮大离不开旧事物中积极因素的支撑，与守正创新蕴含的哲理不谋而合。D项正确。

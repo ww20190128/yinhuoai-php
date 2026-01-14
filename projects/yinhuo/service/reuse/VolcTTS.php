@@ -170,7 +170,7 @@ print_r($response);exit;
      *
      * @return string
      */
-    public function runByV3($text, $speaker, $resourceId = 'seed-tts-1.0')
+    public function runByV3($text, $speaker, $ttsParams = array(), $resourceId = 'seed-tts-1.0')
     {
     	$additions = array(
     		'silence_duration' => 0, // 设置该参数可在句尾增加静音时长，范围0~30000ms。
@@ -183,17 +183,20 @@ print_r($response);exit;
     			//'use_cache' => true,
     		),
     	);
+    	if (!empty($ttsParams['language'])) { // 明确语种
+    		$additions['explicit_language'] = $ttsParams['language'];
+    	}
     	$audioParams = array(
     		'format' 		=> 'mp3',
     		'sample_rate'	=> 24000,
     		'enable_timestamp' => true,
     	);
-//     	if (!empty($params['speechRate'])) { // 语速，取值范围[-50,100]，100代表2.0倍速，-50代表0.5倍数
-//     		$audioParams['speech_rate'] = $params['speechRate'];
-//     	}
-//     	if (!empty($params['loudnessRate'])) { // 音量，取值范围[-50,100]，100代表2.0倍音量，-50代表0.5倍音量（mix音色暂不支持）
-//     		$audioParams['loudness_rate'] = $params['loudnessRate'];
-//     	}
+    	if (!empty($ttsParams['speechRate'])) { // 语速，取值范围[-50,100]，100代表2.0倍速，-50代表0.5倍数
+    		$audioParams['speech_rate'] = $ttsParams['speechRate'];
+    	}
+    	if (!empty($ttsParams['loudnessRate'])) { // 音量，取值范围[-50,100]，100代表2.0倍音量，-50代表0.5倍音量（mix音色暂不支持）
+    		$audioParams['loudness_rate'] = $ttsParams['loudnessRate'];
+    	}
     	$postParams = array(
     		'text' => $text,
     		'speaker' => $speaker,
@@ -247,7 +250,9 @@ print_r($response);exit;
     	$content = base64_decode($content);
     	return array(
     		'content' => $content,
-    		'duration' => $duration,
+    		'duration' => $duration * 1000,
+    		'resourceId' => $resourceId,
+    		'speaker' => $speaker,
     	);
     }
     

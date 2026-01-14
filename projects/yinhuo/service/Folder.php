@@ -241,14 +241,14 @@ class Folder extends ServiceBase
      *
      * @return array
      */
-    public function createAudio($content, $duration, $fileName)
+    public function createAudio($content, $duration, $dubId)
     {
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	$aliEditingSv = \service\AliEditing::singleton();
     	$extension = 'mp3';
-    	$profileKey = "resources/dubAudio/{$fileName}.{$extension}"; // 上传的目录
+    	$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
     	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
     	if (empty($ossResult)) {
     		return false;
@@ -460,6 +460,62 @@ class Folder extends ServiceBase
     		'subList'	=> array_values($subList),
     		'mediaList'	=> array_values($mediaModels),
     		'mediaNum'  => $mediaTotalNum,
+    	);
+    }
+    
+    /**
+     * 获取配音
+     *
+     * @return array
+     */
+    public function getTts($actorInfo, $dubCaptionInfo, $needUrl = false)
+    {
+    	$ttsParams = array();
+    	if (!empty($actorInfo['language'])) {
+    		$ttsParams['language'] = $actorInfo['language'];
+    	}
+    	$dubId = md5($actorInfo['id'] . $dubCaptionInfo['text']); // 字幕唯一标识
+    	$dubFileDao = \dao\DubFile::singleton();
+    	$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
+    	$now = $this->frame->now;
+    	if (empty($dubFileEtt)) {
+    		$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
+    		if (!empty($ttsResult['content'])) { // 配音成功
+				$dubFileEtt = $dubFileDao->getNewEntity();
+    			$dubFileEtt->id = $dubId;
+    			$dubFileEtt->duration = ceil($ttsResult['duration']);
+    			$dubFileEtt->content = base64_encode($ttsResult['content']);
+    			$dubFileEtt->url = '';
+    			$dubFileEtt->actorSpeaker = $actorInfo['id'];
+    			$dubFileEtt->resourceId = $ttsResult['resourceId'];
+    			$dubFileEtt->text = $dubCaptionInfo['text'];
+    			$dubFileEtt->createTime = $now;
+    			$dubFileEtt->updateTime = $now;
+    			$dubFileDao->create($dubFileEtt);
+    		} else {
+    			return false;
+    		}
+    	} 
+    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($dubFileEtt->content)) {
+    		$ossSv = \service\reuse\OSS::singleton();
+    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    		$aliEditingSv = \service\AliEditing::singleton();
+    		$extension = 'mp3';
+    		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, base64_decode($dubFileEtt->content));
+    		if (!empty($ossResult)) {
+    			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    			$dubFileEtt->set('url', $url);
+    			$dubFileDao->update($dubFileEtt);
+    		}
+    	}
+    	return array(
+    		'id' 		=> $dubId,
+    		'duration'	=> ceil($dubFileEtt->duration * 0.001),
+    		'content'	=> $dubFileEtt->content,
+    		'url'		=> $dubFileEtt->url,
     	);
     }
     

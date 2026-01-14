@@ -1412,11 +1412,26 @@ class Editing extends ServiceBase
      */
     public function randomChipParam($editingInfo)
     {
+    	// 配音演员
+    	if (!empty($editingInfo['actorList'])) {
+    		$editingInfo['actorInfo'] = $editingInfo['actorList'][array_rand($editingInfo['actorList'], 1)];
+    	}
+    	
     	// 全局配音
     	// 手动配音
+    	$folderSv = \service\Folder::singleton();
     	$editingDub = array();
     	if (!empty($editingInfo['dubCaptionList'])) {
-    		$editingInfo['dubCaptionInfo'] = $editingInfo['dubCaptionList'][array_rand($editingInfo['dubCaptionList'], 1)];
+    		$dubCaptionInfo = $editingInfo['dubCaptionList'][array_rand($editingInfo['dubCaptionList'], 1)];
+    		if (!empty($editingInfo['actorInfo']) && !empty($dubCaptionInfo['text'])) {
+    			$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
+    			if (!empty($ttsResult['id'])) { // 配音成功
+    				$dubCaptionInfo['dubKey'] = $ttsResult['id'];
+    				$dubCaptionInfo['url'] = $ttsResult['url'];
+    				$dubCaptionInfo['duration'] = $ttsResult['duration'];
+    				$editingInfo['dubCaptionInfo'] = $dubCaptionInfo;
+    			}
+    		}
     	}
     	// 旁白配音
     	if (!empty($editingInfo['dubMediaList'])) {
@@ -1436,8 +1451,10 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['background']['mediaList'])) {
     		$editingInfo['background']['mediaInfo'] = $editingInfo['background']['mediaList'][array_rand($editingInfo['background']['mediaList'], 1)];
     	}
+    	
     	$lensList = $editingInfo['lensList'];
     	$editingInfo['previewMediaId'] = 0; // 预览视频的媒体id
+    	
     	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
     		// 媒体
     		if (!empty($lensRow['mediaList'])) {
@@ -1449,11 +1466,21 @@ class Editing extends ServiceBase
     			unset($editingInfo['lensList'][$lensKey]);
     			continue;
     		}
-    		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 优先全局手动配音
+    		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 没有全局配音
     			$lensDub = array(); // 镜头配音
     			if (!empty($lensRow['dubCaptionList'])) {
-    				$lensDub['dubCaptionInfo'] = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
+    				$dubCaptionInfo = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
+    				if (!empty($editingInfo['actorInfo'])) { // 演员
+    					$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
+    					if (!empty($ttsResult['id'])) { // 配音成功
+    						$dubCaptionInfo['dubKey'] = $ttsResult['id'];
+    						$dubCaptionInfo['url'] = $ttsResult['url'];
+    						$dubCaptionInfo['duration'] = $ttsResult['duration'];
+    						$lensDub['dubCaptionInfo'] = $dubCaptionInfo;
+    					}
+    				}
     			}
+    			
     			// 旁白配音
     			if (!empty($lensRow['dubMediaList'])) {
     				$lensDub['dubMediaInfo'] = $lensRow['dubMediaList'][array_rand($lensRow['dubMediaList'], 1)];
@@ -1463,7 +1490,7 @@ class Editing extends ServiceBase
     			} elseif (!empty($lensDub['dubMediaInfo'])) {
     				$lensRow['dubMediaInfo'] = $lensDub['dubMediaInfo'];
     			}
-    		} else {
+    		} else { // 有全局配音
     			if (!empty($editingInfo['dubCaptionInfo'])) { // 优先手动配音
     				$lensRow['dubCaptionInfo'] = $editingInfo['dubCaptionInfo'];
     			} elseif (!empty($editingInfo['dubMediaInfo'])) {
@@ -1495,15 +1522,14 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['decalList'])) {
     		$editingInfo['decalInfo'] = $editingInfo['decalList'][array_rand($editingInfo['decalList'], 1)];
     	}
-    	if (!empty($editingInfo['actorList'])) {
-    		$editingInfo['actorInfo'] = $editingInfo['actorList'][array_rand($editingInfo['actorList'], 1)];
-    	}
+    	
     	unset($editingInfo['dubCaptionList']);
     	unset($editingInfo['dubMediaList']);
     	unset($editingInfo['titleList']);
     	unset($editingInfo['musicList']);
     	unset($editingInfo['decalList']);
     	unset($editingInfo['actorList']);
+   
     	return $editingInfo;
     }
     

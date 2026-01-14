@@ -166,7 +166,7 @@ class App extends ServiceBase
     	$now = $this->frame->now;
     	$text = "欢迎使用因火AI配音";
     	foreach ($actorArr as $actorClassify => $actorList) {
-    		if ($actorClassify == '1.0音色') {
+    		if ($actorClassify != '1.0音色') {
     			continue;
     		}
     		$list = array();
@@ -177,9 +177,9 @@ class App extends ServiceBase
     				'url'			=> $rowArr['link'],
     				'classify'		=> $actorClassify,
     				'resourceId'	=> 'seed-tts-1.0',
-    				'language'		=> $rowArr['language'],
+    				'language'		=> empty($rowArr['language']) ? '' : $rowArr['language'],
     			);
-    			continue;
+    			
     			$dubId = md5($rowArr['tag'] . $text);
     			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			if (empty($dubFileEtt)) {
@@ -197,9 +197,13 @@ class App extends ServiceBase
     				$dubFileEtt->updateTime = $now;
     				$dubFileDao->create($dubFileEtt);
     			}
-    			$resourceIds = array('seed-tts-1.0', 'seed-tts-2.0'); // 默认都用的seed-tts-1.0
+    			$resourceIds = array('seed-tts-1.0', 'seed-tts-2.0', 'seed-tts-1.0-concurr'); // 默认都用的seed-tts-1.0
     			if (empty($dubFileEtt->url)) foreach ($resourceIds as $resourceId) {
-    				$ttsResult = $volcTTSSv->runByV3($text, $rowArr['tag'], $resourceId);
+    				$ttsParams = array();
+    				if (!empty($rowArr['language'])) {
+    					$ttsParams['language'] = $rowArr['language'];
+    				}
+    				$ttsResult = $volcTTSSv->runByV3($text, $rowArr['tag'], $resourceId, $ttsParams);
     				if (!empty($ttsResult['content'])) {
     					$dubFileEtt->set('content', base64_encode($ttsResult['content']));
     					$dubFileEtt->set('duration', ceil($ttsResult['duration']));
