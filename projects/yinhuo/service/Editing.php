@@ -1416,7 +1416,7 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['actorList'])) {
     		$editingInfo['actorInfo'] = $editingInfo['actorList'][array_rand($editingInfo['actorList'], 1)];
     	}
-    	
+    		
     	// 全局配音
     	// 手动配音
     	$folderSv = \service\Folder::singleton();

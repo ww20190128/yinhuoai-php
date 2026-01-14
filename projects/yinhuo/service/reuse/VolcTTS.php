@@ -180,7 +180,7 @@ print_r($response);exit;
     		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
     		'cache_config' => array(
     			'text_type' => 1,
-    			//'use_cache' => true,
+    			'use_cache' => true,
     		),
     	);
     	if (!empty($ttsParams['language'])) { // 明确语种
@@ -233,7 +233,7 @@ print_r($response);exit;
     	curl_close($ch);
     	$response = empty($response) ? array() : explode("\n", $response);
     	$content = '';
-    	$duration = '';
+    	$duration = 0;
     	if (!empty($response)) foreach ($response as $row) {
     		$rowArr = empty($row) ? array() : json_decode($row, true);
     		if (!empty($rowArr['data'])) {
@@ -250,7 +250,7 @@ print_r($response);exit;
     	$content = base64_decode($content);
     	return array(
     		'content' => $content,
-    		'duration' => $duration * 1000,
+    		'duration' => $duration,
     		'resourceId' => $resourceId,
     		'speaker' => $speaker,
     	);

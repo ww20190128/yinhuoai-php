@@ -484,7 +484,7 @@ class Folder extends ServiceBase
     		if (!empty($ttsResult['content'])) { // 配音成功
 				$dubFileEtt = $dubFileDao->getNewEntity();
     			$dubFileEtt->id = $dubId;
-    			$dubFileEtt->duration = ceil($ttsResult['duration']);
+    			$dubFileEtt->duration = $ttsResult['duration'];
     			$dubFileEtt->content = base64_encode($ttsResult['content']);
     			$dubFileEtt->url = '';
     			$dubFileEtt->actorSpeaker = $actorInfo['id'];
@@ -506,6 +506,7 @@ class Folder extends ServiceBase
     		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, base64_decode($dubFileEtt->content));
     		if (!empty($ossResult)) {
+    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     			$dubFileEtt->set('url', $url);
     			$dubFileDao->update($dubFileEtt);
@@ -513,7 +514,7 @@ class Folder extends ServiceBase
     	}
     	return array(
     		'id' 		=> $dubId,
-    		'duration'	=> ceil($dubFileEtt->duration * 0.001),
+    		'duration'	=> $dubFileEtt->duration,
     		'content'	=> $dubFileEtt->content,
     		'url'		=> $dubFileEtt->url,
     	);
