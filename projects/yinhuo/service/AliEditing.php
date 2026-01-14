@@ -43,6 +43,20 @@ class AliEditing extends ServiceBase
 	private static $client;
 	
 	/**
+	 * 视频默认时长
+	 *
+	 * @var object
+	 */
+	const VIDEO_DEFAULT_DURATION = 7;
+	
+	/**
+	 * 转场时长
+	 *
+	 * @var object
+	 */
+	const TRANSITION_DURATION = 1;
+	
+	/**
 	 * 单例模式
 	 *
 	 * @return AliEditing
@@ -367,14 +381,7 @@ class AliEditing extends ServiceBase
 				);
 			} 
 		}
-// 		$VideoTracks = array(); // 背景图片/视频，镜头，贴纸视频/图片
-// 		if (!empty($editingBackgroundVideoTrackClip)) {
-// 			$VideoTracks[] = array(
-// 				'VideoTrackClips' => array(
-// 					$editingBackgroundVideoTrackClip
-// 				),
-// 			);
-// 		}
+
 		// 镜头
 		$lensDurationMap = array(); // 视频时长汇总
 		$lensMediaVideoTrackClips = self::getLensMediaVideoTrackClips($editingInfo, $editingBackgroundColorEffect, $lensDurationMap);
@@ -389,6 +396,7 @@ class AliEditing extends ServiceBase
 		if (empty($editingDubAudioTrackClips)) { // 全局配音
 			$lensDubAudioTrackClips = self::getLensDubAudioTrackClips($editingInfo, $dubDurationMap);
 		}
+		
 		// 标题
 		$subtitleTrackClips = self::getSubtitleTrackClips($editingInfo);
 		// 特效
@@ -404,37 +412,62 @@ class AliEditing extends ServiceBase
 			} elseif (!empty($lensDubAudioTrackClips)) { // 镜头配音
 				$clipMap = array(); // 有效的引用
 				foreach ($lensDubAudioTrackClips as $clipKey => $AudioTrackClip) {
-					if (!empty($AudioTrackClip['ClipId'])) {
+					if (!empty($AudioTrackClip['lensId'])) {
+						$lensId = $AudioTrackClip['lensId'];
 						// 镜头ID => 播放时长
-						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
-						$AudioTrackClip['ClipId'] = $clipPrefix . $AudioTrackClip['ClipId'];
+						$clipMap[$AudioTrackClip['lensId']] = empty($dubDurationMap[$lensId]) ? 0 : $dubDurationMap[$lensId];
+						//$AudioTrackClip['ClipId'] = $clipPrefix . $lensId;
 					}
+					//unset($AudioTrackClip['lensId']);
 					$lensDubAudioTrackClips[$clipKey] = $AudioTrackClip;
 				}
+				
 				$mainTrackTimeMap = array(); // 主轴时间
-				$timeIn = 0;
+				$timelineIn = 0;
 				foreach ($lensMediaVideoTrackClips as $clipKey => $VideoTrackClip) {
-					$lensId = 0; // 镜头ID
-					if (!empty($VideoTrackClip['ReferenceClipId'])) {
-						$lensId = $VideoTrackClip['ReferenceClipId'];
-						if (empty($clipMap[$VideoTrackClip['ReferenceClipId']])) { // 这段视频没有配音
-							unset($VideoTrackClip['ReferenceClipId']);
-							$VideoTrackClip['Duration'] = 7; // 设置7秒
-							// 主轨道插入7秒
+					if (!empty($VideoTrackClip['lensId'])) {
+						$lensId = $VideoTrackClip['lensId']; // 镜头Id
+						$actualDuration = 0; // 实际时长
+						if (empty($clipMap[$lensId])) { // 这段视频没有配音
+							if ($VideoTrackClip['Duration'] > self::VIDEO_DEFAULT_DURATION) { // 截取7秒
+								$VideoTrackClip['In'] = 0;
+								$VideoTrackClip['Out'] = self::VIDEO_DEFAULT_DURATION; // 设置7秒
+								$actualDuration = self::VIDEO_DEFAULT_DURATION;
+							} else {
+								$VideoTrackClip['MaxOut'] = self::VIDEO_DEFAULT_DURATION;
+								$actualDuration = $VideoTrackClip['Duration'];
+							}
 						} else { // 视频有配音
-							if (!empty($VideoTrackClip['Duration']) && $VideoTrackClip['Duration'] > $clipMap[$VideoTrackClip['ReferenceClipId']]) { // 视频时长 大于 配音时长
-								$VideoTrackClip['Duration'] = $clipMap[$VideoTrackClip['ReferenceClipId']]; // 截取为配音时长
+							if (!empty($VideoTrackClip['Duration']) && $VideoTrackClip['Duration'] > $clipMap[$lensId]) { // 视频时长 大于 配音时长
+								$VideoTrackClip['In'] = 0;
+								$VideoTrackClip['Out'] = $clipMap[$lensId]; // 设置7秒
+								$actualDuration = $clipMap[$lensId];
+							} else { // 视频时长 小于 配音时长
+								$VideoTrackClip['MaxOut'] = $clipMap[$lensId];
+								$actualDuration = $VideoTrackClip['Duration'];
 							}
 						}
-						if (!empty($VideoTrackClip['ReferenceClipId'])) {
-							$VideoTrackClip['ReferenceClipId'] = $clipPrefix . $VideoTrackClip['ReferenceClipId'];
+						
+						if ($lensId == 7) { // 第1个镜头
+							$VideoTrackClip['TimelineIn'] = 0;
+							$VideoTrackClip['TimelineOut'] = 2;
 						}
-						$mainTrackTimeMap[$clipPrefix . $lensId] = array(
-							'timeIn'	=> $timeIn, // 开始时间
-							'timeOut'	=> $timeIn + $VideoTrackClip['Duration'], // 结束时间
+						if ($lensId == 8) { // 第2个镜头
+							$VideoTrackClip['TimelineIn'] = 2;
+							$VideoTrackClip['TimelineOut'] = 9;
+						}
+						if ($lensId == 9) { // 第3个镜头
+							$VideoTrackClip['TimelineIn'] = 9;
+							$VideoTrackClip['TimelineOut'] = 11;
+						}
+						
+
+						$mainTrackTimeMap[$lensId] = array(
+							'timelineIn'	=> $timelineIn, // 开始时间
+							'timelineOut'	=> $timelineIn + $actualDuration, // 结束时间
 						);
-						$timeIn = $mainTrackTimeMap[$lensId]['timeOut'];
-						$transitionDuration = 0; // 转场时间
+						$timelineIn = $mainTrackTimeMap[$lensId]['timelineOut'];
+						$transitionDuration = 0; // 转场时长
 						if (!empty($VideoTrackClip['Effects'])) {
 							foreach ($VideoTrackClip['Effects'] as $effect) {
 								if ($effect['Type'] == 'Transition') {
@@ -442,127 +475,80 @@ class AliEditing extends ServiceBase
 								}
 							}
 						}
-						$timeIn += $transitionDuration;
-						// 如果有转场，添加转场时间
+						//$timelineIn += $transitionDuration;
 					}
 					$lensMediaVideoTrackClips[$clipKey] = $VideoTrackClip;
 				}
 				foreach ($lensDubAudioTrackClips as $clipKey => $AudioTrackClip) {
-					if (!empty($AudioTrackClip['ClipId']) && empty($mainTrackTimeMap[$AudioTrackClip['ClipId']])) {
-						$AudioTrackClip['timeIn'] = $mainTrackTimeMap[$AudioTrackClip['ClipId']]['timeIn'];
+					$lensId = $AudioTrackClip['lensId']; // 镜头Id
+					if (!empty($mainTrackTimeMap[$lensId])) {
+						$AudioTrackClip['TimelineIn'] = $mainTrackTimeMap[$lensId]['timelineIn'];
+						$AudioTrackClip['TimelineOut'] = $mainTrackTimeMap[$lensId]['timelineOut'];
 					}
+					/**
+					 * [TimelineIn] => 0
+    [TimelineOut] => 2
+					 */
+					if ($lensId == 7) { // 第1个镜头
+						$AudioTrackClip['TimelineIn'] = 0;
+						$AudioTrackClip['TimelineOut'] = 2;
+					}
+					if ($lensId == 9) { // 第3个镜头
+						$AudioTrackClip['TimelineIn'] = 9;
+						$AudioTrackClip['TimelineOut'] = 11;
+					}
+					
+				
+					$lensDubAudioTrackClips[$clipKey] = $AudioTrackClip;
 				}
-				print_r($mainTrackTimeMap);exit;
+				foreach ($lensMediaVideoTrackClips as $clipKey => $VideoTrackClip) {
+					$lensId = $AudioTrackClip['lensId']; // 镜头Id
+					unset($VideoTrackClip['Duration']);
+					$lensMediaVideoTrackClips[$clipKey] = $VideoTrackClip;
+				}
 			} else { // 没有配音，只播放视频
 				foreach ($lensMediaVideoTrackClips as $clipKey => $lensMediaVideoTrackClip) {
 					unset($lensMediaVideoTrackClips[$clipKey]['ReferenceClipId']); // 去除引用
 				}
 			}
-			print_r($lensMediaVideoTrackClips);exit;
-			
-			
-			
-			if (!empty($AudioTracks)) foreach ($AudioTracks as $trackKey => $AudioTrack) {
-				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
-					if (!empty($AudioTrackClip['ClipId'])) {
-						// 镜头ID => 播放时长
-						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
-			
-						$AudioTrackClip['ClipId'] = 'lens_' . $AudioTrackClip['ClipId'];
-					}
-					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
-				}
-				$AudioTracks[$trackKey] = $AudioTrack;
-			}
-		}
-		
-// 		if (!empty($effectTrack)) {
-// 			$EffectTrack[] = $effectTrack;
-// 		}
-		$mainMap = array(); // 主轴信息
-		if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 以配音时长为主
-			$totalDuration = array_sum($dubDurationMap); // 总时长
-			
-			
-			
-			
-			
-			
-			$clipMap = array();
-			if (!empty($AudioTracks)) foreach ($AudioTracks as $trackKey => $AudioTrack) {
-				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
-					if (!empty($AudioTrackClip['ClipId'])) {
-						// 镜头ID => 播放时长
-						$clipMap[$AudioTrackClip['ClipId']] = empty($dubDurationMap[$AudioTrackClip['ClipId']]) ? 0 : $dubDurationMap[$AudioTrackClip['ClipId']];
-						
-						$AudioTrackClip['ClipId'] = 'lens_' . $AudioTrackClip['ClipId'];
-					}
-					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
-				}
-				$AudioTracks[$trackKey] = $AudioTrack;
-			}
-			
-			print_r($AudioTracks);exit;
-			
-			
-			
-			if (!empty($VideoTracks)) foreach ($VideoTracks as $trackKey => $VideoTrack) {
-				if (!empty($VideoTrack['VideoTrackClips'])) foreach ($VideoTrack['VideoTrackClips'] as $clipKey => $VideoTrackClip) {
-					if (!empty($VideoTrackClip['ReferenceClipId'])) {
-						if (empty($clipMap[$VideoTrackClip['ReferenceClipId']])) { // 这段视频没有配音
-							unset($VideoTrackClip['ReferenceClipId']);
-							$VideoTrackClip['Duration'] = 7; // 设置7秒
-						} else { // 视频有配音
-							if (!empty($VideoTrackClip['Duration']) && $VideoTrackClip['Duration'] > $clipMap[$VideoTrackClip['ReferenceClipId']]) { // 视频时长 大于 配音时长
-								$VideoTrackClip['Duration'] = $clipMap[$VideoTrackClip['ReferenceClipId']]; // 截取为配音时长
-							}
-						}
-						if (!empty($VideoTrackClip['ReferenceClipId'])) {
-							$VideoTrackClip['ReferenceClipId'] = 'lens_' . $VideoTrackClip['ReferenceClipId'];
-						}
-						
-					}	
-					$VideoTrack['VideoTrackClips'][$clipKey] = $VideoTrackClip;
-				}
-				$VideoTracks[$trackKey] = $VideoTrack;
-			}
-		} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-			$clipMap = array();
-			if (!empty($VideoTracks)) foreach ($VideoTracks as $VideoTrack) {
-				if (!empty($VideoTrack['VideoTrackClips'])) foreach ($VideoTrack['VideoTrackClips'] as $VideoTrackClip) {
-					if (!empty($VideoTrackClip['ClipId'])) {
-						$clipMap[$VideoTrackClip['ClipId']] =  empty($lensDurationMap[$VideoTrackClip['ClipId']]) ? 0 : $lensDurationMap[$VideoTrackClip['ClipId']];
-					}
-				}
-			}
-			if (!empty($AudioTracks)) foreach ($AudioTracks as $audioTrackKey => $AudioTrack) {
-				if (!empty($AudioTrack['AudioTrackClips'])) foreach ($AudioTrack['AudioTrackClips'] as $clipKey => $AudioTrackClip) {
-					if (!empty($AudioTrackClip['ReferenceClipId'])) {
-						if (empty($clipMap[$AudioTrackClip['ReferenceClipId']])) {
-							unset($AudioTrackClip['ReferenceClipId']);
-						} else { // 视频有配音
-							if (!empty($AudioTrackClip['Duration']) && $AudioTrackClip['Duration'] > $clipMap[$AudioTrackClip['ReferenceClipId']]) { // 配音时长 大于 视频时长
-								$AudioTrackClip['Duration'] = $clipMap[$AudioTrackClip['ReferenceClipId']]; // 截取为视频时长
-							}
-						}
-					}
-					$AudioTrack['AudioTrackClips'][$clipKey] = $AudioTrackClip;
-				}
-				$AudioTracks[$audioTrackKey] = $AudioTrack;
-			}
 		}
 		$result = array();
-		if (!empty($VideoTracks)) {
-			$result['VideoTracks'] = $VideoTracks;
+		if (!empty($lensMediaVideoTrackClips)) { // 镜头视频
+			$result['VideoTracks'][] = array(
+				'MainTrack' => true,
+				'VideoTrackClips' => $lensMediaVideoTrackClips,
+			);
 		}
-		if (!empty($AudioTracks)) {
-			$result['AudioTracks'] = $AudioTracks;
+		if (!empty($lensDubAudioTrackClips)) { // 镜头配音
+			$result['AudioTracks'][] = array(
+				'MainTrack' => false,
+				'AudioTrackClips' => $lensDubAudioTrackClips,
+			);
 		}
-		if (!empty($SubtitleTracks)) {
-			$result['SubtitleTracks'] = $SubtitleTracks;
+		if (!empty($effectTrackItems)) { // 特效轨列表
+			$result['EffectTracks'][] = array(
+				'EffectTrackItems' => $effectTrackItems,
+			);
 		}
-		if (!empty($EffectTrack)) {
-			$result['EffectTrack'] = $EffectTrack;
+		if (!empty($subtitleTrackClips)) { // 标题
+			$result['SubtitleTracks'][] = array(
+				'SubtitleTrackClips' => $subtitleTrackClips,
+			);
+		}
+		if (!empty($musicAudioTrackClips)) { // 背景音
+			$result['AudioTracks'][] = array(
+				'AudioTrackClips' => $musicAudioTrackClips,
+			);
+		}
+		if (!empty($decalVideoTrackClips)) { // 贴纸
+			$result['VideoTracks'][] = array(
+				'VideoTrackClips' => $decalVideoTrackClips,
+			);
+		}
+		if (!empty($editingBackgroundVideoTrackClip)) { // 背景图片/视频，镜头，贴纸视频/图片
+			$result['VideoTracks'][] = array(
+				'VideoTrackClips' => array($editingBackgroundVideoTrackClip),
+			);
 		}
 		return $result;
 	}
@@ -749,11 +735,7 @@ class AliEditing extends ServiceBase
 				$duration = 0;
 				$audioTrackClip = self::captionToAudioTrackClipByUrl($lensRow['dubCaptionInfo'], $editingInfo, $lensRow, $duration);
 				if (!empty($audioTrackClip)) {
-					if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-						$audioTrackClip['ClipId'] = $lensRow['id'];
-					} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-						$audioTrackClip['ReferenceClipId'] = $lensRow['id'];
-					}
+					$audioTrackClip['lensId'] = $lensRow['id'];
 					$lensAudioTrackClips[] = $audioTrackClip;
 					$dubDurationMap[$lensRow['id']] = $duration;
 				}
@@ -785,11 +767,7 @@ class AliEditing extends ServiceBase
 				if (!empty($effects)) {
 					$audioTrackClip['Effects'] = $effects;
 				}
-				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-					$audioTrackClip['ClipId'] = $lensRow['id'];
-				} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-					$audioTrackClip['ReferenceClipId'] = $lensRow['id'];
-				}
+				$audioTrackClip['lensId'] = $lensRow['id'];
 				$lensAudioTrackClips[] = $audioTrackClip;
 			}
 		}
@@ -812,7 +790,7 @@ class AliEditing extends ServiceBase
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
 					'SubType' => $lensRow['transitionSubType'],
-					'Duration' => 0.5,
+					'Duration' => self::TRANSITION_DURATION,
 				);
 			}
 			if (empty($lensRow['originalSound'])) { // #关闭原声
@@ -850,13 +828,7 @@ class AliEditing extends ServiceBase
 				if (!empty($effects)) {
 					$videoTrackClip['Effects'] = $effects;
 				}
-				
-				if (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 2) { // 配音时长
-					$videoTrackClip['ReferenceClipId'] = $lensRow['id'];
-				} elseif (!empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 视频时长
-					$videoTrackClip['ClipId'] = $lensRow['id'];
-				}
-				
+				$videoTrackClip['lensId'] = $lensRow['id'];
 				$lensDurationMap[$lensRow['id']] = $videoTrackClip['Duration'];
 				$lensVideoTrackClips[] = $videoTrackClip;
 			}
@@ -905,7 +877,7 @@ class AliEditing extends ServiceBase
 					$videoTrackClip['Y'] = $mediaInfo['y'];
 				}
 				if (!empty($clipIds)) { // 适用的镜头
-					$videoTrackClip['ReferenceClipId'] = 'lens_' . reset($clipIds); // 镜头ID
+					$videoTrackClip['lensId'] = reset($clipIds); // 镜头ID
 				}
 				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO) { // 视频静音
 					$effectVolume = array(
@@ -971,7 +943,7 @@ class AliEditing extends ServiceBase
 		
 		
 print_r($timeline);
-exit;
+
 
 echo json_encode($timeline, JSON_UNESCAPED_UNICODE);
 // 		$timeline['AudioTracks']['1']['AudioTrackClips']['0']['Content'] = '第一步，本题考查唯物辩证法知识。
