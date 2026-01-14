@@ -166,9 +166,9 @@ class App extends ServiceBase
     	$now = $this->frame->now;
     	$text = "欢迎使用因火AI配音";
     	foreach ($actorArr as $actorClassify => $actorList) {
-    		if ($actorClassify != '1.0音色') {
-    			continue;
-    		}
+//     		if ($actorClassify != '1.0音色') {
+//     			continue;
+//     		}
     		$list = array();
     		foreach ($actorList as $rowArr) {
     			$list[] = array(
@@ -179,6 +179,8 @@ class App extends ServiceBase
     				'resourceId'	=> 'seed-tts-1.0',
     				'language'		=> empty($rowArr['language']) ? '' : $rowArr['language'],
     			);
+    			
+    			continue;
     			
     			$dubId = md5($rowArr['tag'] . $text);
     			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
