@@ -1437,15 +1437,22 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['dubMediaList'])) {
     		$editingInfo['dubMediaInfo'] = $editingInfo['dubMediaList'][array_rand($editingInfo['dubMediaList'], 1)];
     	}
+    	$transitionArr = cfg('transition');
+    	$transitionIds = array();
+    	foreach ($transitionArr as $name => $id) {
+    		$transitionIds[] = $id;
+    	}
+    	
     	// 全局转场
     	if (!empty($editingInfo['transitionIds'])) { // 转场
     		if (in_array(-1, $editingInfo['transitionIds'])) { // 随机转场
-    			$editingInfo['transitionSubType'] = 'random';
+    			//$editingInfo['transitionSubType'] = 'random';
+    			$editingInfo['transitionSubType'] = array_rand($transitionIds, 1);
     		} else { // 自选转场
-    			$editingInfo['transitionSubType'] = implode(',', $editingInfo['transitionIds']);
+    			$editingInfo['transitionSubType'] = array_rand(implode(',', $editingInfo['transitionIds']), 1);
     		}
-    	} else { // 默认随机转场
-    		$editingInfo['transitionSubType'] = 'random';
+    	} else { // 默认不设置转场
+    		//$editingInfo['transitionSubType'] = 'random';
     	}
     	// 背景视频/图片
     	if (!empty($editingInfo['background']['mediaList'])) {
