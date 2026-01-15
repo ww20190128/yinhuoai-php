@@ -1451,8 +1451,6 @@ class Editing extends ServiceBase
     		} else { // 自选转场
     			$editingInfo['transitionSubType'] = array_rand(implode(',', $editingInfo['transitionIds']), 1);
     		}
-    	} else { // 默认不设置转场
-    		//$editingInfo['transitionSubType'] = 'random';
     	}
     	// 背景视频/图片
     	if (!empty($editingInfo['background']['mediaList'])) {
@@ -1519,6 +1517,9 @@ class Editing extends ServiceBase
     		unset($lensRow['dubCaptionList']);
     		unset($lensRow['dubMediaList']);
     		$editingInfo['lensList'][$lensKey] = $lensRow;
+    	}
+    	if (empty($editingInfo['lensList'])) {
+    		return false;
     	}
     	if (!empty($editingInfo['titleList'])) {
     		$editingInfo['titleInfo'] = $editingInfo['titleList'][array_rand($editingInfo['titleList'], 1)];

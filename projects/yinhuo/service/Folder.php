@@ -486,7 +486,6 @@ class Folder extends ServiceBase
     	$now = $this->frame->now;
     	if (empty($dubFileEtt)) {
     		$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
-
     		if (!empty($ttsResult['content'])) { // 配音成功
 				$dubFileEtt = $dubFileDao->getNewEntity();
     			$dubFileEtt->id = $dubId;
@@ -503,6 +502,7 @@ class Folder extends ServiceBase
     			return false;
     		}
     	} 
+    	// 需要生成音频链接
     	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($dubFileEtt->content)) {
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
