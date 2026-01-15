@@ -629,6 +629,9 @@ class Project extends ServiceBase
     	$chipParamList = array();
     	for ($index = 1; $index <= $needCreateNum; $index++) {
     		$chipParam = $editingSv->randomChipParam($editingInfo);
+    		if (empty($chipParam)) {
+    			continue;
+    		}
     		$chipParamList[$index] = $chipParam;
     	}
     	$projectClipDao = \dao\ProjectClip::singleton();
