@@ -294,15 +294,15 @@ class Project extends CtrlBase
 EOT;
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true);
 
-		
+		//print_r($chipParam);exit;
 		//print_r($chipParam);
 $matter = "单位接到群众投诉，举报小区附近有施工扰民，由你去进行沟通处理，去到现场后发现正在施工的是街道的一个重点项目，当时你对施工现场情况做了沟通和规劝，但一段时间之后，这位居民又再次投诉，说该项工程施工扰民问题再次发生，并认为你涉嫌包庇、要联系媒体曝光。如果你作为一个执法队员，请问你怎么办?";
 $answer = "单位接到群众投诉，举报小区附近有施工扰民，由我去进行沟通处理，去到现场后发现正在施工的是街道的一个重点项目。当时，我对施工现场情况做了沟通和规劝，但一段时间之后，这位居民又再次投诉，说该项工程施工扰民问题再次发生，并认为我涉嫌包庇、要联系媒体曝光。如果不及时处理，会严重影响单位的公信力。作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
 
-// $folderSv = \service\Folder::singleton();
-// $url = $folderSv->getTtsByText($answer, 'zh_female_tianxinxiaomei_emo_v2_mars_bigtts');
+$folderSv = \service\Folder::singleton();
+$url = $folderSv->getTtsByText($answer, 'zh_female_gujie_mars_bigtts');
 
-// print_r($url);exit;
+print_r($url);exit;
 //$chipParam['showCaption'] = 1;
 //		$chipParam['lensList']['1']['dubCaptionInfo'] = array();
 		
@@ -340,8 +340,7 @@ $chipParam['lensList']['4']['dubCaptionInfo']['text'] = '考生还有需要补�
 		do {
 			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
 		} while (empty($jobId) && --$tries > 0);
-		sleep(10);
-
+		//sleep(10);
 		//$jobId = 'ac33f7841bf84a5f8288505a260c5d49';
 		$tries = 3;
 		do {
@@ -353,6 +352,7 @@ $chipParam['lensList']['4']['dubCaptionInfo']['text'] = '考生还有需要补�
 		$preview['jobStatus'] = $mediaProducingJob['status'];
 		$preview['mediaURL'] = empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL'];
 		$preview['duration'] = empty($mediaProducingJob['duration']) ? 0 : ceil($mediaProducingJob['duration']);
+		
 		print_r($preview);exit;
 	}
 	

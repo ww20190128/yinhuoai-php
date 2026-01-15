@@ -942,7 +942,7 @@ class AliEditing extends ServiceBase
 			$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
 			
 			
-			//print_r($mediaProducingJob);exit;
+print_r($mediaProducingJob);exit;
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {

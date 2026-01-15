@@ -535,10 +535,13 @@ class Folder extends ServiceBase
     {
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
     	$ttsResult = $volcTTSSv->runByV3($text, $speaker);
+    	
+    	_e();exit;
+    	print_r($ttsResult);exit;
     	$url = '';
     	// 需要生成音频链接
     	if ($ttsResult['content']) {
-    		$dubId = md5('test');
+    		$dubId = md5(time());
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
