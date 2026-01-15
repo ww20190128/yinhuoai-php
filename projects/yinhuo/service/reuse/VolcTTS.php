@@ -237,7 +237,11 @@ print_r($response);exit;
     	if (!empty($response)) foreach ($response as $row) {
     		$rowArr = empty($row) ? array() : json_decode($row, true);
     		if (!empty($rowArr['data'])) {
-    			$content .= $rowArr['data'];
+    			$subContent = base64_decode($rowArr['data']);
+    			if (empty($subContent)) {
+    				continue;
+    			}
+    			$content .= $subContent;
     		} elseif (!empty($rowArr['sentence'])) {
     			$sentence = $rowArr['sentence'];
     			if (!empty($sentence['words'])) foreach ($sentence['words'] as $word) {
@@ -247,8 +251,8 @@ print_r($response);exit;
     			}
     		}
     	}
-    	$content = base64_decode($content);
     	return array(
+    		'size' => mb_strlen($duration),
     		'content' => $content,
     		'duration' => $duration,
     		'resourceId' => $resourceId,

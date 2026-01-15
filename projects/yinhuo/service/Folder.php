@@ -526,4 +526,31 @@ class Folder extends ServiceBase
     	);
     }
     
+    /**
+     * 获取配音
+     *
+     * @return array
+     */
+    public function getTtsByText($text, $speaker)
+    {
+    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
+    	$ttsResult = $volcTTSSv->runByV3($text, $speaker);
+    	$url = '';
+    	// 需要生成音频链接
+    	if ($ttsResult['content']) {
+    		$dubId = md5('test');
+    		$ossSv = \service\reuse\OSS::singleton();
+    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    		$aliEditingSv = \service\AliEditing::singleton();
+    		$extension = 'mp3';
+    		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $ttsResult['content']);
+    		if (!empty($ossResult)) {
+    			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    		}
+    	}
+    	return $url;
+    }
+    
 }
