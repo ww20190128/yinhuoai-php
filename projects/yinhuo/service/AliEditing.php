@@ -746,13 +746,15 @@ class AliEditing extends ServiceBase
 					'MediaURL' => $mediaInfo['url'], // 播放链接，视频/图片
 					'Type' => $mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_VIDEO ? 'Video' : 'Image', // Video（视频）Image（图片）
 				);
-				if (!empty($lensRow['duration'])) { // 镜头设置 - 选择时长(秒) 
+				if (!empty($lensRow['duration']) && !empty($editingInfo['durationType']) && $editingInfo['durationType'] == 1) { // 镜头设置 - 选择时长(秒) 
 					$videoTrackClip['In'] = 0;
 					$videoTrackClip['Out'] = $lensRow['duration']; // 素材片段的时长，一般在素材类型是图片时使用。单位：秒，精确到小数点后4位。
 				}
 				if ($mediaInfo['type'] == \constant\Folder::FOLDER_TYPE_IMAGE) {
-					if (empty($videoTrackClip['Duration'])) {
+					if (empty($lensRow['Duration'])) {
 						$videoTrackClip['Duration'] = self::VIDEO_DEFAULT_DURATION; // 图片默认停留7秒
+					} else {
+						$videoTrackClip['Duration'] = $lensRow['Duration']; 
 					}
 					$videoTrackClip['AdaptMode'] = 'Cover'; // 被替换的内容在保持其宽高比的同时填充整个目标区域。如果对象的宽高比与内容框不相匹配，该对象将被剪裁以适应目标区域。
 				}
