@@ -477,51 +477,68 @@ class Folder extends ServiceBase
     	$dubId = md5($actorInfo['id'] . $dubCaptionInfo['text']); // 字幕唯一标识
     	$dubFileDao = \dao\DubFile::singleton();
     	$dubFileEtt = $dubFileDao->readByPrimary($dubId);
-    	if (empty($dubFileEtt->duration) || $dubFileEtt->duration <= 0) {
-    		$dubFileDao->remove($dubFileEtt);
-    		$dubFileEtt = null;
-    	}
-
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
     	$now = $this->frame->now;
-    	if (empty($dubFileEtt)) {
-    		$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
+    	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3'; // 配音源文件
+    	$content = '';
+    	if (!empty($dubFileEtt) && !empty($dubFileEtt->url)) { // 有生成的远程链接，不需要重复生成
+    		return array(
+    			'id' 		=> $dubFileEtt->id,
+    			'duration'	=> $dubFileEtt->duration,
+    			'url'		=> $dubFileEtt->url,
+    		);
+    	} elseif (!empty($dubFileEtt)) { // 没有远程链接
+    		if (file_exists($ttsFile)) {
+    			$content = @file_get_contents($ttsFile);
+    		}
+    	}
+    	if (empty($content)) { // 没有原内容，从火山云获取
+    		$tries = 3;
+    		do {
+    			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
+    		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
-				$dubFileEtt = $dubFileDao->getNewEntity();
-    			$dubFileEtt->id = $dubId;
-    			$dubFileEtt->duration = $ttsResult['duration'];
-    			$dubFileEtt->content = base64_encode($ttsResult['content']);
-    			$dubFileEtt->url = '';
-    			$dubFileEtt->actorSpeaker = $actorInfo['id'];
-    			$dubFileEtt->resourceId = $ttsResult['resourceId'];
-    			$dubFileEtt->text = $dubCaptionInfo['text'];
-    			$dubFileEtt->createTime = $now;
-    			$dubFileEtt->updateTime = $now;
-    			$dubFileDao->create($dubFileEtt);
+    			$content = $ttsResult['content'];
+    			@file_put_contents($ttsFile, $content);
     		} else {
     			return false;
     		}
-    	} 
+    	}
+    	if (empty($dubFileEtt)) {
+    		$dubFileEtt = $dubFileDao->getNewEntity();
+    		$dubFileEtt->id = $dubId;
+    		$dubFileEtt->duration = 0;
+    		$dubFileEtt->content = '';
+    		$dubFileEtt->url = '';
+    		$dubFileEtt->actorSpeaker = $actorInfo['id'];
+    		$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
+    		$dubFileEtt->text = $dubCaptionInfo['text'];
+    		$dubFileEtt->createTime = $now;
+    		$dubFileEtt->updateTime = $now;
+    		$dubFileDao->create($dubFileEtt);
+    	}
+
     	// 需要生成音频链接
-    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($dubFileEtt->content)) {
+    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content)) {
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$aliEditingSv = \service\AliEditing::singleton();
     		$extension = 'mp3';
     		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
-    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, base64_decode($dubFileEtt->content));
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
-    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    			$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
+    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			$dubFileEtt->set('url', $url);
+    			$dubFileEtt->set('duration', empty($mediaInfo['duration'] ? '' : $mediaInfo['duration']));
     			$dubFileDao->update($dubFileEtt);
     		}
     	}
     	return array(
     		'id' 		=> $dubId,
     		'duration'	=> $dubFileEtt->duration,
-    		'content'	=> $dubFileEtt->content,
     		'url'		=> $dubFileEtt->url,
     	);
     }
@@ -533,27 +550,36 @@ class Folder extends ServiceBase
      */
     public function getTtsByText($text, $speaker)
     {
-    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
-    	$ttsResult = $volcTTSSv->runByV3($text, $speaker);
-    	
-    	_e();exit;
-    	print_r($ttsResult);exit;
-    	$url = '';
-    	// 需要生成音频链接
-    	if ($ttsResult['content']) {
-    		$dubId = md5(time());
-    		$ossSv = \service\reuse\OSS::singleton();
-    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
-    		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
-    		$aliEditingSv = \service\AliEditing::singleton();
-    		$extension = 'mp3';
-    		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
-    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $ttsResult['content']);
-    		if (!empty($ossResult)) {
-    			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    	$dubId = md5($speaker . $text);
+    	// 配音源文件
+    	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3';
+    	$content = '';
+    	if (file_exists($ttsFile)) {
+    		$content = @file_get_contents($ttsFile);	
+    	} else {
+    		$volcTTSSv = \service\reuse\VolcTTS::singleton();
+    		$ttsResult = $volcTTSSv->runByV3($text, $speaker);
+    		if (empty($ttsResult['content'])) {
+    			return false;
     		}
+    		@file_put_contents($ttsFile, $ttsResult['content']);
+    		$content = $ttsResult['content'];
     	}
-    	return $url;
+
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$aliEditingSv = \service\AliEditing::singleton();
+    	$extension = 'mp3';
+    	$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
+    	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		return false;
+    	}
+    	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    	$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
+    	$mediaInfo['url'] = $url;
+    	return $mediaInfo;
     }
     
 }

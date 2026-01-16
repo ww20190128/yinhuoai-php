@@ -105,9 +105,9 @@ $conf = array(
 		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 		'chipUrlBase' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/',
 	),
-	'x' => array(
-		'keyId' => 'api-key-20251222143438',
-		'keySecret' => 'a3e46e90-e3d8-4fcc-bcbc-ded163538359',
+	// 火山引擎
+	'volcengine' => array(
+		'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
 	),
 	'appConfig' => array(
 		'name' => '智乐心理',

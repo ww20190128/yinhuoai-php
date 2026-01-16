@@ -180,7 +180,7 @@ print_r($response);exit;
     		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
     		'cache_config' => array(
     			'text_type' => 1,
-    			//'use_cache' => true,
+    			'use_cache' => true,
     		),
     	);
     	if (!empty($ttsParams['language'])) { // 明确语种
@@ -203,60 +203,37 @@ print_r($response);exit;
     		'additions' => json_encode($additions),
     		'audio_params' => $audioParams,
     	);
-    	
     	$postParams = array(
     		'req_params' => $postParams,
     	);
-    	$appId = 'd294de9a-a197-42e4-8a00-e29eaa05a0df';
-    	$url = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
-    	
+    	$volcConf = self::$instance->frame->conf['volcengine'];
+ 
+		$apiUrl = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
+  
+    	$responseContent = ''; // 请求的内容
     	$ch = curl_init();
     	curl_setopt_array($ch, [
-    	CURLOPT_URL => $url,
+    	CURLOPT_URL => $apiUrl,
     	CURLOPT_POST => true,
     	CURLOPT_POSTFIELDS => json_encode($postParams, JSON_UNESCAPED_UNICODE),
     	CURLOPT_HTTPHEADER => [
     		"Content-Type: application/json",
     		"Accept: application/octet-stream", // 接收二进制流
-    		"x-api-key: {$appId}", // 使用火山引擎控制台获取的APP ID，
+    		"x-api-key: {$volcConf['appId']}", // 使用火山引擎控制台获取的APP ID，
     		"X-Api-Resource-Id: {$resourceId}", // 服务的资源信息 ID
     		'Connection: keep-alive',
     	],
+    	
     	CURLOPT_RETURNTRANSFER => false, // 关闭自动拼接，启用流式回调
     	CURLOPT_BINARYTRANSFER => true,  // 处理二进制数据（关键，音频是二进制）
-    	CURLOPT_WRITEFUNCTION => function ($ch, $chunkData) {
-    		// $chunkData：本次收到的音频分片（二进制）
-    		// 避免空数据：服务端可能返回空分片，需过滤
+    	CURLOPT_WRITEFUNCTION => function ($ch, $chunkData) use (&$responseContent) {
     		if (empty($chunkData)) {
     			return strlen($chunkData); // 必须返回接收的字节数，否则 cURL 会中断
     		}
-    		
-    		echo $chunkData . "\n";
-    		
-    		$subResult = json_decode($chunkData, true);
-    		$subContent = empty($subResult['data']) ? '' : base64_decode($subResult['data']);
-    		if (!empty($subContent)) {
-    			// 示例1：实时保存到文件（边接收边写入，无需等待全量数据）
-    			$savePath = "/data/www/test/666.mp3";
-    			file_put_contents($savePath, $subContent, FILE_APPEND); // 追加写入
-    		}
-    	
-    		
-    	
-    		// 示例2：实时输出到前端（如果是 Web 场景，可直接播放）
-    		// echo $chunkData;
-    		// flush(); // 强制输出缓冲区，前端可实时播放
-    	
-    		// 示例3：统计进度（可选）
-    		static $totalBytes = 0;
-    		$totalBytes += strlen($subContent);
-    		//echo "已接收：{$totalBytes} 字节\n";
-    	
-    		// 必须返回本次接收的字节数！否则 cURL 会认为出错并终止请求
+    		$responseContent .= $chunkData;
     		return strlen($chunkData);
     	}
     	]);
-    	// 4. 执行请求并处理异常
     	try {
     		$response = curl_exec($ch);
     		if (curl_errno($ch)) {
@@ -264,67 +241,34 @@ print_r($response);exit;
     		}
     		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     		if ($httpCode !== 200) {
-    			throw new Exception("API 请求失败，状态码：{$httpCode}");
+    			return false;
     		}
-    		echo "流式接收完成！音频已保存到 tts_stream.mp3\n";
     	} catch (Exception $e) {
-    		echo "错误：" . $e->getMessage() . "\n";
+    		return false;
     	} finally {
     		curl_close($ch); // 关闭 cURL 资源
     	}
-    	return ;
-    	
-    	
-
-    	
-    	$ch = curl_init();
-    	curl_setopt_array($ch, array(
-    		CURLOPT_URL            => $url,
-    		CURLOPT_POST           => true,
-    		CURLOPT_POSTFIELDS     => json_encode($postParams, JSON_UNESCAPED_UNICODE),
-    		CURLOPT_HTTPHEADER     => array(
-    			"x-api-key: {$appId}", // 使用火山引擎控制台获取的APP ID，
-    			"X-Api-Resource-Id: {$resourceId}", // 服务的资源信息 ID
-    			'Connection: keep-alive',
-    			'Content-Type: application/json',
-    		),
-    		CURLOPT_RETURNTRANSFER => true,
-    		CURLOPT_SSL_VERIFYPEER => false,
-    		CURLOPT_SSL_VERIFYHOST => false,
-    		CURLOPT_TIMEOUT        => 80,
-    		CURLOPT_CONNECTTIMEOUT => 10
-    	));
-    	$response = curl_exec($ch);
-    	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    	$curlError = curl_error($ch);
-    	curl_close($ch);
-    	$response = empty($response) ? array() : explode("\n", $response);
+    	preg_match_all('/\{\s*"code":.*?\}(?=\s*\{|\s*$)/s', $responseContent, $ttsContentArr);
     	$content = '';
-    	$duration = 0;
-    	if (!empty($response)) foreach ($response as $row) {
+    	if (!empty($ttsContentArr['0'])) foreach ($ttsContentArr['0'] as $row) {
+    		$row = trim($row);
     		$rowArr = empty($row) ? array() : json_decode($row, true);
-    		if (!empty($rowArr['data'])) {
+    		if (empty($rowArr)) {
+    			continue;
+    		}
+    		if (!empty($rowArr['sentence'])) { // 句子
+    			$text = $rowArr['sentence']['text'];
+    		} elseif (!empty($rowArr['data'])) {
     			$subContent = base64_decode($rowArr['data']);
     			if (empty($subContent)) {
-    				
-    				echo "xx\n";
     				continue;
     			}
     			$content .= $subContent;
-    		} elseif (!empty($rowArr['sentence'])) {
-    			$sentence = $rowArr['sentence'];
-    			if (!empty($sentence['words'])) foreach ($sentence['words'] as $word) {
-    				if (!empty($word['endTime']) && $word['endTime'] >= $duration) {
-    					$duration = $word['endTime'];
-    				}
-    			}
     		}
     	}
-    	echo mb_strlen($content) . "\n";
     	return array(
     		'size' => mb_strlen($content),
     		'content' => $content,
-    		'duration' => $duration,
     		'resourceId' => $resourceId,
     		'speaker' => $speaker,
     	);

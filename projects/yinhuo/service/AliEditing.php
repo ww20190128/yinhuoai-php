@@ -411,7 +411,6 @@ class AliEditing extends ServiceBase
 				);
 			} elseif (!empty($lensDubAudioTrackClips)) { // 镜头配音
 				foreach ($lensMediaVideoTrackClips as $lensIndex => $VideoTrackClip) {
-
 					if (empty($lensDubAudioTrackClips[$lensIndex])) { // 这段视频没有配音
 						$VideoTrackClip['In'] = 0;
 						$VideoTrackClip['Out'] = self::VIDEO_DEFAULT_DURATION; // 设置7秒
@@ -430,12 +429,10 @@ class AliEditing extends ServiceBase
 				$result['VideoTracks'][] = array(
 					'VideoTrackClips' => array_values($lensMediaVideoTrackClips),
 				);
-				if (!empty($lensDubAudioTrackClips)) { // 镜头配音
-					$result['AudioTracks'][] = array(
-						'MainTrack' => true,
-						'AudioTrackClips' => array_values($lensDubAudioTrackClips),
-					);
-				}
+				$result['AudioTracks'][] = array(
+					'MainTrack' => true,
+					'AudioTrackClips' => array_values($lensDubAudioTrackClips),
+				);
 			} else { // 没有配音，只播放视频
 				$result['VideoTracks'][] = array(
 					'MainTrack' => true,
@@ -882,7 +879,8 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-//print_r($timeline);exit;
+// print_r($timeline);
+//exit;
 
 		$orientation = 'Horizontal';
 		$width = $height = 0;
@@ -940,9 +938,7 @@ class AliEditing extends ServiceBase
    	 		$request->jobId = $jobId;
     		$response = self::$client->getMediaProducingJob($request);
 			$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
-			
-			
-print_r($mediaProducingJob);exit;
+//print_r($mediaProducingJob);
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {
