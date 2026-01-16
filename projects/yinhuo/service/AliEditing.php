@@ -879,8 +879,8 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-// print_r($timeline);
-//exit;
+//  print_r($timeline);
+// exit;
 
 		$orientation = 'Horizontal';
 		$width = $height = 0;

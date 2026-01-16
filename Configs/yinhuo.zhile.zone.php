@@ -83,7 +83,10 @@ $conf = array(
     	'images' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/',
 //     	'images' => 'http://static.zhile.ink/resources/',
 	),
-
+		// 火山引擎
+	'volcengine' => array(
+				'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
+		),
     'fileDir' => '/data/www/static-kjs/file/',
 	'weChat' => array(
 		'appId' => 'wxde609c2255df3268',
