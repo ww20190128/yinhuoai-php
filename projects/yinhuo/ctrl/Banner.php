@@ -2,23 +2,22 @@
 namespace ctrl;
 
 /**
- * 资讯
+ * 轮播图
  * 
  * @package ctrl
  */
-class News extends CtrlBase
+class Banner extends CtrlBase
 {
 	/**
-     * 新闻列表
+     * 轮播图
      *
      * @return array
      */
-    public function getNewsList()
+    public function getBannerList()
     {
-
     	$params = $this->params;
-    	$newsSv = \service\News::singleton();
-    	$dataList = $newsSv->getNewsList();
+    	$bannerSv = \service\Banner::singleton();
+    	$dataList = $bannerSv->getBannerList();
     	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
     	$pageLimit = $this->paramFilter('pageLimit', 'intval', 200); // 每页数量限制
     	// 符合条件的总条数
@@ -32,11 +31,11 @@ class News extends CtrlBase
     }
     
     /**
-     * 删除资讯
+     * 删除剪辑工程
      *
      * @return array
      */
-    public function deleteNews()
+    public function deleteBanner()
     {
     	$params = $this->params;
     	if (empty($this->userId)) {
@@ -46,8 +45,8 @@ class News extends CtrlBase
     	if (empty($ids)) {
     		throw new $this->exception('请求参数错误');
     	}
-    	$newsSv = \service\News::singleton();
-    	return $newsSv->deleteNews($this->userId, $ids);
+    	$bannerSv = \service\Banner::singleton();
+    	return $bannerSv->deleteBanner($this->userId, $ids);
     }
     
     /**
@@ -55,7 +54,7 @@ class News extends CtrlBase
      *
      * @return array
      */
-    public function reviseNews()
+    public function reviseBanner()
     {
     	$params = $this->params;
     	if (empty($this->userId)) {
@@ -67,25 +66,19 @@ class News extends CtrlBase
     		throw new $this->exception('请求参数错误');
     	}
     	$info = array();
-    	if (isset($params['title'])) {
-    		$info['title'] = $this->paramFilter('title', 'string');
+    	if (isset($params['name'])) {
+    		$info['name'] = $this->paramFilter('name', 'string');
     	}
-    	if (isset($params['source'])) {
-    		$info['source'] = $this->paramFilter('source', 'string');
-    	}
-    	if (isset($params['content'])) {
-    		$info['content'] = $this->paramFilter('content', 'string');
-    	}
-    	$newsSv = \service\News::singleton();
-    	return $newsSv->reviseNews($this->userId, $id, $info);
+    	$bannerSv = \service\Banner::singleton();
+    	return $bannerSv->reviseBanner($this->userId, $id, $info);
     }
     
     /**
-     * 创建资讯
+     * 创建轮播图
      *
      * @return array
      */
-    public function createNews()
+    public function createBanner()
     {
     	$params = $this->params;
     	if (empty($this->userId)) {
@@ -99,24 +92,25 @@ class News extends CtrlBase
     		$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
     		$info['numLimit'] = min($info['numLimit'], 2000);
     	}
-    	$newsSv = \service\News::singleton();
-    	return $newsSv->createNews($this->userId, $info);
+    	$bannerSv = \service\Banner::singleton();
+    	return $bannerSv->createBanner($this->userId, $info);
     }
     
     /**
-     * 资讯详情
+     * 轮播图详情
      *
      * @return array
      */
-    public function NewsInfo()
+    public function bannerInfo()
     {
     	$params = $this->params;
     	$id = $this->paramFilter('id', 'intval', 0);
     	if (empty($id)) {
     		throw new $this->exception('请求参数错误');
     	}
-    	$newsSv = \service\News::singleton();
-    	return $newsSv->newsInfo($id);
+    	$bannerSv = \service\Banner::singleton();
+    	return $bannerSv->bannerInfo($id);
     }
     
 }
+	

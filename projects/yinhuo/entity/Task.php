@@ -38,6 +38,13 @@ class Task extends EntityBase
     public $title;
 
     /**
+     * 创建者Id
+     *
+     * @var int
+     */
+    public $userId = 0;
+    
+    /**
      * 详情
      *
      * @var varchar

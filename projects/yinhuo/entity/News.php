@@ -78,6 +78,13 @@ class News extends EntityBase
      * @var int
      */
     public $createTime = 0;
+    
+    /**
+     * 创建者Id
+     *
+     * @var int
+     */
+    public $userId = 0;
 
 // 表结构end
 }

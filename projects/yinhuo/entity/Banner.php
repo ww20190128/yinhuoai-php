@@ -57,6 +57,13 @@ class Banner extends EntityBase
      * @var int
      */
     public $status = 0;
+    
+    /**
+     * 创建用户ID
+     *
+     * @var int
+     */
+    public $userId = 0;
 
     /**
      * 更新时间

@@ -331,29 +331,4 @@ class App extends ServiceBase
     	);
     }
 
-    /**
-     * 轮播图
-     *
-     * @return array
-     */
-    public function getBannerList()
-    {
-    	// 轮播图
-    	$bannerDao = \dao\Banner::singleton();
-    	$bannerEttList = $bannerDao->readListByIndex(array(
-    		'status' => 0,
-    	));
-    	$commonSv = \service\Common::singleton();
-    	$bannerList = array();
-    	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
-    		$bannerList[] = array(
-    			'id' => intval($bannerEtt->id),
-    			'url' => $bannerEtt->url,
-    			'goto' => $bannerEtt->goto,
-    		);
-    	}
-    	return $bannerList;
-    }
-    
-    
 }
