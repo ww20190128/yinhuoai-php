@@ -348,33 +348,12 @@ class App extends ServiceBase
     	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
     		$bannerList[] = array(
     			'id' => intval($bannerEtt->id),
-    			'url' => $commonSv::formartImgUrl($bannerEtt->url, 'banner'),
+    			'url' => $bannerEtt->url,
     			'goto' => $bannerEtt->goto,
     		);
     	}
     	return $bannerList;
     }
     
-    /**
-     * 资讯
-     *
-     * @return array
-     */
-    public function getNewsList()
-    {
-    	// 轮播图
-    	$bannerDao = \dao\Banner::singleton();
-    	$bannerEttList = $bannerDao->readListByIndex(array(
-    		'status' => 0,
-    	));
-    	$commonSv = \service\Common::singleton();
-    	$bannerList = array();
-    	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
-    		$bannerList[] = array(
-    			'id' => intval($bannerEtt->id),
-    			'url' => $commonSv::formartImgUrl($bannerEtt->url, 'banner'),
-    			'goto' => $bannerEtt->goto,
-    		);
-    	}
-    }
+    
 }

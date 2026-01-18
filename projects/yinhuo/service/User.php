@@ -126,72 +126,62 @@ class User extends ServiceBase
     }
     
     /**
-     * 我的报告
-     * 只获取已经完成的
-     * 
+     * 修改账号信息
+     *
      * @return array
      */
-    public function testOrderList($userId, $pageNum = 1, $pageLimit = 20, $searchTestPaperId = 0)
+    public function reviseUser($userId, $info)
     {
-        $userInfo = $this->userInfo($userId);
-        $userInfo = $userInfo['userInfo'];
-
-    	$testOrderDao = \dao\TestOrder::singleton();
-    	$testOrderEttList = $testOrderDao->readListByIndex(array(
-    		'userId' => $userId,
-    	));
-
-    	$testPaperIds = array();
-    	if (is_iteratable($testOrderEttList)) foreach ($testOrderEttList as $key => $testOrderEtt) {
-    	    if (empty($testOrderEtt->testCompleteTime)) {
-    	        unset($testOrderEttList[$key]);
-    	        continue;
-    	    }
-    	    if (!empty($testOrderEtt->testOrderId)) { // 过滤重测报告
-    	    	unset($testOrderEttList[$key]);
-    	    	continue;
-    	    }
-    	    if (!empty($searchTestPaperId) && $testOrderEtt->testPaperId != $searchTestPaperId) { // 有查找的测评ID
-    	    	continue;
-    	    }
-    	    if (!empty($testOrderEtt->promotionId)) { // 过滤推广测评
-    	    	unset($testOrderEttList[$key]);
-    	    	continue;
-    	    }
-    	    $testPaperIds[] = intval($testOrderEtt->testPaperId);
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('账号不存在');
     	}
-    	// 根据创建时间排序，后创建的放前面
-    	$commonSv = \service\Common::singleton();
-    	uasort($testOrderEttList, array($commonSv, 'sortByCreateTime'));
-    	// 符合条件的总条数
-    	$totalNum = count($testOrderEttList);
-    	// 分页显示
-    	if ($pageNum > 0) {
-    		$testOrderEttList = array_slice($testOrderEttList, ($pageNum - 1) * $pageLimit, $pageLimit);
+    	if (!empty($info['userName']) && $info['userName'] != $userEtt->userName) {
+    		$userEtt->set('userName', $info['userName']);
     	}
-    	
-    	$testPaperIds = array_unique($testPaperIds);
-    	$testPaperDao = \dao\TestPaper::singleton();
-    	$testPaperModels = array();
-    	if (!empty($testPaperIds)) {
-    		$testPaperEttList = $testPaperDao->readListByPrimary($testPaperIds);
-    		if (is_iteratable($testPaperEttList)) foreach ($testPaperEttList as $testPaperEtt) {
-    			$testPaperModels[$testPaperEtt->id] = $testPaperEtt->getModel();
+    	if (!empty($info['phone']) && $info['phone'] != $userEtt->phone) {
+    		$userEtt->set('phone', $info['phone']);
+    	}
+    	if (!empty($info['imageInfo'])) {
+    		$file = $info['imageInfo']['file']; // 文件内容
+    		$fileSize = filesize($file); // 文件大小
+    		$fileInfo = pathInfo($file);
+    		$extension = $fileInfo['extension'];
+    		$profileKey = "resources/userHeadImg/{$fileName}.{$extension}"; // 上传的目录
+    		$ossSv = \service\reuse\OSS::singleton();
+    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, file_get_contents($file));
+    		if (empty($ossResult)) {
+    			throw new $this->exception('头像上传失败');
     		}
+    		$headImgUrl = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    		$userEtt->set('headImgUrl', $headImgUrl);
     	}
-    	$modelList = array();
-    	if (is_iteratable($testOrderEttList)) foreach ($testOrderEttList as $testOrderEtt) {
-    		$testPaperInfo = empty($testPaperModels[$testOrderEtt->testPaperId]) 
-    			? array() : $testPaperModels[$testOrderEtt->testPaperId];
-    	    $testOrderModel = $testOrderEtt->getModel();
-    	    $testOrderModel['testPaperInfo'] = $testPaperInfo;
-    	    $modelList[$testOrderEtt->id] = $testOrderModel;
+    	$now = $this->frame->now;
+    	$userEtt->set('headImgUrl', $now);
+    	$userDao->update($userEtt);
+    	return $this->userInfo($userEtt);
+    }
+    
+    /**
+     * 注销登录
+     *
+     * @param  int  $userId  用户id
+     *
+     * @return array
+     */
+    public function logout($userId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('账号不存在');
     	}
     	return array(
-            'totalNum' => intval($totalNum),
-            'list' => array_values($modelList),
-    		'vipInfo' => empty($userInfo['vipInfo']) ? array() : $userInfo['vipInfo'],
-        );
+    		'result' => 1,
+    	);
     }
     
 }

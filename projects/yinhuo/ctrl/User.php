@@ -38,5 +38,62 @@ class User extends CtrlBase
         $userSv = \service\User::singleton();
         return $userSv->userInfo($this->userId);
     }
+    
+    /**
+     * 修改账号
+     *
+     * @return array
+     */
+    public function reviseUser()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$imageInfo = array();
+		$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+		if (!empty($files)) foreach ($files as $file) {
+			$fileInfo = pathinfo($file['name']);
+			$fileTmp = '/tmp/' .  $file['name'];
+			move_uploaded_file($file['tmp_name'], $fileTmp);
+			if (!file_exists($fileTmp)) {
+				throw new $this->exception('文件上传失败');
+			}
+			$imageInfo = array(
+				'extension' => $fileInfo['extension'],
+				'file' 		=> $fileTmp,
+			);
+		}	
+		$userSv = \service\User::singleton();
+    	$userName = $this->paramFilter('userName', 'string');
+    	$phone = $this->paramFilter('phone', 'intval');
+    	// 检查手机号格式
+    	if (empty($phone) || !preg_match(cfg('common.regular.phone'), $phone)) {
+    		throw new $this->exception('请输入正确的手机号');
+    	}
+    	$now = $this->frame->now;
+    	$info = array(
+    		'userName' 			=> $userName, 	// 姓名
+    		'phone'  			=> $phone, 		// 手机号
+    		'imageInfo'  		=> $imageInfo,
+    	);
+    	return $userSv->reviseUser($this->userId, $info);
+    }
+    
+    /**
+     * 注销登录
+     *
+     * @return array
+     */
+    public function logout()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$userSv = \service\User::singleton();
+    	$result = $userSv->logout($this->userId);
+    	return $result;
+    }
 
 }

@@ -114,6 +114,27 @@ class User extends ModelBase
      * @var varchar
      */
     public $editingId = 0;
+    
+    /**
+     * 个性签名
+     *
+     * @var varchar
+     */
+    public $signature = '';
+    
+    /**
+     * 火币
+     *
+     * @var varchar
+     */
+    public $gold = '';
+    
+    /**
+     * 奖励金
+     *
+     * @var varchar
+     */
+    public $award = '';
  
 // 表结构end
 
@@ -131,6 +152,9 @@ class User extends ModelBase
     		'status'        => intval($this->status),
     	    'updateTime'    => intval($this->updateTime),
     	    'createTime'    => intval($this->createTime),
+    		'signature'     => $this->signature,
+    		'gold'    		=> intval($this->gold),
+    		'award'    		=> intval($this->award),
 //     	    'openid'        => $this->openid,
 //          'sex'           => intval($this->sex),
 //          'country'       => $this->country,
