@@ -148,7 +148,7 @@ class User extends ServiceBase
     		$fileSize = filesize($file); // 文件大小
     		$fileInfo = pathInfo($file);
     		$extension = $fileInfo['extension'];
-    		$profileKey = "resources/userHeadImg/{$fileName}.{$extension}"; // 上传的目录
+    		$profileKey = "resources/userHeadImg/{$userId}.{$extension}"; // 上传的目录
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
