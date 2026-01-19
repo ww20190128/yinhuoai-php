@@ -160,7 +160,7 @@ class User extends ServiceBase
     		$userEtt->set('headImgUrl', $headImgUrl);
     	}
     	$now = $this->frame->now;
-    	$userEtt->set('headImgUrl', $now);
+    	$userEtt->set('updateTime', $now);
     	$userDao->update($userEtt);
     	return $this->userInfo($userEtt);
     }
