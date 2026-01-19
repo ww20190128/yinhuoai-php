@@ -86,8 +86,8 @@ class User extends ServiceBase
     	    if ($userEtt->status == \constant\Common::DATA_DELETE) {
     	        throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	    }
-    	    $userEtt->set('userName', $userName);
-    	    $userEtt->set('headImgUrl', $headImgUrl);
+//     	    $userEtt->set('userName', $userName);
+//     	    $userEtt->set('headImgUrl', $headImgUrl);
     	    $userEtt->set('sex', $sex);
     	    $userEtt->set('language', $language);
     	    $userEtt->set('country', $country);
