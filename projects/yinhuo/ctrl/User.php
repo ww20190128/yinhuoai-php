@@ -68,7 +68,7 @@ class User extends CtrlBase
     	$userName = $this->paramFilter('userName', 'string');
     	$phone = $this->paramFilter('phone', 'intval');
     	// 检查手机号格式
-    	if (empty($phone) || !preg_match(cfg('common.regular.phone'), $phone)) {
+    	if (!empty($phone) && !preg_match(cfg('common.regular.phone'), $phone)) {
     		throw new $this->exception('请输入正确的手机号');
     	}
     	$now = $this->frame->now;
