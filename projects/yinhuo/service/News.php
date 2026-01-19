@@ -56,4 +56,28 @@ class News extends ServiceBase
     	return $newsList;
     }
 
+    /**
+     * 新闻详情
+     *
+     * @return array
+     */
+    public function newsInfo($id)
+    {
+    	$newsDao = \dao\News::singleton();
+    	$newsEtt = $newsDao->readByPrimary($id);
+    	if (empty($newsEtt) || $newsEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('新闻已删除');
+    	}
+    	return array(
+    		'id' => intval($newsEtt->id),
+    		'title' => $newsEtt->title,
+    		'content' => $newsEtt->content,
+    		'source' => $newsEtt->source,
+    		'coverURL' => $newsEtt->coverURL,
+    		'status' => intval($newsEtt->status),
+    		'updateTime' => intval($newsEtt->updateTime),
+    		'createTime' => intval($newsEtt->createTime),
+    	);
+    }
+    
 }

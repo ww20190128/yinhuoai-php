@@ -108,7 +108,7 @@ class News extends CtrlBase
      *
      * @return array
      */
-    public function NewsInfo()
+    public function newsInfo()
     {
     	$params = $this->params;
     	$id = $this->paramFilter('id', 'intval', 0);
