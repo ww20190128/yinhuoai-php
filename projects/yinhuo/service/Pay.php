@@ -244,7 +244,7 @@ class Pay extends ServiceBase
 			'description'  => $description, // 商品描述  
 			'notify_url'   => $notify_url, // 商户回调地址
 			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
-			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商sp_appid下的唯一标识
+			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
 
 		);
 		try {

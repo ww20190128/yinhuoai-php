@@ -118,8 +118,6 @@ class Coupon extends ServiceBase
     	    }
     	    $targetInfos = $vipConfigs;
     	} 
-    	
-    
     	$couponConfigModel['targetIds'] = empty($targetInfos) ? array() : array_keys($targetInfos);
     	$userCouponModel['targetInfos'] = array_values($targetInfos);
     	

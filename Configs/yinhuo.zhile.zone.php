@@ -99,7 +99,7 @@ $conf = array(
 		'RSA' => '1B84A18252BFC94060DF9B551587288FC432AC84', // 平台证书
 		'APIv3Key' => '3UCb52tx4RMNhUQfAFXAqgHNNUV7ViV3', // APIv3密钥
 	),
-	// php CertificateDownloader.php -k F8F194CD3157F2330AE2D48DA6262514 -m 1708405300 -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s 407D6C1B24DBF31F53D46E20B4C76C38117C196D -o /data/www/mood-php/Configs/xince/
+	// php CertificateDownloader.php -k APIv3Key -m merchantId -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s APICertificateKey -o /data/www/mood-php/Configs/xince/
 	
 	'aliEditing' => array( // 阿里云剪辑
 		'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
