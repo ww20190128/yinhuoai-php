@@ -31,7 +31,6 @@ class Order extends CtrlBase
         );
         $info = array(
             'couponId' => $this->paramFilter('couponId', 'intval', 0), // 优惠券
-            'testPaperId' => $this->paramFilter('testPaperId', 'intval', 0), // TODO 测评ID 不确定用法
         );
         $userId = empty($this->userId) ? 0 : $this->userId;
         $orderSv = \service\Order::singleton();
@@ -51,8 +50,7 @@ class Order extends CtrlBase
     	$orderId = $this->paramFilter('orderId', 'intval');  // 订单ID
     	$paymentType = $this->paramFilter('paymentType', 'intval'); // 支付类型  1 微信支付
     	$redirectUrl = $this->paramFilter('redirectUrl', 'string'); // 跳转URL
-    	$tradeType = $this->paramFilter('tradeType', 'string'); // 交易类型
-    	if (empty($orderId) || empty($redirectUrl) || empty($paymentType) || empty($tradeType)) {
+    	if (empty($orderId) || empty($redirectUrl) || empty($paymentType)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$couponId = $this->paramFilter('couponId', 'intval', 0); // 优惠券Id
@@ -64,110 +62,7 @@ class Order extends CtrlBase
     	$orderSv = \service\Order::singleton();
     	return $orderSv->vipOrderPay($userId, $orderId, $info, $couponId);
     }
-    
-    /**
-     * 测评订单支付
-     * 
-     * @return array
-     */
-    public function testOrderPay()
-    {
-        $params = $this->params;
-        $testOrderId = $this->paramFilter('testOrderId', 'intval');  // 测试订单ID
-        $paymentType = $this->paramFilter('paymentType', 'intval'); // 支付类型  1 微信支付
-        $redirectUrl = $this->paramFilter('redirectUrl', 'string'); // 跳转URL
-        $tradeType = $this->paramFilter('tradeType', 'string'); // 交易类型
-        $h5Type = $this->paramFilter('h5Type', 'string', 'wx'); // h5支付类型   wx  微信支付  zfb 支付宝支付
-        if (empty($testOrderId) || empty($redirectUrl) || empty($paymentType) || empty($tradeType)) {
-        	throw new $this->exception('请求参数错误');
-        }
-        $couponId = $this->paramFilter('couponId', 'intval', 0); // 优惠券ID
-        $redPacketType = $this->paramFilter('redPacketType', 'intval', 0); // 红包类型 1第一个红包 2第二个红包
-        $unlockIndex = $this->paramFilter('unlockIndex', 'intval', 0); // 解锁的类型   0  1  2
-        $info = array(
-            'paymentType' => $paymentType,
-            'tradeType' => $tradeType,
-            'redirectUrl' => $redirectUrl,
-        	'redPacketType' => $redPacketType,
-        	'unlockIndex' => $unlockIndex,
-        	'h5Type' => $h5Type,
-        );
-        
-        $orderSv = \service\Order::singleton();
-        return $orderSv->testOrderPay($testOrderId, $info, $this->userId, $couponId);
-    }
-    
-    /**
-     * 创建正念课程支付订单
-     *
-     * @return array
-     */
-    public function createMindfulnessOrder()
-    {
-    	$params = $this->params;
-    	$mindfulnessId = $this->paramFilter('mindfulnessId', 'intval'); // 课程ID  必填
-    	if (empty($mindfulnessId)) {
-    		throw new $this->exception('请求参数错误');
-    	}
-    	if (empty($this->userId)) {
-    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
-    	}
-    	// 设备信息
-    	$deviceInfo = array(
-    		'phoneModel'        => $this->paramFilter('phoneModel', 'string'),
-    		'browserVersion'    => $this->paramFilter('browserVersion', 'string'),
-    		'network'           => $this->paramFilter('network', 'string'),
-    		'screenResolution'  => $this->paramFilter('screenResolution', 'string'),
-    		'hasParams'         => $this->paramFilter('hasParams', 'string'),
-    		'useEnv'            => $this->paramFilter('useEnv', 'intval'),
-    	);
-    	$orderSv = \service\Order::singleton();
-    	return $orderSv->createMindfulnessOrder($this->userId, $mindfulnessId, $deviceInfo);
-    }
-    
-    /**
-     * 正念课程订单支付
-     *
-     * @return array
-     */
-    public function mindfulnessOrderPay()
-    {
-    	$params = $this->params;
-    	if (empty($this->userId)) {
-    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
-    	}
-    	$orderId = $this->paramFilter('orderId', 'intval');  // 订单ID
-    	$paymentType = $this->paramFilter('paymentType', 'intval'); // 支付类型  1 微信支付
-    	$redirectUrl = $this->paramFilter('redirectUrl', 'string'); // 跳转URL
-    	$tradeType = $this->paramFilter('tradeType', 'string'); // 交易类型
-    	if (empty($orderId) || empty($redirectUrl) || empty($paymentType) || empty($tradeType)) {
-    		throw new $this->exception('请求参数错误');
-    	}
-    	$info = array(
-    		'paymentType' => $paymentType,
-    		'tradeType' => $tradeType,
-    		'redirectUrl' => $redirectUrl,
-    	);
-    	$orderSv = \service\Order::singleton();
-    	return $orderSv->mindfulnessOrderPay($this->userId, $orderId, $info);
-    }
-    
-    /**
-     * 检查测评订单是否需要支付
-     * 
-     * @return array
-     */
-    public function checkTestOrderPay()
-    {
-        $params = $this->params;
-        $testOrderId = $this->paramFilter('testOrderId', 'intval'); // 测试订单Id
-        if (empty($testOrderId)) {
-            throw new $this->exception('请求参数错误');
-        }
-        $orderSv = \service\Order::singleton();
-        return $orderSv->checkTestOrderPay($testOrderId, $this->userId);
-    }
-    
+   
     /**
      * 检查vip订单是否需要支付
      *
@@ -184,21 +79,6 @@ class Order extends CtrlBase
     	return $orderSv->checkVipOrderPay($this->userId, $orderId);
     }
     
-    /**
-     * 检查正念订单是否需要支付
-     *
-     * @return array
-     */
-    public function checkMindfulnessOrderPay()
-    {
-    	$params = $this->params;
-    	$orderId = $this->paramFilter('orderId', 'intval'); // 订单Id
-    	if (empty($orderId)) {
-    		throw new $this->exception('请求参数错误');
-    	}
-    	$orderSv = \service\Order::singleton();
-    	return $orderSv->checkMindfulnessOrderPay($this->userId, $orderId);
-    }
     
     /**
      * 支付通知（腾讯）
@@ -244,34 +124,7 @@ class Order extends CtrlBase
     	$paySv = \service\Pay::singleton();
     	return $paySv->wxPayNotify($resource, $bodyJson, $info);
     }
-    
-    /**
-     * 支付通知（支付宝）
-     * 
-     * @return array
-     */
-    public function aliPayNotify()
-    {
-    	$params = $this->params;
-    	$body = file_get_contents('php://input');
 
-    	$file = CACHE_PATH . 'aliPayNotify.txt';
-   		@file_put_contents($file, $body);
-   		
-    	//$body = 'gmt_create=2025-03-06+20%3A51%3A32&charset=UTF-8&seller_email=13718693103&subject=MBTI%E6%80%A7%E6%A0%BC%E6%B5%8B%E8%AF%952025%E6%9C%80%E6%96%B0%E7%89%88&sign=ls7dHdhwLUXLHm%2BA5dsiY9hI9Xc21mmVkSO1vy8fTfEzGHX0CCw2HvlWW1oXyFffS4CYeXUvBuYbDqIPYm6n7Z1%2BM8KjqViPaDJxNSujqlUKMiMz72rmsHPH9bRt71NUvvXOjn66qhbo%2Bhu6YbHh%2BZQd%2FtULXxCU%2FpBQV%2F4xNErNqAQjjqxfJRkc3HYhwBM2qzz0KdOMegJFYfbJIC1Vvjyv8ldgNwju%2Bj5ESiCF93R4TX%2FDh3cziRV%2BKEMO1pLa614bpm%2FRQqDlFpCY%2B94rcSmgMz4N5qCSZ5rPE8X6yCjNLaPT5CUInGWZVm0FXxwEt7QHsxXVUSjiyX4UdFuPbg%3D%3D&buyer_open_id=034y5F57WRfqFJnEfAVaUu3VbDwngI_QhIgKiKztw2lwks7&invoice_amount=0.01&notify_id=2025030601222205133035341491605958&fund_bill_list=%5B%7B%22amount%22%3A%220.01%22%2C%22fundChannel%22%3A%22ALIPAYACCOUNT%22%7D%5D&notify_type=trade_status_sync&trade_status=TRADE_SUCCESS&receipt_amount=0.01&buyer_pay_amount=0.01&app_id=2021005113605464&sign_type=RSA2&seller_id=2088702705517590&gmt_payment=2025-03-06+20%3A51%3A33&notify_time=2025-03-06+20%3A51%3A34&merchant_app_id=2021005113605464&version=1.0&out_trade_no=X-202503062051200695463&total_amount=0.01&trade_no=2025030622001435341458705797&auth_app_id=2021005113605464&buyer_logon_id=132****8967&point_amount=0.00'; 	
-    	
-   		parse_str($body, $bodyArr);
-    	if (empty($bodyArr['out_trade_no']) || empty($bodyArr['sign']) || empty($bodyArr['sign_type'])) {
-    		return false;
-    	}
-    	if (empty($bodyArr['trade_status']) || !in_array($bodyArr['trade_status'], array('TRADE_SUCCESS', 'TRADE_FINISHED'))) {
-    		return false;
-    	}
- 
-    	$aliPaySv = \service\AliPay::singleton();
-    	return $aliPaySv->payNotify($bodyArr);
-    }
-    
     /**
      * 申请提现，发起转账（微信）
      *

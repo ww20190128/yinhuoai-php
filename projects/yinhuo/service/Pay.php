@@ -111,25 +111,7 @@ class Pay extends ServiceBase
         return true;
 	}
 	
-	/**
-	 * 支付准备
-	 *
-	 * @return array
-	 */
-	public function prepare($tradeType, $userEtt, $orderEtt, $description, $info = array())
-	{
-		$result = array();
-		if ($tradeType == 'JSAPI') {
-			$result = $this->jsApiPay($userEtt, $orderEtt, $description);
-		} elseif ($tradeType == 'NATIVE') {
-			$result = $this->nativePay($userEtt, $orderEtt, $description);
-		} elseif ($tradeType == 'MWEB') { // h5支付
-			$result = $this->h5Pay($userEtt, $orderEtt, $description, $info);
-		} else {
-			return false;
-		}
-		return $result;
-	}
+	
 	
 	/**
 	 * 发起转账
@@ -250,32 +232,30 @@ class Pay extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private function jsApiPay($userEtt, $orderEtt, $description)
+	public function prepare($userEtt, $orderEtt, $description)
 	{
-		if (empty($userEtt)) {
-			return false;
-		}
 		$weChatConf = $this->frame->conf['weChat'];
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
 		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
 		$data = array(
-			'mchid' => $weChatConf['merchantId'],
-			'out_trade_no' => $orderEtt->outTradeNo,
-			'appid'        => $weChatConf['appId'],
-			'description'  => $description,
-			'notify_url'   => $notify_url,
-			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'),
-			'payer'        => array('openid' => $userEtt->openid)
+			'sp_mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
+			'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
+			'sp_appid'     => $weChatConf['appId'], // 服务商APPID
+			'description'  => $description, // 商品描述  
+			'notify_url'   => $notify_url, // 商户回调地址
+			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
+			'payer'        => array('sp_openid' => $userEtt->openid) // 用户在服务商sp_appid下的唯一标识
+			//'sub_mchid' // 子商户号
 		);
 		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
+			$response = self::$weChatPayInstance->chain('v3/pay/partner/transactions/jsapi')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
 			return false;
 		}
     	
 		$response = empty($response) ? '' : json_decode($response, true);
-		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id'];
+		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; // 
 		if (empty($prepayId)) {
 			return false;
 		}
@@ -283,37 +263,7 @@ class Pay extends ServiceBase
 		$result = $this->getPaySign($weChatConf, $prepayId);
 		return $result;
 	}
-	
-	/**
-	 * 微信Native 支付
-	 * 
-	 * @return array
-	 */
-	private function nativePay($userEtt, $orderEtt, $description)
-	{
-		$weChatConf = $this->frame->conf['weChat'];
-		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
-		$data = array(
-			'mchid' => $weChatConf['merchantId'],
-			'out_trade_no' => $orderEtt->outTradeNo,
-			'appid'        => $weChatConf['appId'],
-			'description'  => $description,
-			'notify_url'   => $this->frame->conf['serve_url'] . '/order/payNotify',
-			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'),
-		);
-		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/transactions/native')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-		} catch (\Exception $e) {
-			return false;
-		}
-		$response = empty($response) ? '' : json_decode($response, true);
-		if (empty($response['code_url'])) {
-			return false;
-		}
-		return $response;
-	}
-	
+
 	/**
 	 * 获取客户端IP
 	 * 
@@ -341,48 +291,6 @@ class Pay extends ServiceBase
 		}
 		$ip = str_replace(['::ffff:', '[', ']'], ['', '', ''], $ip);
 		return $ip;
-	}
-	
-	/**
-	 * 微信h5  支付
-	 *
-	 * @return array
-	 */
-	private function h5Pay($userEtt, $orderEtt, $description, $info = array())
-	{
-		$weChatConf = $this->frame->conf['weChat'];
-//  $userEtt->openid = 'o3IwL6Rda-2cAvPbx1kBmYETzmJU';
-// $weChatConf['appId'] = 'wx85f02643c332534e';
-		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
-		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
-
-		$data = array(
-			'mchid' => $weChatConf['merchantId'],
-			'out_trade_no' => $orderEtt->outTradeNo,
-			'appid'        => $weChatConf['appId'],
-			'description'  => $description,
-			'notify_url'   => $this->frame->conf['serve_url'] . '/order/payNotify',
-			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'),
-			'scene_info' => array(
-				'payer_client_ip' => self::getClientIP(),
-				'h5_info' => array('type' => 'Wap')
-			),
-		);
-		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/transactions/h5')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-		} catch (\Exception $e) {
-			return false;
-		}
-		$response = empty($response) ? '' : json_decode($response, true);
-		if (empty($response['h5_url'])) {
-			return false;
-		}
-		$response['mweb_url'] = $response['h5_url'];
-		if (!empty($info['redirectUrl'])) {
-			$response['mweb_url'] .= '&redirect_url=' . $info['redirectUrl'];
-		}
-		return $response;
 	}
 	
 }

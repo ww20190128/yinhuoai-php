@@ -101,18 +101,10 @@ class Coupon extends ServiceBase
     	$userCouponModel['status'] = $status;
     	$userCouponModel['effectiveEndTime'] = $effectiveEndTime;
     	unset($userCouponModel['id']);
-    	$testPaperIds = array(); // 测评ID
+
     	$targetInfos = array();
 
-    	// 测评赠送券, 测评折扣券
-    	if (in_array($couponConfigModel['type'], array(
-    		\constant\Coupon::TYPE_TEST_PAPER_GIVE,
-    		\constant\Coupon::TYPE_TEST_PAPER_DISCOUNT,
-    	))) {
-    		if (!empty($couponConfigModel['targetIds'])) {
-    			$testPaperIds = $couponConfigModel['targetIds'];
-    		}
-    	} elseif ($couponConfigModel['type'] == \constant\Coupon::TYPE_VIP_DISCOUNT) { // vip 抵扣券
+    	if ($couponConfigModel['type'] == \constant\Coupon::TYPE_VIP_DISCOUNT) { // vip 抵扣券
     	    $vipConfigs = array();
     	    $vipSv = \service\Vip::singleton();
     	    $vipConfigList = $vipSv->getConfigList();
@@ -127,15 +119,7 @@ class Coupon extends ServiceBase
     	    $targetInfos = $vipConfigs;
     	} 
     	
-    	if (!empty($testPaperIds)) {
-    	    $testPaperDao = \dao\TestPaper::singleton();
-    	    $testPaperEttList = $testPaperDao->readListByPrimary($testPaperIds);
-    	    $testPaperEttList = $testPaperDao->refactorListByKey($testPaperEttList);
-    	    if (is_iteratable($testPaperEttList)) foreach ($testPaperEttList as $testPaperEtt) {
-    	        $targetModel = $testPaperEtt->getModel();
-    	        $targetInfos[$targetModel['id']] = $targetModel;
-    	    }
-    	}
+    
     	$couponConfigModel['targetIds'] = empty($targetInfos) ? array() : array_keys($targetInfos);
     	$userCouponModel['targetInfos'] = array_values($targetInfos);
     	

@@ -80,3 +80,146 @@ CREATE TABLE IF NOT EXISTS `task` (
 REPLACE INTO `task` (`id`, `title`, `detail`, `goto`, `award`, `from`, `status`, `updateTime`, `createTime`) VALUES
 (1, '品牌视频分享任务', '分享奥迪新车发布视频至朋友圈保留2小时', 'https://www.aliyun.com/benefit?utm_content=se_1019865494', 50, '奥迪汽车', 0, 0, 0),
 (2, '新游戏测评体验', '下载并试玩《原神》新版本，录制30秒游戏体验视频', 'https://www.aliyun.com/benefit?utm_content=se_1019865494', 80, '米哈游', 0, 0, 0);
+
+
+
+
+CREATE TABLE IF NOT EXISTS `couponConfig` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '类型 1 现金券  2 赠送券 3 折扣券  4 VIP折扣券',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称',
+  `desc` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+  `targetIds` varchar(256) NOT NULL DEFAULT '' COMMENT '作用对象ID',
+  `value` int(11) NOT NULL DEFAULT '0' COMMENT '数量',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `effectiveDay` int(11) NOT NULL DEFAULT '0' COMMENT '生效天数',
+  `limitNum` int(11) NOT NULL DEFAULT '0' COMMENT '限制领取数量',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='优惠券配置' AUTO_INCREMENT=101 ;
+
+--
+-- 转存表中的数据 `couponConfig`
+--
+
+REPLACE INTO `couponConfig` (`id`, `type`, `name`, `desc`, `targetIds`, `value`, `status`, `effectiveDay`, `limitNum`, `createTime`, `updateTime`) VALUES
+(1, 1, 'VIP现金抵扣券', '可用于开通VIP会员时抵扣￥30元现金。', '0', 30, 0, 10, 100, 1715085213, 1715085213),
+(2, 2, '免费测评券', '可免费参与《MBTI性格测试专业版》测试，快试一试吧！', '108', 1, 0, 10, 100, 1715085213, 1715085213),
+(3, 3, '精选测评折扣券', '参与《MBTI性格测试专业版》享受限时85折优惠活动，快试一试吧！', '108', 85, 0, 10, 0, 1715085213, 1715085213),
+(12, 4, 'vip折扣券(全部)', '', '0', 60, 0, 10, 0, 1715085213, 1715085213),
+(13, 4, 'vip折扣券(指定1)', '', '2', 60, 0, 10, 0, 1715085213, 1715085213),
+(14, 4, 'vip折扣券(指定2)', '', '2', 60, 0, 10, 0, 1715085213, 1715085213),
+(15, 4, 'vip折扣券(指定3', '', '2', 60, 0, 10, 0, 1715085213, 1715085213),
+(100, 1, 'VIP赠送券', '可用于开通VIP会员时抵扣￥98元现金。', '0', 98, 0, 10, 10, 1715085213, 1715085213);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `userCoupon`
+--
+
+CREATE TABLE IF NOT EXISTS `userCoupon` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `couponId` int(11) NOT NULL DEFAULT '0' COMMENT '优惠券ID',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='优惠券' AUTO_INCREMENT=6 ;
+
+--
+-- 转存表中的数据 `userCoupon`
+--
+
+REPLACE INTO `userCoupon` (`id`, `userId`, `couponId`, `status`, `createTime`, `updateTime`) VALUES
+(3, 1, 100, 1, 1744683656, 1745207623),
+(4, 12, 100, 0, 1744882610, 1744882610),
+(5, 16, 100, 0, 1745479482, 1745479482);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `userVip`
+--
+
+CREATE TABLE IF NOT EXISTS `userVip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `vipId` int(11) NOT NULL DEFAULT '0' COMMENT '购买的vipId',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `useGiveNum` int(11) NOT NULL DEFAULT '0' COMMENT '已赠送的次数',
+  `useTestIds` text NOT NULL COMMENT '已测试Id',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `effectTime` int(11) NOT NULL DEFAULT '0' COMMENT '生效时间',
+  `createTime` int(11) DEFAULT '0' COMMENT '购买时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='vip购买记录' AUTO_INCREMENT=2 ;
+
+--
+-- 转存表中的数据 `userVip`
+--
+
+REPLACE INTO `userVip` (`id`, `vipId`, `userId`, `useGiveNum`, `useTestIds`, `status`, `effectTime`, `createTime`, `updateTime`) VALUES
+(1, 4, 1, 2, '', 0, 1749565499, 1749565499, 1749708604);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `vipConfig`
+--
+
+CREATE TABLE IF NOT EXISTS `vipConfig` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `name` varchar(32) NOT NULL DEFAULT '' COMMENT '名称',
+  `desc` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+  `intro` varchar(256) NOT NULL DEFAULT '' COMMENT '简介',
+  `content` text NOT NULL COMMENT '内容描述',
+  `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '类型',
+  `originalPrice` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '原始价格',
+  `price` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '价格',
+  `testPaperNum` int(11) NOT NULL DEFAULT '0' COMMENT '可免费测试的数量',
+  `giveNum` int(11) NOT NULL DEFAULT '0' COMMENT '可赠送的次数',
+  `effectDay` int(11) NOT NULL DEFAULT '0' COMMENT '有效时长',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态0 正常 1禁用',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='vip-配置' AUTO_INCREMENT=5 ;
+
+--
+-- 转存表中的数据 `vipConfig`
+--
+
+REPLACE INTO `vipConfig` (`id`, `name`, `desc`, `intro`, `content`, `type`, `originalPrice`, `price`, `testPaperNum`, `giveNum`, `effectDay`, `status`, `createTime`, `updateTime`) VALUES
+(1, '黄金VIP次卡', '免费测试20道，可为您节省300+', '黄金VIP次卡是我们平台推出的次卡会员服务，会员可以任意测试我们平台内所有付费题型（包含现有题型+未来推出的新测评），次卡有效期为1个年，可测试本平台任意20道付费测试题型和所有免费题型，并享受赠送好友3次付费题型。', '{"使用期限":"自购买之日起一年内有效","使用范围":"本平台在公众号内所有的付费题型","使用次数":"可测试20道付费题型","附赠权益":"可免费赠送3个好友付费题型，收到赠送的好友可以免费测试1次该题"}', 1, '188.00', '88.00', 20, 3, 365, -1, 0, 0),
+(2, '铂金VIP季卡', '所有题任意测，可为您节省800+', '铂金VIP季卡是我们平台推出的季卡会员服务，会员可以任意测试我们平台内所有付费题型（包含现有题型+未来推出的新测评），次卡有效期为1个季度，可测试本平台任意付费及免费测试题型，并享受赠送好友19次付费题型。', '{"使用期限":"自购买之日起3个月内有效","使用范围":"本平台在公众号内所有的付费题型","使用次数":"可测试所有付费题型","附赠权益":"可免费赠送19个好友付费题型，收到赠送的好友可以免费测试1次该题"}', 2, '288.00', '188.00', 0, 19, 90, -1, 0, 0),
+(3, '钻石VIP年卡', '放肆任意测，可为您节省2000+', '钻石VIP年卡是我们平台推出的年卡会员服务，会员可以任意测试我们平台内所有付费题型（包含现有题型+未来推出的新测评），年卡有效期为1年，可测试本平台任意付费测试题型，并享受赠送好友99次付费题型。', '{"使用期限":"自购买之日起一年内有效","使用范围":"本平台在公众号内所有的付费题型","使用次数":"可测试所有付费题型","附赠权益":"可免费赠送99个好友付费题型，收到赠送的好友可以免费测试1次该题"}', 3, '388.00', '288.00', 0, 99, 365, -1, 0, 0),
+(4, 'VIP年卡', '放肆任意测，可为您节省1000+', '会员可任意测试平台内所有付费测评（包含未来推出的新测评），有效期为1年，并可享受赠送好友99次付费测评福利。', '{"使用期限":"自购买之日起一年内有效","使用范围":"本平台内所有的付费测评","使用次数":"可测试所有付费测评","附赠权益":"可免费赠送99次好友，收到赠送的好友可免费测试1次该测评"}', 3, '188.00', '99.00', 0, 99, 365, 0, 0, 0);
+
+
+
+CREATE TABLE IF NOT EXISTS `order` (
+  `id` bigint(22) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `outTradeNo` varchar(64) NOT NULL DEFAULT '' COMMENT '交易订单',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '支付状态',
+  `goodsType` tinyint(4) NOT NULL DEFAULT '0' COMMENT '商品类型',
+  `goodsId` int(11) NOT NULL DEFAULT '0' COMMENT '商品Id',
+  `price` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '实际支付价格',
+  `redPacketValue` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '红包金额',
+  `couponId` int(11) NOT NULL DEFAULT '0' COMMENT '消耗的优惠券ID',
+  `tradeInfo` text NOT NULL COMMENT '交易信息',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `outTradeNo` (`outTradeNo`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=80 ;
+
+

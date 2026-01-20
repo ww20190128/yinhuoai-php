@@ -153,4 +153,33 @@ EOT;
         return $appSv->getStaticConfig();
     }
 
+    /**
+     * 获取vip的配置
+     *
+     * @return array
+     */
+    public function getVipConfig()
+    {
+    	$params = $this->params;
+    	$couponId = $this->paramFilter('couponId', 'intval'); // 优惠券ID
+    	$vipSv = \service\Vip::singleton();
+    	$vipConfigList = $vipSv->getConfigList($couponId);
+    
+    	$couponInfo = array();
+    	if (!empty($couponId)) { // 优惠券
+    		$couponSv = \service\Coupon::singleton();
+    		$couponInfo = $couponSv->couponInfo($couponId, $this->userId);
+    	}
+    	$vipInfo = empty($couponInfo['vipInfo']) ? array() : $couponInfo['vipInfo'];
+    	if (empty($vipInfo) && !empty($this->userId)) {
+    		$userSv = \service\User::singleton();
+    		$userInfo = $userSv->userInfo($this->userId);
+    		$vipInfo = empty($userInfo['userInfo']['vipInfo']) ? array() : $userInfo['userInfo']['vipInfo'];
+    	}
+    	return array(
+    		'vipConfigList' => array_values($vipConfigList),
+    		'couponInfo' => $couponInfo, // 优惠券信息
+    		'vipInfo' => $vipInfo,
+    	);
+    }
 }
