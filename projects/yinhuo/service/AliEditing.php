@@ -98,6 +98,7 @@ class AliEditing extends ServiceBase
 				$captionRow['url'] = $ttsResult['url'];
 			}
 		}
+	
 		if (empty($captionRow['url'])) {
 			return false;
 		}
@@ -107,6 +108,10 @@ class AliEditing extends ServiceBase
 		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速 -500～500，默认值：0  0.2~3
 			$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 		}
+		
+// 		if (!empty($captionRow['in'])) { // 有载入点
+// 			$audioTrackClip['In'] = $captionRow['in'];
+// 		}
 		// 字幕
 		$effectText = array(
 			'Type' 		=> 'Text',
@@ -130,10 +135,13 @@ class AliEditing extends ServiceBase
 		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
 			$effectText['FontColorOpacity'] = 0;
 		}
+
 		if (!empty($captionRow['font'])) { // 字体
 			if (!empty($captionRow['font']['text-align'])) { // 排版
 				$effectText['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
 			}
+			
+			
 			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
 				$effectText['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
@@ -338,6 +346,9 @@ class AliEditing extends ServiceBase
 				}
 			}
 		}
+		if (isset($captionRow['lensIndex'])) { // 适用的镜头
+			$subtitleTrackClip['ReferenceClipId'] = 'lens_' . $captionRow['lensIndex']; // 镜头ID
+		}
 		return $subtitleTrackClip;
 	}
 	
@@ -500,6 +511,7 @@ class AliEditing extends ServiceBase
 				'VideoTrackClips' => array($editingBackgroundVideoTrackClip),
 			);
 		}
+		
 		return $result;
 	}
 	
@@ -724,10 +736,10 @@ class AliEditing extends ServiceBase
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffect = array(); // 镜头的效果-转场 在素材间转场，1种效果
-			if (!empty($lensRow['transitionSubType']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
+			if (!empty($lensRow['transitionIds']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
-					'SubType' => $lensRow['transitionSubType'],
+					'SubType' => implode(',', $lensRow['transitionIds']),
 					'Duration' => self::TRANSITION_DURATION,
 				);
 			}
@@ -879,8 +891,10 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-//  print_r($timeline);
-// exit;
+		
+
+//print_r($timeline);
+
 
 		$orientation = 'Horizontal';
 		$width = $height = 0;
@@ -938,7 +952,7 @@ class AliEditing extends ServiceBase
    	 		$request->jobId = $jobId;
     		$response = self::$client->getMediaProducingJob($request);
 			$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
-//print_r($mediaProducingJob);
+
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {

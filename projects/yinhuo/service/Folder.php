@@ -470,11 +470,16 @@ class Folder extends ServiceBase
      */
     public function getTts($actorInfo, $dubCaptionInfo, $needUrl = false)
     {
+    	// 如果配音有指定配音演员，使用指定的配音演员
+    	$speaker = empty($dubCaptionInfo['speaker']) ? $actorInfo['id'] : $dubCaptionInfo['speaker'];
+    	if (empty($dubCaptionInfo['text']) || empty($speaker)) {
+    		return false;
+    	}
     	$ttsParams = array();
     	if (!empty($actorInfo['language'])) {
     		$ttsParams['language'] = $actorInfo['language'];
     	}
-    	$dubId = md5($actorInfo['id'] . $dubCaptionInfo['text']); // 字幕唯一标识
+    	$dubId = md5($speaker . $dubCaptionInfo['text']); // 字幕唯一标识
     	$dubFileDao = \dao\DubFile::singleton();
     	$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
@@ -495,7 +500,7 @@ class Folder extends ServiceBase
     	if (empty($content)) { // 没有原内容，从火山云获取
     		$tries = 3;
     		do {
-    			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $actorInfo['id'], $ttsParams);
+    			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $ttsParams);
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
     			$content = $ttsResult['content'];
@@ -510,7 +515,7 @@ class Folder extends ServiceBase
     		$dubFileEtt->duration = 0;
     		$dubFileEtt->content = '';
     		$dubFileEtt->url = '';
-    		$dubFileEtt->actorSpeaker = $actorInfo['id'];
+    		$dubFileEtt->actorSpeaker = $speaker;
     		$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
     		$dubFileEtt->text = $dubCaptionInfo['text'];
     		$dubFileEtt->createTime = $now;
