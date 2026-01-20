@@ -125,7 +125,7 @@ class Order extends ServiceBase
      *
      * @return array
      */
-    public function vipOrderPay($userId, $orderId, $info, $couponId = 0)
+    public function vipOrderPay($userId, $orderId, $couponId = 0)
     {
     	$userEtt = null;
     	if (!empty($userId)) {

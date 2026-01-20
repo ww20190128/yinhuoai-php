@@ -50,17 +50,13 @@ class Order extends CtrlBase
     	$orderId = $this->paramFilter('orderId', 'intval');  // 订单ID
     	$paymentType = $this->paramFilter('paymentType', 'intval'); // 支付类型  1 微信支付
     	$redirectUrl = $this->paramFilter('redirectUrl', 'string'); // 跳转URL
-    	if (empty($orderId) || empty($redirectUrl) || empty($paymentType)) {
+    	if (empty($orderId)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$couponId = $this->paramFilter('couponId', 'intval', 0); // 优惠券Id
-    	$info = array(
-    		'paymentType' => $paymentType,
-    		'tradeType' => $tradeType,
-    		'redirectUrl' => $redirectUrl,
-    	);
+    	
     	$orderSv = \service\Order::singleton();
-    	return $orderSv->vipOrderPay($userId, $orderId, $info, $couponId);
+    	return $orderSv->vipOrderPay($userId, $orderId, $couponId);
     }
    
     /**

@@ -1,8 +1,5 @@
 <?php
 namespace service;
-require_once('vendor/autoload.php');
-use Volcengine\Kernel\VolcengineClient;
-use Volcengine\Kernel\Credentials\StaticCredentials;
 
 /**
  * AI 逻辑类
@@ -31,44 +28,80 @@ class AI extends ServiceBase
         return self::$instance;
     }
 
-    /**
-     * 获取认证的key
-     *
-     * @return void
-     */
-    public function getApiKey()
-    {
-    	$client = new TtsClient();
-    	print_r($client);exit;
-    	
-//     	$AK = '';
-//     	$SK = '';
-//     	$config = \Volcengine\Common\Configuration::getDefaultConfiguration()
-//     		->setAk("Your AK")
-//     		->setSk("Your SK")
-//     		->setRegion("cn-beijing");
-    	return ;
-    }
-    
     
     /**
      * 主方法
-     * private $accessKey = "AKLTZTM1NWJhNDJlNjI4NDk3ZGE4MzllZWJlZGZhZWJkYmU";    // AccessKey ID
-    private $secretKey = "T1dReU5tSTVZekEzWkdRNU5EZG1PV0kyT0RkaVpUVmpZV1EzWVdFMlpqSQ==";    // SecretKey
-    private $appKey = "d294de9a-a197-42e4-8a00-e29eaa05a0df";       // TTS应用AppKey
+     * curl 'https://ark.cn-beijing.volces.com/api/v3/bots/chat/completions' \
+-H "Authorization: Bearer $ARK_API_KEY"  \
+-H 'Content-Type: application/json' \
+-d '{
+    "model": "bot-20240819194405-sf4xh-nocode-preset", 
+    "stream": true,
+    "stream_options": {"include_usage": true},
+    "messages": [ 
+        {
+            "role": "system",
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ]
+}'
      * @return void
      */
     public function test()
     {
-    	$text = "这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。这是火山引擎TTS V3最新版本的测试文本，倍速可以设置到5倍，也能精准控制慢速。";
-    	$speaker = 'zh_female_shuangkuaisisi_moon_bigtts';
-    	$volcTTSSv = \service\reuse\VolcTTS::singleton();
-    	$ttsResult = $volcTTSSv->runByV1($text, $speaker);
+    	$apiUrl = "https://ark.cn-beijing.volces.com/api/v3/bots/chat/completions";
+    	$apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/responses';
+    	$params = array(
+    		'model' => 'doubao-seed-1-8-251228',
+    		'input' => array(
+    			array(
+    				'role' => 'user',
+    				'content' => array(
+    					array(
+    						'type' => 'input_image',
+    						'text' => 'https://ark-project.tos-cn-beijing.volces.com/doc_image/ark_demo_img_1.png',
+    					),
+    					array(
+    						'type' => 'input_text',
+    						'text' => '你看见了什么？',
+    					),
+    				),			
+    			)
+    		),
+    	);
+    	$ARK_API_KEY = '38078d13-166f-4194-8fa1-1c0bd4ba2084';
+    	$bodyStr = json_encode($params, JSON_UNESCAPED_UNICODE);
     	
-    	_e();exit;
-    	
-    	print_r($ttsResult);exit;
-        return ;
+    	$ch = curl_init();
+    	curl_setopt_array($ch, array(
+	    	CURLOPT_URL            => $apiUrl,
+	    	CURLOPT_POST           => true,
+	    	CURLOPT_POSTFIELDS     => $bodyStr,
+	    	CURLOPT_HTTPHEADER     => array(
+	    		'Content-Type: application/json; charset=utf-8',
+	    		'Authorization: Bearer ' . $ARK_API_KEY,
+	    		'Accept: application/json'
+	    	),
+	    	CURLOPT_RETURNTRANSFER => true,
+	    	CURLOPT_SSL_VERIFYPEER => false,
+	    	CURLOPT_SSL_VERIFYHOST => false,
+	    	CURLOPT_TIMEOUT        => 60,
+	    	CURLOPT_CONNECTTIMEOUT => 10
+    	));
+    	$response = curl_exec($ch);
+    	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    	$curlError = curl_error($ch);
+    	curl_close($ch);
+
+    	 
+
+    	print_r($response);exit;
+    	return ;
     }
+    
 
 }
