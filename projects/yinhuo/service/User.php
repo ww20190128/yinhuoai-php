@@ -118,7 +118,73 @@ class User extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
-        $userModel = $userEtt->getModel();
+    	// 用户购买的vip
+    	$userVipDao = \dao\UserVip::singleton();
+    	$userVipEttList = $userVipDao->readListByIndex(array(
+    		'userId' => $userEtt->userId,
+    	));
+    	$vipSv = \service\Vip::singleton();
+    	$vipConfigList = $vipSv->getConfigList();
+    	
+    	$now = $this->frame->now;
+    	$userVipList = array(); // 用户购买的vip列表
+    	if (is_iteratable($userVipEttList)) foreach ($userVipEttList as $userVipEtt) {
+    		if (empty($vipConfigList[$userVipEtt->vipId]) || empty($userVipEtt->effectTime)) { // 未支付
+    			continue;
+    		}
+    		$vipConfigModel = $vipConfigList[$userVipEtt->vipId];
+    		// 生效的时间
+    		$effectEndTime = $userVipEtt->effectTime + $vipConfigModel['effectDay'] * 86400;
+    		if ($effectEndTime <= $now) { // vip已失效
+    			continue;
+    		}
+    		$userVipList[$userVipEtt->id] = array(
+    			'id' => intval($userVipEtt->id),
+    			'userId' => intval($userVipEtt->userId),
+    			'effectTime' => intval($userVipEtt->effectTime), // 生效时间
+    			'effectEndTime' => $effectEndTime, // 效果结束时间
+    			'effectDay' => ceil(($effectEndTime - $userVipEtt->effectTime) / 86400), // vip有效时长
+    			'createTime' => intval($userVipEtt->createTime),
+    			'updateTime' => intval($userVipEtt->updateTime),
+    			'type' => intval($vipConfigModel['type']), // vip 类型
+    			'name' => $vipConfigModel['name'], // vip名称
+    			'price' => $vipConfigModel['price'], // 价格
+    			'originalPrice' => $vipConfigModel['originalPrice'], // 原始价格
+    			'outTradeNo' => '',
+    		);
+    	}
+    	// 获取购买的订单号
+    	if (!empty($userVipList)) {
+    		$orderDao = \dao\Order::singleton();
+    		$where = "`goodsType`=" . \constant\Order::TYPE_GOODS_VIP . ' and `goodsId` in (' . implode(',', array_keys($userVipList)) . ')';
+    		$orderEttList = $orderDao->readListByWhere($where);
+    		if (is_iteratable($orderEttList)) foreach ($orderEttList as $orderEtt) {
+    			if (!empty($userVipList[$orderEtt->goodsId])) {
+    				$userVipList[$orderEtt->goodsId]['outTradeNo'] = $orderEtt->outTradeNo;
+    			}
+    		}
+    	}
+    	$showVipModel = array(); // 优先展示的vip，展示级别最高，到期时间靠后的
+    	foreach ($userVipList as $userVip) {
+    		if ($userVip['effectEndTime'] <= $now) { // vip已失效
+    			continue;
+    		}
+  
+    		if (empty($showVipModel)) {
+    			$showVipModel = $userVip;
+    		} elseif ($userVip['type'] > $showVipModel['type']) { // 显示当前生效且最牛逼的
+    			$showVipModel = $userVip;
+    		} elseif ($userVip['type'] == $showVipModel['type'] && $userVip['effectEndTime'] > $showVipModel['effectEndTime']) {
+    			$showVipModel = $userVip;
+    		}
+    	}
+    	$vipModel = array(); // vip信息
+    	
+    	if (!empty($showVipModel)) {
+    		$vipModel = $showVipModel;
+    	}
+    	$userModel = $userEtt->getModel();
+    	$userModel['vipInfo'] = $vipModel;
         return array(
         	'userInfo' => $userModel,
         	'configList' => array(),
