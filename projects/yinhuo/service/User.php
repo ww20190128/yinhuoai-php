@@ -169,7 +169,6 @@ class User extends ServiceBase
     		if ($userVip['effectEndTime'] <= $now) { // vip已失效
     			continue;
     		}
-  
     		if (empty($showVipModel)) {
     			$showVipModel = $userVip;
     		} elseif ($userVip['type'] > $showVipModel['type']) { // 显示当前生效且最牛逼的

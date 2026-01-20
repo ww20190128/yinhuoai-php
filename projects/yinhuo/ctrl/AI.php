@@ -9,13 +9,13 @@ namespace ctrl;
 class AI extends CtrlBase
 {
 	/**
-	 * test
+	 * 聊天
 	 *
 	 * @return array
 	 */
-	public function test()
+	public function chat()
 	{
 		$AISv = \service\AI::singleton();
-		$AISv->test();
+		return $AISv->chat();
 	}
 }

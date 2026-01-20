@@ -48,6 +48,11 @@ class Order extends ServiceBase
         if (empty($vipConfigEtt) || $vipConfigEtt->status == \constant\Common::DATA_DELETE) {
             throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
         }
+        $userSv = \service\User::singleton();
+        $userInfo = $userSv->userInfo($userEtt);
+        if (!empty($userInfo['vipInfo']['effectDay'])) {
+        	throw new $this->exception('vip不用重复购买');
+        }
         $basePrice = $vipConfigEtt->price; // 原始价格
         // 优惠券信息
         $couponInfo = array();

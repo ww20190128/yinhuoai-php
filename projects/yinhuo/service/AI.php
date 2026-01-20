@@ -30,30 +30,12 @@ class AI extends ServiceBase
 
     
     /**
-     * 主方法
-     * curl 'https://ark.cn-beijing.volces.com/api/v3/bots/chat/completions' \
--H "Authorization: Bearer $ARK_API_KEY"  \
--H 'Content-Type: application/json' \
--d '{
-    "model": "bot-20240819194405-sf4xh-nocode-preset", 
-    "stream": true,
-    "stream_options": {"include_usage": true},
-    "messages": [ 
-        {
-            "role": "system",
-            "content": "You are a helpful assistant."
-        },
-        {
-            "role": "user",
-            "content": "Hello!"
-        }
-    ]
-}'
-     * @return void
+     * 聊天
+     * 
+     * @return array
      */
-    public function test()
+    public function chat()
     {
-    	$apiUrl = "https://ark.cn-beijing.volces.com/api/v3/bots/chat/completions";
     	$apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/responses';
     	$params = array(
     		'model' => 'doubao-seed-1-8-251228',
@@ -63,7 +45,7 @@ class AI extends ServiceBase
     				'content' => array(
     					array(
     						'type' => 'input_image',
-    						'text' => 'https://ark-project.tos-cn-beijing.volces.com/doc_image/ark_demo_img_1.png',
+    						'image_url' => 'https://ark-project.tos-cn-beijing.volces.com/doc_image/ark_demo_img_1.png',
     					),
     					array(
     						'type' => 'input_text',
@@ -73,9 +55,9 @@ class AI extends ServiceBase
     			)
     		),
     	);
+
     	$ARK_API_KEY = '38078d13-166f-4194-8fa1-1c0bd4ba2084';
     	$bodyStr = json_encode($params, JSON_UNESCAPED_UNICODE);
-    	
     	$ch = curl_init();
     	curl_setopt_array($ch, array(
 	    	CURLOPT_URL            => $apiUrl,
@@ -96,12 +78,25 @@ class AI extends ServiceBase
     	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     	$curlError = curl_error($ch);
     	curl_close($ch);
-
-    	 
-
-    	print_r($response);exit;
-    	return ;
+    	$response = empty($response) ? array() : json_decode($response, true);
+    	$output = empty($response['output']) ? array() : $response['output'];
+    	$textList = array();
+    	foreach ($output as $row) {
+    		if (empty($row['type']) || $row['type'] != 'message' || empty($row['content'])) {
+    			continue;
+    		}
+    		$content = $row['content'];
+    		foreach ($content as $value) {
+    			if (empty($value['text']) && $value['type'] != 'output_text') {
+    				continue;
+     			}
+     			$textList[] = $value['text'];
+    		}
+    	}
+    	$text = implode(',', $textList);
+    	return array(
+    		'text' => $text,
+    	);
     }
     
-
 }
