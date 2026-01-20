@@ -136,6 +136,12 @@ class User extends ModelBase
      */
     public $award = '';
  
+    /**
+     * 手机号
+     *
+     * @var varchar
+     */
+    public $phone = '';
 // 表结构end
 
     /**
@@ -152,6 +158,7 @@ class User extends ModelBase
     		'status'        => intval($this->status),
     	    'updateTime'    => intval($this->updateTime),
     	    'createTime'    => intval($this->createTime),
+    		'phone'    		=> intval($this->phone),
     		'signature'     => $this->signature,
     		'gold'    		=> intval($this->gold),
     		'award'    		=> intval($this->award),

@@ -238,17 +238,17 @@ class Pay extends ServiceBase
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
 		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
 		$data = array(
-			'sp_mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
+			'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
 			'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
-			'sp_appid'     => $weChatConf['appId'], // 服务商APPID
+			'appid'        => $weChatConf['appId'], // 服务商APPID
 			'description'  => $description, // 商品描述  
 			'notify_url'   => $notify_url, // 商户回调地址
 			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
-			'payer'        => array('sp_openid' => $userEtt->openid) // 用户在服务商sp_appid下的唯一标识
-			//'sub_mchid' // 子商户号
+			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商sp_appid下的唯一标识
+
 		);
 		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/partner/transactions/jsapi')->post(array('json' => $data));
+			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
 			return false;
