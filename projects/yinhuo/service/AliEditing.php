@@ -94,8 +94,10 @@ class AliEditing extends ServiceBase
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
 			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
+		
 			if (!empty($ttsResult['url'])) {
 				$captionRow['url'] = $ttsResult['url'];
+				$captionRow['subtitles'] = $ttsResult['subtitles'];
 			}
 		}
 	
@@ -108,21 +110,34 @@ class AliEditing extends ServiceBase
 		if (!empty($editingInfo['volume']['dubSpeed'])) { // 配音语速 -500～500，默认值：0  0.2~3
 			$audioTrackClip['Speed'] = $editingInfo['volume']['dubSpeed'];
 		}
-		
+		// 字幕
+		$subtitles = empty($captionRow['subtitles']) ? array() : $captionRow['subtitles'];
+		$subtitleTrackClips = array();
+		if (!empty($subtitles)) {
+			$clipPrefix = 'lens_';
+			foreach ($subtitles as $subtitle) {
+				$startTime = 0;
+				$endTime = 0;
+				foreach ($subtitle['words'] as $word) {
+					if ($word['startTime'] <= $startTime || empty($startTime)) {
+						$startTime = $word['startTime'];
+					}
+					if ($word['endTime'] >= $endTime || empty($endTime)) {
+						$endTime = $word['endTime'];
+					}
+				}
+				$subtitle['startTime'] = $startTime;
+				$subtitle['endTime'] = $endTime;
+				$subtitleTrackClip = self::dubSubtitleTrack($subtitle, $captionRow);
+				if (!empty($subtitleTrackClip) && isset($lensRow['index'])) {
+					$subtitleTrackClip['ReferenceClipId'] = $clipPrefix . $lensRow['index'];
+					$subtitleTrackClips[] = $subtitleTrackClip;
+				}
+			}
+		}
 // 		if (!empty($captionRow['in'])) { // 有载入点
 // 			$audioTrackClip['In'] = $captionRow['in'];
 // 		}
-		// 字幕
-		$effectText = array(
-			'Type' 		=> 'Text',
-			'Content'	=> $captionRow['text'],
-			'AdaptMode' => 'AutoWrap', // 字段换行
-			'FontFace' => array(
-				'Bold' => true,
-				'Italic' => false,
-				'Underline' => false,
-			),
-		);
 		$effectVolume = array(); // 音量效果
 		if (!empty($editingInfo['volume'])) {
 			if (!empty($editingInfo['volume']['dubVolume'])) { // 配音音量0~3
@@ -132,66 +147,17 @@ class AliEditing extends ServiceBase
 				);
 			}
 		}
-		if (empty($editingInfo['showCaption'])) { // 是否显示字幕  0 不显示
-			$effectText['FontColorOpacity'] = 0;
-		}
-
-		if (!empty($captionRow['font'])) { // 字体
-			if (!empty($captionRow['font']['text-align'])) { // 排版
-				$effectText['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
-			}
-			
-			
-			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
-				$effectText['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
-			}
-			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$effectText['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
-			}
-			if (!empty($captionRow['font']['font-family'])) { // 字体
-				$effectText['Font'] = $captionRow['font']['font-family'];
-			}
-		}
-		if (!empty($captionRow['style'])) { // 样式
-			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
-				$effectText['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
-			}
-			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
-				if (!empty($captionRow['style']['color'])) { // 颜色
-					$effectText['FontColor'] = $captionRow['style']['color'];
-				}
-				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
-					$effectText['SubtitleEffects'] = array(
-						array(
-							'Type' => 'Box',
-							'Color' => $captionRow['style']['background'],
-							'Opacity' => 0.9,
-						),
-					);
-				}
-
-				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
-					if (!empty($captionRow['style']['border-size'])) { // 边框大小
-						$effectText['Outline'] = $captionRow['style']['border-size'];
-					}
-					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
-						$effectText['OutlineColour'] = $captionRow['style']['border-color'];
-					}
-				}	
-			}
-		}
 		$effects = array();
-	
-		if (!empty($effectText) && !empty($editingInfo['showCaption'])) {
-			$effects[] = $effectText;
-		}
 		if (!empty($effectVolume)) {
 			$effects[] = $effectVolume;
 		}
 		if (!empty($effects)) {
 			$audioTrackClip['Effects'] = $effects;
 		}
-		return $audioTrackClip;
+		return array(
+			'audioTrackClip' => $audioTrackClip,
+			'subtitleTrackClips' => $subtitleTrackClips, 
+		);
 	}
 	
 	/**
@@ -288,6 +254,7 @@ class AliEditing extends ServiceBase
 		}
 		return $audioTrackClipAI_TTS;
 	}
+	
 	/**
 	 * 将文本组织成SubtitleTrack （标题）
 	 * 
@@ -314,6 +281,70 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48 
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+			}
+			if (!empty($captionRow['font']['font-family'])) { // 字体
+				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
+			}
+		}
+		if (!empty($captionRow['style'])) { // 样式
+			if (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 2 && !empty($captionRow['style']['effectColorStyle'])) { // 花字
+				$subtitleTrackClip['EffectColorStyle'] = $captionRow['style']['effectColorStyle'];
+			} elseif (!empty($captionRow['style']['styleType']) && $captionRow['style']['styleType'] == 1) { // 普通样式
+				if (!empty($captionRow['style']['color'])) { // 颜色
+					$subtitleTrackClip['FontColor'] = $captionRow['style']['color'];
+				}
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 2 && !empty($captionRow['style']['background'])) { // 字幕背景
+					$subtitleTrackClip['SubtitleEffects'] = array(
+						array(
+							'Type' => 'Box',
+							'Color' => $captionRow['style']['background'],
+							'Opacity' => 0.9,
+						),
+					);
+				}
+				if (!empty($captionRow['style']['fontType']) && $captionRow['style']['fontType'] == 3) { // 字幕边框
+					if (!empty($captionRow['style']['border-size'])) { // 边框大小
+						$subtitleTrackClip['Outline'] = $captionRow['style']['border-size'];
+					}
+					if (!empty($captionRow['style']['border-color'])) { // 边框颜色
+						$subtitleTrackClip['OutlineColour'] = $captionRow['style']['border-color'];
+					}
+				}
+			}
+		}
+		if (isset($captionRow['lensIndex'])) { // 适用的镜头
+			$subtitleTrackClip['ReferenceClipId'] = 'lens_' . $captionRow['lensIndex']; // 镜头ID
+		}
+		return $subtitleTrackClip;
+	}
+	
+	/**
+	 * 将文本组织成SubtitleTrack （配音）
+	 *
+	 * @return array
+	 */
+	private static function dubSubtitleTrack($subtitle, $captionRow)
+	{
+		$subtitleTrackClip = array( // 文案1
+			'Type' => 'Text', // 类型
+			'Content' => $subtitle['text'], // 文案内容
+			'AdaptMode' => 'AutoWrap', // 自动换行
+		);
+		if (!empty($subtitle['startTime'])) {
+			$subtitleTrackClip['In'] = $subtitle['startTime']; // 显示时长-开始
+		}
+		if (!empty($subtitle['endTime'])) {
+			$subtitleTrackClip['Out'] = $subtitle['endTime']; // 显示时长-结束
+		}
+		if (!empty($captionRow['font'])) { // 字体
+			if (!empty($captionRow['font']['text-align'])) { // 排版
+				$subtitleTrackClip['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
+			}
+			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
+				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
+			}
+			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
 				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
@@ -400,12 +431,25 @@ class AliEditing extends ServiceBase
 		// 全局配音
 		$editingDubAudioTrackClips = self::getEditingDubAudioTrackClips($editingInfo);
 		$lensDubAudioTrackClips = array();
+		$dubSubtitleTrackClips = array(); // 配音的字幕
 		if (empty($editingDubAudioTrackClips)) { // 全局配音
-			$lensDubAudioTrackClips = self::getLensDubAudioTrackClips($editingInfo);
+			$lensDubAudioTrackClipsResult = self::getLensDubAudioTrackClips($editingInfo);
+			if (!empty($lensDubAudioTrackClipsResult['audioTrackClips'])) {
+				$lensDubAudioTrackClips = $lensDubAudioTrackClipsResult['audioTrackClips'];
+			}
+			if (!empty($lensDubAudioTrackClipsResult['subtitleTrackClips'])) {
+				$subtitleTrackClips = $lensDubAudioTrackClipsResult['subtitleTrackClips'];
+				foreach ($subtitleTrackClips as $index => $list) {
+					foreach ($list as $row) {
+						$dubSubtitleTrackClips[] = $row;
+					}
+				}
+			}
 		}
-		
+
 		// 标题
 		$subtitleTrackClips = self::getSubtitleTrackClips($editingInfo);
+		
 		// 特效
 		$effectTrackItems = self::getEffectTrackItems($editingInfo);
 		$result = array();
@@ -496,6 +540,11 @@ class AliEditing extends ServiceBase
 				'SubtitleTrackClips' => $subtitleTrackClips,
 			);
 		}
+		if (!empty($dubSubtitleTrackClips)) { // 配音
+			$result['SubtitleTracks'][] = array(
+				'SubtitleTrackClips' => $dubSubtitleTrackClips,
+			);
+		}
 		if (!empty($musicAudioTrackClips)) { // 背景音
 			$result['AudioTracks'][] = array(
 				'AudioTrackClips' => $musicAudioTrackClips,
@@ -511,7 +560,7 @@ class AliEditing extends ServiceBase
 				'VideoTrackClips' => array($editingBackgroundVideoTrackClip),
 			);
 		}
-		
+
 		return $result;
 	}
 	
@@ -683,13 +732,19 @@ class AliEditing extends ServiceBase
 	private static function getLensDubAudioTrackClips($editingInfo)
 	{
 		$lensAudioTrackClips = array();
+		$dubSubtitleTrackClips = array(); // 配音的字幕
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
+			$lensRow['index'] = $lensKey;
 			// 配音 - 文本字幕
 			if (!empty($lensRow['dubCaptionInfo'])) { // 手动配音
-				$audioTrackClip = self::captionToAudioTrackClipByUrl($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
-				if (!empty($audioTrackClip)) {
-					$lensAudioTrackClips[$lensKey] = $audioTrackClip;
+				$audioTrackClipResult = self::captionToAudioTrackClipByUrl($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
+				if (!empty($audioTrackClipResult['audioTrackClip'])) {
+					$lensAudioTrackClips[$lensKey] = $audioTrackClipResult['audioTrackClip'];
+					if (!empty($audioTrackClipResult['subtitleTrackClips'])) { // 字幕
+						$dubSubtitleTrackClips[$lensKey] = $audioTrackClipResult['subtitleTrackClips'];
+					}
 				}
+				
 			} elseif (!empty($lensRow['dubMediaInfo'])) { // 配音文件
 				$effectVolume = array(); // 音量效果
 				if (!empty($editingInfo['volume'])) {
@@ -721,7 +776,10 @@ class AliEditing extends ServiceBase
 				$lensAudioTrackClips[$lensKey] = $audioTrackClip;
 			}
 		}
-		return $lensAudioTrackClips;
+		return array(
+			'audioTrackClips' => $lensAudioTrackClips, // 配音的音频
+			'subtitleTrackClips' => $dubSubtitleTrackClips, // 配音的字幕
+		);
 	}
 	
 	/**
@@ -893,7 +951,8 @@ class AliEditing extends ServiceBase
 		$timeline = self::getTimeline($chipParam);
 		
 
-//print_r($timeline);
+print_r($timeline);
+//exit;
 
 
 		$orientation = 'Horizontal';

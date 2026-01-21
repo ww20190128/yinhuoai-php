@@ -29,12 +29,26 @@ class VolcTTS extends \service\ServiceBase
      * 获取v1 请求的头信息
      * 
      * @return array
+     * 
+     * 
+     * https://openspeech.bytedance.com/api/v1/tts
      */
-    private function getRequestHeader()
+    private function getToken($request)
     {
     	$ak = "AKLTZTM1NWJhNDJlNjI4NDk3ZGE4MzllZWJlZGZhZWJkYmU";  // AK
     	$sk = "T1dReU5tSTVZekEzWkdRNU5EZG1PV0kyT0RkaVpUVmpZV1EzWVdFMlpqSQ==";  // SK
-    	//     	$token = $this->getToken($accessKey, $secretKey); // 生成官方要求的Token
+$Service = "iam";
+$Version = "V1";
+$Region = "cn-north-1";
+$Host = "iam.volcengineapi.com";
+$ContentType = "application/x-www-form-urlencoded";
+
+
+$action = "ListUsers";
+		$method = "POST";
+
+$body ="";
+
 
     	$credential = array(
     		'accessKeyId' => $ak,
@@ -42,11 +56,6 @@ class VolcTTS extends \service\ServiceBase
     		'service' => $Service,
     		'region' => $Region,
     	);
-    	// 初始化签名结构体
-    	$query = array_merge($query, array(
-    		'Action' => $action,
-    		'Version' => $Version
-    	));
     	ksort($query);
     	$requestParam = array(
     		'body' => $body, // body是http请求需要的原生body
@@ -63,12 +72,7 @@ class VolcTTS extends \service\ServiceBase
     	$xDate = $requestParam['date'];
     	$shortXDate = substr($xDate, 0, 8);
     	$xContentSha256 = hash('sha256', $requestParam['body']);
-    	$signResult = [
-    		'Host' => $requestParam['host'],
-    		'X-Content-Sha256' => $xContentSha256,
-    		'X-Date' => $xDate,
-    		'Content-Type' => $requestParam['contentType']
-    	];
+    
     	// 第四步：计算 Signature 签名。
     	$signedHeaderStr = join(';', ['content-type', 'host', 'x-content-sha256', 'x-date']);
     	$canonicalRequestStr = join("\n", [
@@ -88,23 +92,47 @@ class VolcTTS extends \service\ServiceBase
     	$kService = hash_hmac("sha256", $credential['service'], $kRegion, true);
     	$kSigning = hash_hmac("sha256", 'request', $kService, true);
     	$signature = hash_hmac("sha256", $stringToSign, $kSigning);
-    	$signResult['Authorization'] = sprintf("HMAC-SHA256 Credential=%s, SignedHeaders=%s, Signature=%s", $credential['accessKeyId'] . '/' . $credentialScope, $signedHeaderStr, $signature);
-    	$header = array_merge($header, $signResult);
-    	
+    	$token = sprintf("HMAC-SHA256 Credential=%s, SignedHeaders=%s, Signature=%s", $credential['accessKeyId'] . '/' . $credentialScope, $signedHeaderStr, $signature);
+    	return $token;
     }
 
     /**
-     * 通过v1版本的接口合成
-     * 
-     * @return
+     * 通过v3版本的接口合成
+     *
+     * @return string
      */
-    public function runByV1($text, $voiceType)
-    {  
-$a = $this->getRequestHeader();
+    public function runByV1($text, $speaker, $ttsParams = array(), $resourceId = 'seed-tts-1.0')
+    {
+    	$request = array(
+    		'app' => array(
+    			'appid' => 'appid123',
+    			'token' => 'access_token',
+    			'cluster' => 'volcano_tts', // 业务集群
+    		),
+    		'user' => array(
+    			'uid' => 'uid123', // 用户标识
+    		),
+    		'audio' => array(
+    			'voice_type' => $speaker,
+    			'encoding' => 'mp3',
+    		),
+    		'request' => array(
+    			'reqid' => 1,
+    			'text' => $text,
+    			'operation' => 'query',
+    			
+    		),
+    	);
+    	$token = $this->getToken($request);
+
+print_r($token);exit;
 //     	$accessKey = "AKLTZTM1NWJhNDJlNjI4NDk3ZGE4MzllZWJlZGZhZWJkYmU";  // AK
 //     	$secretKey = "T1dReU5tSTVZekEzWkdRNU5EZG1PV0kyT0RkaVpUVmpZV1EzWVdFMlpqSQ==";  // SK
 //     	$token = $this->getToken($accessKey, $secretKey); // 生成官方要求的Token
 
+		$url = "https://openspeech.bytedance.com/api/v1/tts";
+
+		
         $defaultAudioParams = array(
             'voice_type'    => $voiceType, // 免费通用音色（替换BV700避免权限问题）
             'encoding'      => 'mp3',
@@ -180,7 +208,7 @@ print_r($response);exit;
     		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
     		'cache_config' => array(
     			'text_type' => 1,
-    			'use_cache' => true,
+    			//'use_cache' => true,
     		),
     	);
     	if (!empty($ttsParams['language'])) { // 明确语种
@@ -250,6 +278,7 @@ print_r($response);exit;
     	}
     	preg_match_all('/\{\s*"code":.*?\}(?=\s*\{|\s*$)/s', $responseContent, $ttsContentArr);
     	$content = '';
+    	$subtitles = array();
     	if (!empty($ttsContentArr['0'])) foreach ($ttsContentArr['0'] as $row) {
     		$row = trim($row);
     		$rowArr = empty($row) ? array() : json_decode($row, true);
@@ -257,7 +286,24 @@ print_r($response);exit;
     			continue;
     		}
     		if (!empty($rowArr['sentence'])) { // 句子
+    			$words = empty($rowArr['sentence']['words']) ? array() : $rowArr['sentence']['words'];
+    			if (empty($words)) {
+    				continue;
+    			}
     			$text = $rowArr['sentence']['text'];
+    			$wordArr = array();
+    			foreach ($words as $word) {
+    				$wordArr[] = array(
+    					'startTime' => $word['startTime'],
+    					'endTime' => $word['endTime'],
+    					'word' => $word['word'],
+    				);
+    			}
+    			$subtitles[] = array(
+    				'text' => $text,
+    				'words' => $wordArr,
+    			);
+    			
     		} elseif (!empty($rowArr['data'])) {
     			$subContent = base64_decode($rowArr['data']);
     			if (empty($subContent)) {
@@ -271,6 +317,7 @@ print_r($response);exit;
     		'content' => $content,
     		'resourceId' => $resourceId,
     		'speaker' => $speaker,
+    		'subtitles' => $subtitles,
     	);
     }
     

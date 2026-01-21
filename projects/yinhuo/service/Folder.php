@@ -491,16 +491,19 @@ class Folder extends ServiceBase
     			'id' 		=> $dubFileEtt->id,
     			'duration'	=> $dubFileEtt->duration,
     			'url'		=> $dubFileEtt->url,
+    			'subtitles'	=> empty($dubFileEtt->content) ? array() : json_decode($dubFileEtt->content, true),
     		);
     	} elseif (!empty($dubFileEtt)) { // 没有远程链接
     		if (file_exists($ttsFile)) {
     			$content = @file_get_contents($ttsFile);
     		}
     	}
+
     	if (empty($content)) { // 没有原内容，从火山云获取
     		$tries = 3;
     		do {
     			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $ttsParams);
+    	
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
     			$content = $ttsResult['content'];
@@ -513,7 +516,7 @@ class Folder extends ServiceBase
     		$dubFileEtt = $dubFileDao->getNewEntity();
     		$dubFileEtt->id = $dubId;
     		$dubFileEtt->duration = 0;
-    		$dubFileEtt->content = '';
+    		$dubFileEtt->content = empty($ttsResult['subtitles']) ? '' : json_encode($ttsResult['subtitles'], JSON_UNESCAPED_UNICODE);
     		$dubFileEtt->url = '';
     		$dubFileEtt->actorSpeaker = $speaker;
     		$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
@@ -545,6 +548,7 @@ class Folder extends ServiceBase
     		'id' 		=> $dubId,
     		'duration'	=> $dubFileEtt->duration,
     		'url'		=> $dubFileEtt->url,
+    		'subtitles'	=> empty($dubFileEtt->content) ? array() : json_decode($dubFileEtt->content, true),
     	);
     }
     
