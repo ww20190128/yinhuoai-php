@@ -503,7 +503,6 @@ class Folder extends ServiceBase
     		$tries = 3;
     		do {
     			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $ttsParams);
-    	
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
     			$content = $ttsResult['content'];
@@ -527,7 +526,7 @@ class Folder extends ServiceBase
     	}
 
     	// 需要生成音频链接
-    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content)) {
+    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content) || true) {
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
@@ -535,12 +534,13 @@ class Folder extends ServiceBase
     		$extension = 'mp3';
     		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+
     		if (!empty($ossResult)) {
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     			$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
     			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			$dubFileEtt->set('url', $url);
-    			$dubFileEtt->set('duration', empty($mediaInfo['duration'] ? '' : $mediaInfo['duration']));
+    			$dubFileEtt->set('duration', empty($mediaInfo['duration']) ? 0 : $mediaInfo['duration']);
     			$dubFileDao->update($dubFileEtt);
     		}
     	}
