@@ -95,10 +95,7 @@ class Folder extends CtrlBase
 	public function uploadMedias()
 	{
 		$params = $this->params;
-		$file = CACHE_PATH . 'test.txt';
-		$params = (array)$params;
-		$params['now'] = date('Y-m-d H:i:s', time());
-		@file_put_contents($file, json_encode($params));
+		$logfile = CACHE_PATH . 'test.txt';
 		
 		
 		
@@ -125,7 +122,13 @@ class Folder extends CtrlBase
 			);
 		}	
 		$folderSv = \service\Folder::singleton();
-		return $folderSv->uploadMedias($this->userId, $id, $uploadFiles);
+		$result = $folderSv->uploadMedias($this->userId, $id, $uploadFiles);
+		
+		$result['start'] = $now;
+		$result['end'] = date('Y-m-d H:i:s', time());
+		@file_put_contents($logfile, json_encode($result));
+		
+		return $result;
 	}
 	
 	/**
