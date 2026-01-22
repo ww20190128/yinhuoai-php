@@ -16,7 +16,6 @@ class News extends CtrlBase
      */
     public function getNewsList()
     {
-
     	$params = $this->params;
     	$newsSv = \service\News::singleton();
     	$dataList = $newsSv->getNewsList();
@@ -52,7 +51,7 @@ class News extends CtrlBase
     }
     
     /**
-     * 修改轮播图
+     * 修改新闻
      *
      * @return array
      */
@@ -68,13 +67,13 @@ class News extends CtrlBase
     		throw new $this->exception('请求参数错误');
     	}
     	$info = array();
-    	if (isset($params['title'])) {
+    	if (isset($params['title'])) { // 标题
     		$info['title'] = $this->paramFilter('title', 'string');
     	}
-    	if (isset($params['source'])) {
+    	if (isset($params['source'])) { // 来源
     		$info['source'] = $this->paramFilter('source', 'string');
     	}
-    	if (isset($params['content'])) {
+    	if (isset($params['content'])) { // 内容
     		$info['content'] = $this->paramFilter('content', 'string');
     	}
     	$newsSv = \service\News::singleton();
@@ -93,13 +92,17 @@ class News extends CtrlBase
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
     	$params = (array)$params;
-    	if (!empty($params['name'])) {
-    		$info['name'] = $this->paramFilter('name', 'string');
+    	$info = array();
+    	if (!empty($params['title'])) {
+    		$info['title'] = $this->paramFilter('title', 'string');
     	}
-    	if (!empty($params['numLimit'])) {
-    		$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
-    		$info['numLimit'] = min($info['numLimit'], 2000);
+    	if (!empty($params['source'])) {
+    		$info['source'] = $this->paramFilter('source', 'string');
     	}
+    	if (!empty($params['content'])) {
+    		$info['content'] = $this->paramFilter('content', 'string');
+    	}
+    	
     	$newsSv = \service\News::singleton();
     	return $newsSv->createNews($this->userId, $info);
     }

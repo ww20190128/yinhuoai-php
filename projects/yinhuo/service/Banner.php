@@ -42,16 +42,33 @@ class Banner extends ServiceBase
     	));
     	$commonSv = \service\Common::singleton();
     	$bannerList = array();
+    	$backstageUserIds = array();
+    	$backstageUserIds = array();
     	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
+    		$backstageUserIds[] = intval($bannerEtt->userId);
+    	}
+    	$backstageUserDao = \dao\BackstageUser::singleton();
+    	$backstageUserEttList = $backstageUserDao->readListByPrimary($backstageUserIds);
+    	$backstageUserEttList = $backstageUserDao->refactorListByKey($backstageUserEttList);
+    	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
+    		$userInfo = array();
+    		if (!empty($backstageUserEttList[$bannerEtt->userId])) {
+    			$userInfo = array(
+    				'userId' 	=> intval($bannerEtt->userId),
+    				'userName'	=> $backstageUserEttList[$bannerEtt->userId]->userName,
+    			);
+    		}
     		$bannerList[] = array(
     			'id' => intval($bannerEtt->id),
     			'url' => $bannerEtt->url,
     			'goto' => $bannerEtt->goto,
-    			'userId' => intval($bannerEtt->userId),
+    			'userInfo' => $userInfo,
     			'createTime' => intval($bannerEtt->createTime),
     			'updateTime' => intval($bannerEtt->updateTime),
     		);
+    		$backstageUserIds[] = intval($bannerEtt->userId);
     	}
+    	
     	return $bannerList;
     }
 
