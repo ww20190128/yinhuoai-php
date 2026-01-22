@@ -200,7 +200,7 @@ class Folder extends ServiceBase
     	$folderMediaIds = empty($folderEtt->mediaIds) ? array() : explode(',', $folderEtt->mediaIds);
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
-    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET'], true);
     	$aliEditingSv = \service\AliEditing::singleton();
 
     	if (is_iteratable($uploadFiles)) foreach ($uploadFiles as $uploadFile) {
@@ -209,12 +209,16 @@ class Folder extends ServiceBase
     		$fileInfo = pathInfo($file);
     		$fileName = md5(implode('', file($file)));
     		$content = @file_get_contents($file);
-    	_e();exit;
-    	
+    
     		$extension = $fileInfo['extension'];
     		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
     		$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
-    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    		//$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    		
+    		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    		
+    		print_r($ossResult);
+    		_e();exit;
     		if (empty($ossResult)) {
     			continue;
     		}
