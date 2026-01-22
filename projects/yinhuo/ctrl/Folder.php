@@ -94,8 +94,13 @@ class Folder extends CtrlBase
 	 */
 	public function uploadMedias()
 	{
-
 		$params = $this->params;
+		$file = CACHE_PATH . 'test.txt';
+		$params['now'] = date('Y-m-d H:i:s');
+		@file_put_contents($file, json_encode($params));
+		
+		
+		
 		$id = $this->paramFilter('id', 'intval', 0); // 文件夹id
 		if (empty($id)) {
 			throw new $this->exception('请求参数错误');
