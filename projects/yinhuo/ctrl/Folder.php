@@ -96,7 +96,8 @@ class Folder extends CtrlBase
 	{
 		$params = $this->params;
 		$file = CACHE_PATH . 'test.txt';
-		$params['now'] = date('Y-m-d H:i:s');
+		$params = (array)$params;
+		$params['now'] = date('Y-m-d H:i:s', time());
 		@file_put_contents($file, json_encode($params));
 		
 		
