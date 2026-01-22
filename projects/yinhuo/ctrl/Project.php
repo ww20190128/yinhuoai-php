@@ -288,6 +288,17 @@ class Project extends CtrlBase
 	 */
 	public function test()
 	{
+		
+		$uploadFiles = array();
+		$uploadFiles[] = array(
+				'extension' => 'mp4',
+				'file' 		=> '/data/www/yinhuoai-php/cache/test.mp4',
+				'name' 		=> 'test',
+		);
+		$folderSv = \service\Folder::singleton();
+		return $folderSv->uploadMedias(1, 1, $uploadFiles);
+		
+		
 // 		$text = "测试";
 // 		$speaker = 'zh_female_gujie_mars_bigtts';
 // 		$volcTTSSv = \service\reuse\VolcTTS::singleton();

@@ -209,6 +209,7 @@ class Folder extends ServiceBase
     		$fileInfo = pathInfo($file);
     		$fileName = md5(implode('', file($file)));
     		$content = @file_get_contents($file);
+    	_e();exit;
     	
     		$extension = $fileInfo['extension'];
     		$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;

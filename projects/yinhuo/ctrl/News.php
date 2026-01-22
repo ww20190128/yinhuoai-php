@@ -8,6 +8,7 @@ namespace ctrl;
  */
 class News extends CtrlBase
 {
+
 	/**
      * 新闻列表
      *
