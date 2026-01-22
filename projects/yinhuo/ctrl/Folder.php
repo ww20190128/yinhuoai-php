@@ -79,11 +79,22 @@ class Folder extends CtrlBase
 	
 	/**
 	 * 文件夹上传素材
-	 *
+	 *		$uploadFiles = array();
+		$uploadFiles[] = array(
+			'extension' => 'mp4',
+			'file' 		=> '/data/www/test/test.mp4',
+			'name' 		=> 'test',
+		);
+		$folderSv = \service\Folder::singleton();
+		return $folderSv->uploadMedias(1, 1, $uploadFiles);
+		
+		
+		
 	 * @return array
 	 */
 	public function uploadMedias()
 	{
+
 		$params = $this->params;
 		$id = $this->paramFilter('id', 'intval', 0); // 文件夹id
 		if (empty($id)) {
