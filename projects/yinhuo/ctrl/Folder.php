@@ -96,7 +96,7 @@ class Folder extends CtrlBase
 	{
 		$params = $this->params;
 		$logfile = CACHE_PATH . 'test.txt';
-		
+$now = date('Y-m-d H:i:s', time());
 		
 		
 		$id = $this->paramFilter('id', 'intval', 0); // 文件夹id
