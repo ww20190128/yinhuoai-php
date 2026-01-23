@@ -108,6 +108,7 @@ $conf = array(
 	// 火山引擎
 	'volcengine' => array(
 		'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
+		'arkApiKey' => '38078d13-166f-4194-8fa1-1c0bd4ba2084', // AI请求的 ARK_API_KEY
 	),
 	'appConfig' => array(
 		'name' => '智乐心理',

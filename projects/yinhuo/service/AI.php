@@ -84,7 +84,8 @@ EOT;
     		),
     	);
 
-    	$ARK_API_KEY = '38078d13-166f-4194-8fa1-1c0bd4ba2084';
+
+    	$volcConf = $this->frame->conf['volcengine'];
     	$bodyStr = json_encode($params, JSON_UNESCAPED_UNICODE);
     	$ch = curl_init();
     	curl_setopt_array($ch, array(
@@ -93,7 +94,7 @@ EOT;
 	    	CURLOPT_POSTFIELDS     => $bodyStr,
 	    	CURLOPT_HTTPHEADER     => array(
 	    		'Content-Type: application/json; charset=utf-8',
-	    		'Authorization: Bearer ' . $ARK_API_KEY,
+	    		'Authorization: Bearer ' . $volcConf['arkApiKey'],
 	    		'Accept: application/json'
 	    	),
 	    	CURLOPT_RETURNTRANSFER => true,
