@@ -45,16 +45,12 @@ class Order extends CtrlBase
     public function vipOrderPay()
     {
     	$params = $this->params;
-    	
     	$userId = empty($this->userId) ? 0 : $this->userId;
     	$orderId = $this->paramFilter('orderId', 'intval');  // 订单ID
-    	$paymentType = $this->paramFilter('paymentType', 'intval'); // 支付类型  1 微信支付
-    	$redirectUrl = $this->paramFilter('redirectUrl', 'string'); // 跳转URL
     	if (empty($orderId)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$couponId = $this->paramFilter('couponId', 'intval', 0); // 优惠券Id
-    	
     	$orderSv = \service\Order::singleton();
     	return $orderSv->vipOrderPay($userId, $orderId, $couponId);
     }
@@ -213,6 +209,31 @@ class Order extends CtrlBase
 		$userEtt->set('updateTime', $now);
 		$userDao->update($userEtt);
 		return true;
+    }
+    
+    /**
+     * 获取订单列表
+     *
+     * @return array
+     */
+    public function getOrderList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$searchStartTime = $this->paramFilter('searchStartTime', 'intval'); // 开始时间
+		$searchEndTime = $this->paramFilter('searchEndTime', 'intval'); // 结束时间
+		$searchStatus = $this->paramFilter('searchStatus', 'intval'); // 支付状态
+		$info = array(
+			'searchStatus' 	  => $searchTestType,
+		    'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
+		    'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
+		);
+    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+    	$orderSv = \service\Order::singleton();
+    	return $orderSv->getOrderList($this->userId, $info, $pageNum, $pageLimit);
     }
     
 }

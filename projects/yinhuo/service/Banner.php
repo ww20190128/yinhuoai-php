@@ -40,38 +40,31 @@ class Banner extends ServiceBase
     	$bannerEttList = $bannerDao->readListByIndex(array(
     		'status' => 0,
     	));
-    	$commonSv = \service\Common::singleton();
     	$bannerList = array();
-    	$backstageUserIds = array();
     	$backstageUserIds = array();
     	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
     		$backstageUserIds[] = intval($bannerEtt->userId);
     	}
-    	$backstageUserDao = \dao\BackstageUser::singleton();
-    	$backstageUserEttList = $backstageUserDao->readListByPrimary($backstageUserIds);
-    	$backstageUserEttList = $backstageUserDao->refactorListByKey($backstageUserEttList);
+    	$backstageUserSv = \service\BackstageUser::singleton();
+    	$backstageUserModels = $backstageUserSv->getBackstageUserModels($backstageUserIds);
     	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
-    		$userInfo = array();
-    		if (!empty($backstageUserEttList[$bannerEtt->userId])) {
-    			$userInfo = array(
-    				'userId' 	=> intval($bannerEtt->userId),
-    				'userName'	=> $backstageUserEttList[$bannerEtt->userId]->userName,
-    			);
-    		}
     		$bannerList[] = array(
     			'id' => intval($bannerEtt->id),
     			'url' => $bannerEtt->url,
     			'goto' => $bannerEtt->goto,
-    			'userInfo' => $userInfo,
+    			'userId' => intval($bannerEtt->userId),
+    			'userInfo' => empty($backstageUserModels[$bannerEtt->userId]) 
+    				? array() : $backstageUserModels[$bannerEtt->userId],
     			'createTime' => intval($bannerEtt->createTime),
     			'updateTime' => intval($bannerEtt->updateTime),
     		);
-    		$backstageUserIds[] = intval($bannerEtt->userId);
+    		$bannerList[] = intval($bannerEtt->userId);
     	}
-    	
+    	$commonSv = \service\Common::singleton();
+    	uasort($bannerList, array($commonSv, 'sortByCreateTime'));
     	return $bannerList;
     }
-
+    
     /**
      * 删除轮播图
      *
@@ -86,14 +79,18 @@ class Banner extends ServiceBase
     	}
     	$bannerDao = \dao\Banner::singleton();
     	$bannerEttList = $bannerDao->readListByPrimary($ids);
-    	foreach ($bannerEttList as $bannerEtt) {
+    	$removeEttList = array();
+    	if (!empty($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
     		if ($bannerEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
     		if ($bannerEtt->userId != $backstageUserEtt->userId) {
     			throw new $this->exception('轮播图已删除');
     		}
-    		$bannerDao->remove($bannerEtt);
+    		$removeEttList[] = $bannerEtt;
+    	}
+    	if (!empty($removeEttList)) foreach ($removeEttList as $removeEtt) {
+    		$bannerDao->remove($removeEtt);
     	}
     	return array(
     		'result' => 1,
@@ -123,6 +120,12 @@ class Banner extends ServiceBase
     	if (!empty($info['name'])) {
     		$bannerEtt->set('name', $info['name']);
     	}
+    	if (!empty($info['goto'])) {
+    		$bannerEtt->set('goto', $info['goto']);
+    	}
+    	if (!empty($info['url'])) {
+    		$bannerEtt->set('url', $info['url']);
+    	}
     	$now = $this->frame->now;
     	$bannerEtt->set('updateTime', $now);
     	$bannerDao->update($bannerEtt);
@@ -146,8 +149,10 @@ class Banner extends ServiceBase
     	$now = $this->frame->now;
     	$bannerDao = \dao\Banner::singleton();
     	$bannerEtt = $bannerDao->getNewEntity();
-    	$bannerEtt->editingId = $editingId;
-    	$bannerEtt->userId = $backstageUserEtt->userId;
+    	$bannerEtt->userId = $backstageUserId;
+    	$bannerEtt->name = $info['name'];
+    	$bannerEtt->url = $info['url'];
+    	$bannerEtt->goto = $info['goto'];
     	$bannerEtt->createTime = $now;
     	$bannerEtt->updateTime = $now;
     	$bannerDao->create($bannerEtt);
@@ -168,12 +173,18 @@ class Banner extends ServiceBase
     	if (empty($bannerEtt) || $bannerEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('轮播图已删除');
     	}
+    	$backstageUserSv = \service\BackstageUser::singleton();
+    	$backstageUserModels = $backstageUserSv->getBackstageUserModels(array($bannerEtt->userId));
     	return array(
     		'id' =>  intval($bannerEtt->id),
+    		'name' => $bannerEtt->name,
     		'url' => $bannerEtt->url,
     		'goto' => $bannerEtt->goto,
+    		'userId' => intval($bannerEtt->userId),
     		'createTime' => intval($bannerEtt->createTime),
     		'updateTime' => intval($bannerEtt->updateTime),
+    		'userInfo' => empty($backstageUserModels[$bannerEtt->userId]) ? array() : $backstageUserModels[$bannerEtt->userId],
     	);
     }
+    
 }

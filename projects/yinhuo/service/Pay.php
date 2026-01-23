@@ -111,8 +111,6 @@ class Pay extends ServiceBase
         return true;
 	}
 	
-	
-	
 	/**
 	 * 发起转账
 	 *

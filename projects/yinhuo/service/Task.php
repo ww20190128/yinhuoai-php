@@ -39,7 +39,9 @@ class Task extends ServiceBase
     	$taskEttList = $taskDao->readListByIndex(array(
     		'status' => 0,
     	));
-    	$commonSv = \service\Common::singleton();
+    	$backstageUserIds = array_column($taskEttList, null, 'userId');
+    	$backstageUserSv = \service\BackstageUser::singleton();
+    	$backstageUserModels = $backstageUserSv->getBackstageUserModels($backstageUserIds);
     	$taskList = array();
     	if (is_iteratable($taskEttList)) foreach ($taskEttList as $taskEtt) {
     		$taskList[] = array(
@@ -52,9 +54,145 @@ class Task extends ServiceBase
     			'status' => intval($taskEtt->status),
     			'updateTime' => intval($taskEtt->updateTime),
     			'createTime' => intval($taskEtt->createTime),
+    			'userInfo' => empty($backstageUserModels[$taskEtt->userId]) 
+    				? array() : $backstageUserModels[$taskEtt->userId],
     		);
     	}
+    	$commonSv = \service\Common::singleton();
+    	uasort($taskList, array($commonSv, 'sortByCreateTime'));
     	return $taskList;
     }
 
+    /**
+     * 删除任务
+     *
+     * @return array
+     */
+    public function deleteTask($backstageUserId, $ids)
+    {
+    	$backstageUserDao = \dao\BackstageUser::singleton();
+    	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
+    	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$taskDao = \dao\Task::singleton();
+    	$taskEttList = $taskDao->readListByPrimary($ids);
+    	$removeEttList = array();
+    	if (!empty($taskEttList)) foreach ($taskEttList as $taskEtt) {
+    		if ($taskEtt->status == \constant\Common::DATA_DELETE) {
+    			continue;
+    		}
+    		if ($taskEtt->userId != $backstageUserEtt->userId) {
+    			throw new $this->exception('轮播图已删除');
+    		}
+    		$removeEttList[] = $taskEtt;
+    	}
+    	if (!empty($removeEttList)) foreach ($removeEttList as $removeEtt) {
+    		$taskDao->remove($removeEtt);
+    	}
+    	return array(
+    		'result' => 1,
+    	);
+    }
+    
+    /**
+     * 修改任务
+     *
+     * @return array
+     */
+    public function reviseTask($backstageUserId, $id, $info)
+    {
+    	$backstageUserDao = \dao\BackstageUser::singleton();
+    	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
+    	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$taskDao = \dao\Task::singleton();
+    	$taskEtt = $taskDao->readByPrimary($id);
+    	if (empty($taskEtt) || $taskEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('任务已删除');
+    	}
+    	if ($taskEtt->userId != $backstageUserEtt->userId) {
+    		throw new $this->exception('轮播图已删除');
+    	}
+    	if (!empty($info['title'])) {
+    		$taskEtt->set('title', $info['title']);
+    	}
+    	if (!empty($info['detail'])) {
+    		$taskEtt->set('detail', $info['detail']);
+    	}
+    	if (!empty($info['goto'])) {
+    		$taskEtt->set('goto', $info['goto']);
+    	}
+    	if (!empty($info['award'])) {
+    		$taskEtt->set('award', $info['award']);
+    	}
+    	if (!empty($info['from'])) {
+    		$taskEtt->set('from', $info['from']);
+    	}
+    	$now = $this->frame->now;
+    	$taskEtt->set('updateTime', $now);
+    	$taskDao->update($taskEtt);
+    	return array(
+    		'result' => 1,
+    	);
+    }
+    
+    /**
+     * 创建任务
+     *
+     * @return array
+     */
+    public function createTask($backstageUserId, $info)
+    {
+    	$backstageUserDao = \dao\BackstageUser::singleton();
+    	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
+    	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$now = $this->frame->now;
+    	$taskDao = \dao\Task::singleton();
+    	$taskEtt = $taskDao->getNewEntity();
+    	$taskEtt->userId = $backstageUserId;
+    	$taskEtt->title = $info['title'];
+    	$taskEtt->detail = $info['detail'];
+    	$taskEtt->goto = $info['goto'];
+    	$taskEtt->award = $info['award'];
+    	$taskEtt->from = $info['from'];
+    	$taskEtt->createTime = $now;
+    	$taskEtt->updateTime = $now;
+    	$taskDao->create($taskEtt);
+    	return array(
+    		'result' => 1,
+    	);
+    }
+    
+    /**
+     * 任务详情
+     *
+     * @return array
+     */
+    public function taskInfo($id)
+    {
+    	$taskDao = \dao\Task::singleton();
+    	$taskEtt = $taskDao->readByPrimary($id);
+    	if (empty($taskEtt) || $taskEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('任务已删除');
+    	}
+    	$backstageUserSv = \service\BackstageUser::singleton();
+    	$backstageUserModels = $backstageUserSv->getBackstageUserModels(array($taskEtt->userId));
+    	return array(
+    		'id' => intval($taskEtt->id),
+    		'title' => $taskEtt->title,
+    		'detail' => $taskEtt->detail,
+    		'goto' => $taskEtt->goto,
+    		'award' => intval($taskEtt->award),
+    		'from' => $taskEtt->from,
+    		'status' => intval($taskEtt->status),
+    		'updateTime' => intval($taskEtt->updateTime),
+    		'createTime' => intval($taskEtt->createTime),
+    		'userInfo' => empty($backstageUserModels[$taskEtt->userId]) ? array() : $backstageUserModels[$taskEtt->userId],
+    	);
+    }
+    
 }

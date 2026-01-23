@@ -19,7 +19,7 @@ class Banner extends CtrlBase
     	$bannerSv = \service\Banner::singleton();
     	$dataList = $bannerSv->getBannerList();
     	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
-    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 200); // 每页数量限制
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
     	// 符合条件的总条数
     	$totalNum = count($dataList);
     	// 分页显示
@@ -31,7 +31,7 @@ class Banner extends CtrlBase
     }
     
     /**
-     * 删除剪辑工程
+     * 删除轮播图
      *
      * @return array
      */
@@ -60,14 +60,22 @@ class Banner extends CtrlBase
     	if (empty($this->userId)) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
-    	$params = (array)$params;
     	$id = $this->paramFilter('id', 'intval', 0);
     	if (empty($id)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$info = array();
-    	if (isset($params['name'])) {
-    		$info['name'] = $this->paramFilter('name', 'string');
+    	$name = $this->paramFilter('name', 'string');
+    	if (!empty($name)) {
+    		$info['name'] = $name;
+    	}
+    	$goto = $this->paramFilter('goto', 'string');
+    	if (!empty($goto)) {
+    		$info['goto'] = $goto;
+    	}
+    	$url = $this->paramFilter('url', 'string');
+    	if (!empty($url)) {
+    		$info['url'] = $url;
     	}
     	$bannerSv = \service\Banner::singleton();
     	return $bannerSv->reviseBanner($this->userId, $id, $info);
@@ -84,13 +92,18 @@ class Banner extends CtrlBase
     	if (empty($this->userId)) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
-    	$params = (array)$params;
-    	if (!empty($params['name'])) {
-    		$info['name'] = $this->paramFilter('name', 'string');
+    	$info = array();
+    	$name = $this->paramFilter('name', 'string');
+    	if (!empty($name)) {
+    		$info['name'] = $name;
     	}
-    	if (!empty($params['numLimit'])) {
-    		$info['numLimit'] = $this->paramFilter('numLimit', 'intval');
-    		$info['numLimit'] = min($info['numLimit'], 2000);
+    	$goto = $this->paramFilter('goto', 'string');
+    	if (!empty($goto)) {
+    		$info['goto'] = $goto;
+    	}
+    	$url = $this->paramFilter('url', 'string');
+    	if (!empty($url)) {
+    		$info['url'] = $url;
     	}
     	$bannerSv = \service\Banner::singleton();
     	return $bannerSv->createBanner($this->userId, $info);
@@ -113,4 +126,3 @@ class Banner extends CtrlBase
     }
     
 }
-	

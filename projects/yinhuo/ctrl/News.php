@@ -20,7 +20,7 @@ class News extends CtrlBase
     	$newsSv = \service\News::singleton();
     	$dataList = $newsSv->getNewsList();
     	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
-    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 200); // 每页数量限制
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
     	// 符合条件的总条数
     	$totalNum = count($dataList);
     	// 分页显示
@@ -51,7 +51,7 @@ class News extends CtrlBase
     }
     
     /**
-     * 修改新闻
+     * 修改资讯
      *
      * @return array
      */
@@ -70,11 +70,14 @@ class News extends CtrlBase
     	if (isset($params['title'])) { // 标题
     		$info['title'] = $this->paramFilter('title', 'string');
     	}
+    	if (isset($params['content'])) { // 内容
+    		$info['content'] = $this->paramFilter('content', 'string');
+    	}
     	if (isset($params['source'])) { // 来源
     		$info['source'] = $this->paramFilter('source', 'string');
     	}
-    	if (isset($params['content'])) { // 内容
-    		$info['content'] = $this->paramFilter('content', 'string');
+    	if (isset($params['coverURL'])) { // 封面
+    		$info['coverURL'] = $this->paramFilter('coverURL', 'string');
     	}
     	$newsSv = \service\News::singleton();
     	return $newsSv->reviseNews($this->userId, $id, $info);

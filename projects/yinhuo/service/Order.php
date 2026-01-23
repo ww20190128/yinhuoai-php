@@ -51,7 +51,7 @@ class Order extends ServiceBase
         $userSv = \service\User::singleton();
         $userInfo = $userSv->userInfo($userEtt);
         if (!empty($userInfo['vipInfo']['effectDay'])) {
-        	throw new $this->exception('vip不用重复购买');
+        	throw new $this->exception('已购买VIP，不用重复购买');
         }
         $basePrice = $vipConfigEtt->price; // 原始价格
         // 优惠券信息
@@ -273,6 +273,39 @@ class Order extends ServiceBase
     	}
     	return array(
     		'needPay' => empty($needPay) ? 0 : 1, // 是否需要支付
+    	);
+    }
+    
+    /**
+     * 获取订单列表
+     *
+     * @return array
+     */
+    public function getOrderList($userId, $info, $pageNum, $pageLimit)
+    {
+    	$orderDao = \dao\Order::singleton();
+    	$dataList = $orderDao->getList($info, $pageNum, $pageLimit);
+    	$userIds = array_column($dataList, null, 'userId');
+    	
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels($userIds);
+    	// 获取查询总数
+    	$totalNum = $orderDao->getList($info, -1);
+    	$models = array();
+    	foreach ($dataList as $data) {
+    		$models[] = array(
+    			'id' => intval($data->id),
+    			'outTradeNo' => $data->outTradeNo,
+    			'status' => intval($data->status),
+    			'price' => intval($data->price),
+    			'updateTime' => intval($data->updateTime),
+    			'createTime' => intval($data->createTime),
+    			'userInfo' => empty($userModels[$data->userId]) ? array() : $userModels[$data->userId],
+    		);
+    	}
+    	return array(
+    		'list'     => array_values($models),
+    		'totalNum' => intval($dataList),
     	);
     }
     

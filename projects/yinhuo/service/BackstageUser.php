@@ -784,4 +784,26 @@ class BackstageUser extends ServiceBase
     	}
     	return ['access_token' => $token];
     }
+    
+    /**
+     * 获取管理后台用户
+     *
+     * @return array
+     */
+    public function getBackstageUserModels($backstageUserIds)
+    {
+    	$backstageUserDao = \dao\BackstageUser::singleton();
+    	$backstageUserEttList = $backstageUserDao->readListByPrimary($backstageUserIds);
+    	$models = array();
+    	if (!empty($backstageUserEttList)) foreach ($backstageUserEttList as $backstageUserEtt) {
+    		$models[$backstageUserEtt->userId] = array(
+    			'userId' => intval($backstageUserEtt->userId),
+    			'userName' => $backstageUserEtt->userName,
+    			'updateTime' => intval($backstageUserEtt->updateTime),
+    			'createTime' => intval($backstageUserEtt->createTime),
+    		);
+    	}
+    	return $models;
+    }
+    
 }

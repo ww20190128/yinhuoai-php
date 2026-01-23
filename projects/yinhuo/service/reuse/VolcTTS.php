@@ -208,7 +208,7 @@ print_r($response);exit;
     		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
     		'cache_config' => array(
     			'text_type' => 1,
-    			//'use_cache' => true,
+    			'use_cache' => true,
     		),
     	);
     	if (!empty($ttsParams['language'])) { // 明确语种

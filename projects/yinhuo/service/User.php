@@ -249,4 +249,29 @@ class User extends ServiceBase
     	);
     }
     
+    /**
+     * 获取用户列表
+     *
+     * @return array
+     */
+    public function getUserModels($userIds)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEttList = $userDao->readListByPrimary($userIds);
+    	$models = array();
+    	if (!empty($userEttList)) foreach ($userEttList as $userEtt) {
+    		$models[$userEtt->userId] = array(
+    			'userId' => intval($userEtt->userId),
+    			'status' => intval($userEtt->status),
+    			'sex' => intval($userEtt->sex),
+    			'userName' => $userEtt->userName,
+    			'headImgUrl' => $userEtt->headImgUrl,
+    			'phone' => $userEtt->phone,
+    			'updateTime' => intval($userEtt->updateTime),
+    			'createTime' => intval($userEtt->createTime),
+    		);
+    	}
+    	return $models;
+    }
+    
 }
