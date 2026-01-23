@@ -289,14 +289,14 @@ class Project extends CtrlBase
 	public function test()
 	{
 		
-		$uploadFiles = array();
-		$uploadFiles[] = array(
-				'extension' => 'mp4',
-				'file' 		=> '/data/www/yinhuoai-php/cache/test.mp4',
-				'name' 		=> 'test',
-		);
-		$folderSv = \service\Folder::singleton();
-		return $folderSv->uploadMedias(1, 1, $uploadFiles);
+// 		$uploadFiles = array();
+// 		$uploadFiles[] = array(
+// 				'extension' => 'mp4',
+// 				'file' 		=> '/data/www/yinhuoai-php/cache/test.mp4',
+// 				'name' 		=> 'test',
+// 		);
+// 		$folderSv = \service\Folder::singleton();
+// 		return $folderSv->uploadMedias(1, 1, $uploadFiles);
 		
 		
 // 		$text = "测试";
@@ -308,8 +308,71 @@ class Project extends CtrlBase
 		
 		
 		
-		$answer = "作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
+		$text = "作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
 		
+		// 第一步：预处理文本（去除多余空格、换行，统一标点）
+		$text = trim($text);
+		$text = str_replace(["\r\n", "\r", "\n"], "。", $text); // 换行替换为句号，保证语义停顿
+		$text = preg_replace('/\s+/', '', $text); // 去除所有空格
+		
+		// 第二步：定义语义分割符（优先级从高到低）
+		$splitChars = ['。', '！', '？', '；', '，', '、'];
+		
+		// 第三步：按语义分割符拆分文本为短句
+		$sentences = [];
+		$tempSentence = '';
+		for ($i = 0; $i < mb_strlen($text); $i++) {
+			$char = mb_substr($text, $i, 1);
+			$tempSentence .= $char;
+		
+			// 遇到分割符，拆分短句
+			if (in_array($char, $splitChars)) {
+				$sentences[] = $tempSentence;
+				$tempSentence = '';
+			}
+		}
+		// 处理最后一段无分割符的文本
+		if (!empty($tempSentence)) {
+			$sentences[] = $tempSentence;
+		}
+		$maxLen = 30;
+		// 第四步：合并短句为符合长度的文本段（避免单段过短/过长）
+		$result = [];
+		$currentSegment = '';
+		foreach ($sentences as $sentence) {
+			$sentenceLen = mb_strlen($sentence);
+			$currentLen = mb_strlen($currentSegment);
+		
+			// 情况1：当前段+新短句 ≤ 最大长度，直接合并
+			if ($currentLen + $sentenceLen <= $maxLen) {
+				$currentSegment .= $sentence;
+			}
+			// 情况2：新短句本身超过最大长度，先拆分当前段，再拆分超长短句
+			elseif ($sentenceLen > $maxLen) {
+				// 先把当前段存入结果
+				if (!empty($currentSegment)) {
+					$result[] = $currentSegment;
+					$currentSegment = '';
+				}
+				// 拆分超长短句（按最大长度兜底）
+				$longSentenceParts = str_split($sentence, $maxLen);
+				foreach ($longSentenceParts as $part) {
+					if (!empty($part)) {
+						$result[] = $part;
+					}
+				}
+			}
+			// 情况3：当前段+新短句超过最大长度，先存入当前段，再重置为新短句
+			else {
+				$result[] = $currentSegment;
+				$currentSegment = $sentence;
+			}
+		}
+		// 处理最后一段
+		if (!empty($currentSegment)) {
+			$result[] = $currentSegment;
+		}
+		print_r($result);exit;
 // 		$folderSv = \service\Folder::singleton();
 // 		$url = $folderSv->getTtsByText($answer, 'zh_female_gujie_mars_bigtts');
 		
