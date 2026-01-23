@@ -73,9 +73,9 @@ class Banner extends CtrlBase
     	if (!empty($goto)) {
     		$info['goto'] = $goto;
     	}
-    	$url = $this->paramFilter('url', 'string');
-    	if (!empty($url)) {
-    		$info['url'] = $url;
+    	$urlData = $this->paramFilter('urlData', 'string');
+    	if (!empty($urlData)) {
+    		$info['urlData'] = $urlData;
     	}
     	$bannerSv = \service\Banner::singleton();
     	return $bannerSv->reviseBanner($this->userId, $id, $info);
@@ -101,9 +101,9 @@ class Banner extends CtrlBase
     	if (!empty($goto)) {
     		$info['goto'] = $goto;
     	}
-    	$url = $this->paramFilter('url', 'string');
-    	if (!empty($url)) {
-    		$info['url'] = $url;
+    	$urlData = $this->paramFilter('urlData', 'string');
+    	if (!empty($urlData)) {
+    		$info['urlData'] = $urlData;
     	}
     	$bannerSv = \service\Banner::singleton();
     	return $bannerSv->createBanner($this->userId, $info);

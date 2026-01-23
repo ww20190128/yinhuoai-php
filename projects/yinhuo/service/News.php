@@ -39,7 +39,8 @@ class News extends ServiceBase
     	$newsEttList = $newsDao->readListByIndex(array(
     		'status' => 0,
     	));
-    	$backstageUserIds = array_column($newsEttList, null, 'userId');
+    	$backstageUserIds = array_column($newsEttList, 'userId');
+
     	$backstageUserSv = \service\BackstageUser::singleton();
     	$backstageUserModels = $backstageUserSv->getBackstageUserModels($backstageUserIds);
     	

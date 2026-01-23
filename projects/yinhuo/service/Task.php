@@ -39,7 +39,7 @@ class Task extends ServiceBase
     	$taskEttList = $taskDao->readListByIndex(array(
     		'status' => 0,
     	));
-    	$backstageUserIds = array_column($taskEttList, null, 'userId');
+    	$backstageUserIds = array_column($taskEttList, 'userId');
     	$backstageUserSv = \service\BackstageUser::singleton();
     	$backstageUserModels = $backstageUserSv->getBackstageUserModels($backstageUserIds);
     	$taskList = array();

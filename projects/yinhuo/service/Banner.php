@@ -41,10 +41,7 @@ class Banner extends ServiceBase
     		'status' => 0,
     	));
     	$bannerList = array();
-    	$backstageUserIds = array();
-    	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
-    		$backstageUserIds[] = intval($bannerEtt->userId);
-    	}
+    	$backstageUserIds = array_column($bannerEttList, 'userId');
     	$backstageUserSv = \service\BackstageUser::singleton();
     	$backstageUserModels = $backstageUserSv->getBackstageUserModels($backstageUserIds);
     	if (is_iteratable($bannerEttList)) foreach ($bannerEttList as $bannerEtt) {
@@ -58,8 +55,8 @@ class Banner extends ServiceBase
     			'createTime' => intval($bannerEtt->createTime),
     			'updateTime' => intval($bannerEtt->updateTime),
     		);
-    		$bannerList[] = intval($bannerEtt->userId);
     	}
+
     	$commonSv = \service\Common::singleton();
     	uasort($bannerList, array($commonSv, 'sortByCreateTime'));
     	return $bannerList;
@@ -123,6 +120,10 @@ class Banner extends ServiceBase
     	if (!empty($info['goto'])) {
     		$bannerEtt->set('goto', $info['goto']);
     	}
+    	if (!empty($info['urlData'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$info['url'] = $folderSv->getUrlByConten(base64_decode($info['urlData']), time(), 'png');
+    	}
     	if (!empty($info['url'])) {
     		$bannerEtt->set('url', $info['url']);
     	}
@@ -146,12 +147,17 @@ class Banner extends ServiceBase
     	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
+    	$url = '';
+    	if (!empty($info['urlData'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$url = $folderSv->getUrlByConten(base64_decode($info['urlData']), time(), 'png');
+    	}
     	$now = $this->frame->now;
     	$bannerDao = \dao\Banner::singleton();
     	$bannerEtt = $bannerDao->getNewEntity();
     	$bannerEtt->userId = $backstageUserId;
     	$bannerEtt->name = $info['name'];
-    	$bannerEtt->url = $info['url'];
+    	$bannerEtt->url = $url;
     	$bannerEtt->goto = $info['goto'];
     	$bannerEtt->createTime = $now;
     	$bannerEtt->updateTime = $now;
