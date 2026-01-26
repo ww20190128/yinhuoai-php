@@ -364,7 +364,7 @@ class Project extends ServiceBase
     	if (is_numeric($projectEtt)) {
     		$projectEtt = $projectDao->readByPrimary($projectEtt);
     	}
-    	
+print_r($projectEtt);exit;    	
     	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑工程已删除');
     	}
