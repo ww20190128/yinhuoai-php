@@ -140,7 +140,8 @@ class App extends ServiceBase
     {
 		$musicClassifyDao = \dao\MusicClassify::singleton();
 		
-		
+		createEntity('music', 'music');
+		print_r($musicClassifyDao);exit;
 		$musicClassifyEttList = $musicClassifyDao->readListByWhere();
 		$list = array();
 		if (!empty($musicClassifyEttList)) foreach ($musicClassifyEttList as $musicClassifyEtt) {
