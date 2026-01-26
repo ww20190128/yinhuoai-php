@@ -199,6 +199,7 @@ class Project extends ServiceBase
     		$projectModels[$projectEtt->id] = array(
     			'id' 			=> $projectEtt->id,
     			'editingId' 	=> intval($projectEtt->editingId),
+    			'status' 		=> intval($projectEtt->status),
     			'name'			=> $projectEtt->name,
     			'createTime' 	=> intval($projectEtt->createTime),
     			'updateTime' 	=> intval($projectEtt->updateTime),
@@ -352,7 +353,7 @@ class Project extends ServiceBase
      *
      * @return array
      */
-    public function getProjectClipList($userId, $id)
+    public function getProjectClipList($userId, $projectEtt)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -360,7 +361,10 @@ class Project extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$projectDao = \dao\Project::singleton();
-    	$projectEtt = $projectDao->readByPrimary($id);
+    	if (is_numeric($projectEtt)) {
+    		$projectEtt = $projectDao->readByPrimary($projectEtt);
+    	}
+    	
     	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑工程已删除');
     	}
@@ -369,7 +373,7 @@ class Project extends ServiceBase
     	}
     	$projectClipDao = \dao\ProjectClip::singleton();
     	$projectClipEttList = $projectClipDao->readListByIndex(array(
-    		'projectId' => $id,
+    		'projectId' => $projectEtt->id,
     	));
     	$aliEditingSv = \service\AliEditing::singleton();
     	$projectClipModels = array();
@@ -389,8 +393,7 @@ class Project extends ServiceBase
     	$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
     	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
     	$folderSv = \service\Folder::singleton();
-    	
-    	
+
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
@@ -495,6 +498,9 @@ class Project extends ServiceBase
     	}
     	if (!empty($info['name'])) {
     		$projectEtt->set('name', $info['name']);
+    	}
+    	if (isset($info['status'])) {
+    		$projectEtt->set('status', $info['status']);
     	}
     	$now = $this->frame->now;
     	$projectEtt->set('updateTime', $now);
@@ -659,4 +665,62 @@ class Project extends ServiceBase
     	);
     }
     
+    /**
+     * 发布成品
+     *
+     * @return array
+     */
+    public function publicClip($userId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('用户不存在');
+    	}
+    	$projectDao = \dao\Project::singleton();
+    	$projectEttList = $projectDao->readListByIndex(array(
+    		'status' => 1,
+    	));
+    	if (empty($projectEttList)) {
+    		throw new $this->exception("当前没有设置可发布的工程");
+    	}
+    	$editingSv = \service\Editing::singleton();
+    	$projectEttList = shuffle($projectEttList);
+    	$result = array();
+    	foreach ($projectEttList as $projectEtt) {
+    		$projectClipModels = $this->getProjectClipList($userId, $projectEtt);
+    		if (empty($projectClipModels)) {
+    			continue;
+    		}
+    		$projectClipModels = shuffle($projectClipModels);
+    		$publicClipModel = array();
+    		foreach ($projectClipModels as $projectClipModel) {
+    			if ($projectClipModel['jobStatus'] == 'Success') {
+    				$publicClipModel = $projectClipModel;
+    				break;		
+    			}
+    		}
+    		if (empty($publicClipModel)) {
+    			continue;
+    		}
+    		$editingInfo = empty($projectEtt->editingInfo) ? array() : json_decode($projectEtt->editingInfo, true);
+    		if (empty($editingInfo)) {
+    			$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    		}
+    		if (empty($editingInfo)) {
+    			continue;
+    		}
+    		$result = array(
+    			'name'	=> $projectEtt->name, // 工程名称
+    			'topic'	=> $editingInfo['topic'], // 话题
+    			'title'	=> $editingInfo['title'], // 标题
+    			'clip'	=> $publicClipModel,
+    		);
+    		break;
+    	}
+    	if (empty($result)) {
+    		throw new $this->exception("当前没有可发布的成品");
+    	}
+    	return $result;
+    }
 }

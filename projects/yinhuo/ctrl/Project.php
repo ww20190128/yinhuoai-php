@@ -102,9 +102,6 @@ class Project extends CtrlBase
 	 */
 	public function getProjectList()
 	{
-
-		
-		
 		$params = $this->params;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
@@ -162,6 +159,9 @@ class Project extends CtrlBase
 		if (isset($params['name'])) {
 			$info['name'] = $this->paramFilter('name', 'string');
 		}	
+		if (isset($params['status'])) {
+			$info['status'] = $this->paramFilter('status', 'intval');
+		}
 		$projectSv = \service\Project::singleton();
 		return $projectSv->reviseProject($this->userId, $id, $info);
 	}
@@ -279,6 +279,21 @@ class Project extends CtrlBase
 		}
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProjectClipsByNum($this->userId, $id, $num);
+	}
+	
+	/**
+	 * 发布成品
+	 *
+	 * @return array
+	 */
+	public function publicClip()
+	{
+		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$projectSv = \service\Project::singleton();
+		return $projectSv->publicClip($this->userId);
 	}
 	
 	/**
