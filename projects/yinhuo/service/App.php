@@ -139,6 +139,8 @@ class App extends ServiceBase
     public function getMusicClassifys()
     {
 		$musicClassifyDao = \dao\MusicClassify::singleton();
+		
+		
 		$musicClassifyEttList = $musicClassifyDao->readListByWhere();
 		$list = array();
 		if (!empty($musicClassifyEttList)) foreach ($musicClassifyEttList as $musicClassifyEtt) {
