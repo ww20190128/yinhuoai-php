@@ -1476,7 +1476,7 @@ class Editing extends ServiceBase
     		if (!empty($lensRow['mediaList'])) {
     			$lensRow['mediaInfo'] = self::randomOne($lensRow['mediaList']);
     			
-    		print_r($lensRow['mediaInfo']);exit;
+    		print_r($lensRow['mediaList']);exit;
     			if (empty($editingInfo['previewMediaId'])) {
     				$editingInfo['previewMediaId'] = $lensRow['mediaInfo']['id'];
     			}
