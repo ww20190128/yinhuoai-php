@@ -685,14 +685,14 @@ class Project extends ServiceBase
     		throw new $this->exception("当前没有设置可发布的工程");
     	}
     	$editingSv = \service\Editing::singleton();
-    	$projectEttList = shuffle($projectEttList);
+    	shuffle($projectEttList);
     	$result = array();
     	foreach ($projectEttList as $projectEtt) {
     		$projectClipModels = $this->getProjectClipList($userId, $projectEtt);
     		if (empty($projectClipModels)) {
     			continue;
     		}
-    		$projectClipModels = shuffle($projectClipModels);
+    		shuffle($projectClipModels);
     		$publicClipModel = array();
     		foreach ($projectClipModels as $projectClipModel) {
     			if ($projectClipModel['jobStatus'] == 'Success') {

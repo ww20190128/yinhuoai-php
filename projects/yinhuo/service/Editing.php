@@ -1412,7 +1412,7 @@ class Editing extends ServiceBase
      */
     private static function randomOne($list)
     {
-    	$list = shuffle($list);
+    	shuffle($list);
     	return empty($list) ? array() : reset($list);
     }
     
@@ -1475,8 +1475,6 @@ class Editing extends ServiceBase
     		// 媒体
     		if (!empty($lensRow['mediaList'])) {
     			$lensRow['mediaInfo'] = self::randomOne($lensRow['mediaList']);
-    			
-    		print_r($lensRow['mediaList']);exit;
     			if (empty($editingInfo['previewMediaId'])) {
     				$editingInfo['previewMediaId'] = $lensRow['mediaInfo']['id'];
     			}
