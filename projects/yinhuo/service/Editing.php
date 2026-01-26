@@ -1410,7 +1410,7 @@ class Editing extends ServiceBase
      *
      * @return array
      */
-    private static function random($list)
+    private static function randomOne($list)
     {
     	$list = shuffle($list);
     	return empty($list) ? array() : reset($list);
@@ -1425,7 +1425,7 @@ class Editing extends ServiceBase
     {
     	// 配音演员
     	if (!empty($editingInfo['actorList'])) {
-    		$editingInfo['actorInfo'] = self::random($editingInfo['actorList']);
+    		$editingInfo['actorInfo'] = self::randomOne($editingInfo['actorList']);
     	}
     		
     	// 全局配音
@@ -1433,7 +1433,7 @@ class Editing extends ServiceBase
     	$folderSv = \service\Folder::singleton();
     	$editingDub = array();
     	if (!empty($editingInfo['dubCaptionList'])) {
-    		$dubCaptionInfo = self::random($editingInfo['dubCaptionList']);
+    		$dubCaptionInfo = self::randomOne($editingInfo['dubCaptionList']);
     		if (!empty($editingInfo['actorInfo']) && !empty($dubCaptionInfo['text'])) {
     			$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
     			if (!empty($ttsResult['id'])) { // 配音成功
@@ -1446,7 +1446,7 @@ class Editing extends ServiceBase
     	}
     	// 旁白配音
     	if (!empty($editingInfo['dubMediaList'])) {
-    		$editingInfo['dubMediaInfo'] = self::random($editingInfo['dubMediaList']);
+    		$editingInfo['dubMediaInfo'] = self::randomOne($editingInfo['dubMediaList']);
     	}
     	$transitionArr = cfg('transition');
     	$transitionIds = array();
@@ -1465,7 +1465,7 @@ class Editing extends ServiceBase
     	}
     	// 背景视频/图片
     	if (!empty($editingInfo['background']['mediaList'])) {
-    		$editingInfo['background']['mediaInfo'] = self::random($editingInfo['background']['mediaList']);
+    		$editingInfo['background']['mediaInfo'] = self::randomOne($editingInfo['background']['mediaList']);
     	}
     	
     	$lensList = $editingInfo['lensList'];
@@ -1474,7 +1474,7 @@ class Editing extends ServiceBase
     	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
     		// 媒体
     		if (!empty($lensRow['mediaList'])) {
-    			$lensRow['mediaInfo'] = self::random($lensRow['mediaList']);
+    			$lensRow['mediaInfo'] = self::randomOne($lensRow['mediaList']);
     			
     		print_r($lensRow['mediaInfo']);exit;
     			if (empty($editingInfo['previewMediaId'])) {
@@ -1501,7 +1501,7 @@ class Editing extends ServiceBase
     			
     			// 旁白配音
     			if (!empty($lensRow['dubMediaList'])) {
-    				$lensDub['dubMediaInfo'] = self::random($lensRow['dubMediaList']);
+    				$lensDub['dubMediaInfo'] = self::randomOne($lensRow['dubMediaList']);
     			}
     			if (!empty($lensDub['dubCaptionInfo'])) { // 优先手动配音
     				$lensRow['dubCaptionInfo'] = $lensDub['dubCaptionInfo'];
@@ -1535,13 +1535,13 @@ class Editing extends ServiceBase
     		return false;
     	}
     	if (!empty($editingInfo['titleList'])) {
-    		$editingInfo['titleInfo'] = self::random($editingInfo['titleList']);
+    		$editingInfo['titleInfo'] = self::randomOne($editingInfo['titleList']);
     	}
     	if (!empty($editingInfo['musicList'])) {
-    		$editingInfo['musicInfo'] = self::random($editingInfo['musicList']);
+    		$editingInfo['musicInfo'] = self::randomOne($editingInfo['musicList']);
     	}
     	if (!empty($editingInfo['decalList'])) {
-    		$editingInfo['decalInfo'] = self::random($editingInfo['decalList']);
+    		$editingInfo['decalInfo'] = self::randomOne($editingInfo['decalList']);
     	}
     	
     	unset($editingInfo['dubCaptionList']);
