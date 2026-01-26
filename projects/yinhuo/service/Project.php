@@ -361,10 +361,9 @@ class Project extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$projectDao = \dao\Project::singleton();
-    	if (is_numeric($projectEtt)) {
+    	if (!is_object($projectEtt)) {
     		$projectEtt = $projectDao->readByPrimary($projectEtt);
-    	}
-print_r($projectEtt);exit;    	
+    	}  	
     	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑工程已删除');
     	}
