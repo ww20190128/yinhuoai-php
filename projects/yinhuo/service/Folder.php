@@ -512,7 +512,7 @@ class Folder extends ServiceBase
     	$now = $this->frame->now;
     	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3'; // 配音源文件
     	$content = '';
-    	if (!empty($dubFileEtt) && !empty($dubFileEtt->url)) { // 有生成的远程链接，不需要重复生成
+    	if (!empty($dubFileEtt) && !empty($dubFileEtt->url) && $dubFileEtt->duration > 0) { // 有生成的远程链接，不需要重复生成
     		return array(
     			'id' 		=> $dubFileEtt->id,
     			'duration'	=> $dubFileEtt->duration,

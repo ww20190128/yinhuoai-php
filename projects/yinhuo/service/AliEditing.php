@@ -90,11 +90,11 @@ class AliEditing extends ServiceBase
 	private static function captionToAudioTrackClipByUrl($captionRow, $editingInfo, $lensRow = array())
 	{
 		$folderSv = \service\Folder::singleton();
-		if (empty($captionRow['url'])) {
+
+		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0)) {
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
 			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
-
 			if (!empty($ttsResult['url'])) {
 				$captionRow['url'] = $ttsResult['url'];
 				$captionRow['subtitles'] = $ttsResult['subtitles'];
@@ -1032,10 +1032,7 @@ class AliEditing extends ServiceBase
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-		
-//print_r($timeline);
-//exit;
-//
+
 		$orientation = 'Horizontal';
 		$width = $height = 0;
 		if ($chipParam['ratio'] == '9:16') {
