@@ -1047,7 +1047,7 @@ class AliEditing extends ServiceBase
 			$height = 900;
 		}
 		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
-		$mediaURL = $aliEditingConf['chipUrlBase'] . $chipParam['id'] . '_' . strtotime(date('Y-m-d H:i:s')) . '.mp4';
+		$mediaURL = $aliEditingConf['chipUrlBase'] . $chipParam['id'] . '_' . strtotime(date('Y-m-d H:i:s')) . '_' . rand(1, 99999) . '.mp4';
 		$outputMediaConfig = array(
 			'MediaURL' => $mediaURL, // 指定输出到OSS的媒资文件URL。
 			'Video' => array(
