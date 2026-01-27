@@ -226,7 +226,7 @@ class Order extends CtrlBase
 		$searchEndTime = $this->paramFilter('searchEndTime', 'intval'); // 结束时间
 		$searchStatus = $this->paramFilter('searchStatus', 'intval'); // 支付状态
 		$info = array(
-			'searchStatus' 	  => $searchTestType,
+			'searchStatus' 	  => $searchStatus,
 		    'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
 		    'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
 		);

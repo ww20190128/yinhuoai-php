@@ -154,11 +154,11 @@ class Task extends ServiceBase
     	$taskDao = \dao\Task::singleton();
     	$taskEtt = $taskDao->getNewEntity();
     	$taskEtt->userId = $backstageUserId;
-    	$taskEtt->title = $info['title'];
-    	$taskEtt->detail = $info['detail'];
-    	$taskEtt->goto = $info['goto'];
-    	$taskEtt->award = $info['award'];
-    	$taskEtt->from = $info['from'];
+    	$taskEtt->title = empty($info['title']) ? '' : $info['title'];
+    	$taskEtt->detail = empty($info['detail']) ? '' : $info['detail'];
+    	$taskEtt->goto = empty($info['goto']) ? '' : $info['goto'];
+    	$taskEtt->award = empty($info['award']) ? 0 : $info['award'];
+    	$taskEtt->from = empty($info['from']) ? '' : $info['from'];
     	$taskEtt->createTime = $now;
     	$taskEtt->updateTime = $now;
     	$taskDao->create($taskEtt);

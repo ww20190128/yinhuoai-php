@@ -120,13 +120,6 @@ class Banner extends ServiceBase
     	if (!empty($info['goto'])) {
     		$bannerEtt->set('goto', $info['goto']);
     	}
-    	if (!empty($info['urlData'])) { // 上传图片
-    		$folderSv = \service\Folder::singleton();
-    		$info['url'] = $folderSv->getUrlByConten(base64_decode($info['urlData']), time(), 'png');
-    	}
-    	if (!empty($info['url'])) {
-    		$bannerEtt->set('url', $info['url']);
-    	}
     	$now = $this->frame->now;
     	$bannerEtt->set('updateTime', $now);
     	$bannerDao->update($bannerEtt);
@@ -140,7 +133,7 @@ class Banner extends ServiceBase
      *
      * @return array
      */
-    public function createBanner($backstageUserId, $info)
+    public function createBanner($backstageUserId, $info, $uploadFile)
     {
     	$backstageUserDao = \dao\BackstageUser::singleton();
     	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
@@ -148,17 +141,17 @@ class Banner extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$url = '';
-    	if (!empty($info['urlData'])) { // 上传图片
+    	if (!empty($uploadFile['file'])) { // 上传图片
     		$folderSv = \service\Folder::singleton();
-    		$url = $folderSv->getUrlByConten(base64_decode($info['urlData']), time(), 'png');
+    		$url = $folderSv->getUrlByFile($uploadFile['file'], time() . rand(0, 9999), 'png');
     	}
     	$now = $this->frame->now;
     	$bannerDao = \dao\Banner::singleton();
     	$bannerEtt = $bannerDao->getNewEntity();
     	$bannerEtt->userId = $backstageUserId;
-    	$bannerEtt->name = $info['name'];
+    	$bannerEtt->name = empty($info['name']) ? '' : $info['name'];
     	$bannerEtt->url = $url;
-    	$bannerEtt->goto = $info['goto'];
+    	$bannerEtt->goto = empty($info['goto']) ? '' : $info['goto'];
     	$bannerEtt->createTime = $now;
     	$bannerEtt->updateTime = $now;
     	$bannerDao->create($bannerEtt);

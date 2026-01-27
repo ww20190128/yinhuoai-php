@@ -285,7 +285,7 @@ class Order extends ServiceBase
     {
     	$orderDao = \dao\Order::singleton();
     	$dataList = $orderDao->getList($info, $pageNum, $pageLimit);
-    	$userIds = array_column($dataList, null, 'userId');
+    	$userIds = array_column($dataList, 'userId');
     	
     	$userSv = \service\User::singleton();
     	$userModels = $userSv->getUserModels($userIds);
@@ -297,7 +297,7 @@ class Order extends ServiceBase
     			'id' => intval($data->id),
     			'outTradeNo' => $data->outTradeNo,
     			'status' => intval($data->status),
-    			'price' => intval($data->price),
+    			'price' => $data->price,
     			'updateTime' => intval($data->updateTime),
     			'createTime' => intval($data->createTime),
     			'userInfo' => empty($userModels[$data->userId]) ? array() : $userModels[$data->userId],

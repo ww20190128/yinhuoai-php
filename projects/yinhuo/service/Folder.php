@@ -241,25 +241,25 @@ class Folder extends ServiceBase
     }
     
     /**
-     * 内容上传
+     * 上传文件
      *
      * @return array
      */
-    public function getUrlByConten($content, $fileName, $extension)
+    public function getUrlByFile($file, $fileName, $extension)
     {
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
-    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET'], true);
-    	$aliEditingSv = \service\AliEditing::singleton();
-
-    	$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
-    	$profileKey = "resources/other/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
-    	$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
-    	if (empty($ossResult)) {
-    		return false;
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	$content = @file_get_contents($file);
+    	if (empty($content) || strlen($content) <= 0) {
+    		return '';
     	}
-    	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-    	return $url;
+    	$profileKey = "resources/other/{$fileName}.{$extension}"; // 上传的目录
+    	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		return '';
+    	}
+    	return trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     }
     
     /**

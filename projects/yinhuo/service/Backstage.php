@@ -243,6 +243,9 @@ class Backstage extends ServiceBase
 		foreach ($data as $row) {
 			$map[$row['parentId']][$row['index']] = $row;
 		}
+		if (empty($map['0'])) {
+			return array();
+		}
 		// 获取第一个元素
 		$root = $map['0'];
 		unset($map['0']);

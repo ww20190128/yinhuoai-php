@@ -104,10 +104,14 @@ class Task extends CtrlBase
     	$title = $this->paramFilter('title', 'string');
     	if (!empty($title)) {
     		$info['title'] = $title;
+    	} else {
+    		throw new $this->exception('请编辑标题');
     	}
     	$detail = $this->paramFilter('detail', 'string');
     	if (!empty($detail)) {
     		$info['detail'] = $detail;
+    	} else {
+    		throw new $this->exception('请编辑详情');
     	}
     	$goto = $this->paramFilter('goto', 'string');
     	if (!empty($goto)) {
@@ -116,6 +120,8 @@ class Task extends CtrlBase
     	$award = $this->paramFilter('award', 'string');
     	if (!empty($award)) {
     		$info['award'] = $award;
+    	} else {
+    		throw new $this->exception('请设置奖励');
     	}
     	$from = $this->paramFilter('from', 'string');
     	if (!empty($from)) {

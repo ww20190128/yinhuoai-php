@@ -101,7 +101,7 @@ class News extends ServiceBase
      *
      * @return array
      */
-    public function reviseNews($backstageUserId, $id, $info)
+    public function reviseNews($backstageUserId, $id, $info, $uploadFile)
     {
     	$backstageUserDao = \dao\BackstageUser::singleton();
     	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
@@ -125,8 +125,14 @@ class News extends ServiceBase
     	if (!empty($info['source'])) {
     		$newsEtt->set('source', $info['source']);
     	}
-    	if (!empty($info['coverURL'])) {
-    		$newsEtt->set('coverURL', $info['coverURL']);
+    	$coverURL = '';
+    	if (!empty($uploadFile['file'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$coverURL = $folderSv->getUrlByFile($uploadFile['file'], time() . rand(0, 9999), 'png');
+    	}
+    	
+    	if (!empty($coverURL)) {
+    		$newsEtt->set('coverURL', $coverURL);
     	}
     	$now = $this->frame->now;
     	$newsEtt->set('updateTime', $now);
@@ -141,21 +147,26 @@ class News extends ServiceBase
      *
      * @return array
      */
-    public function createTask($backstageUserId, $info)
+    public function createNews($backstageUserId, $info, $uploadFile)
     {
     	$backstageUserDao = \dao\BackstageUser::singleton();
     	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
     	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
+    	$url = '';
+    	if (!empty($uploadFile['file'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$url = $folderSv->getUrlByFile($uploadFile['file'], time() . rand(0, 9999), 'png');
+    	}
     	$now = $this->frame->now;
     	$newsDao = \dao\News::singleton();
     	$newsEtt = $newsDao->getNewEntity();
     	$newsEtt->userId = $backstageUserId;
-    	$newsEtt->title = $info['title'];
-    	$newsEtt->content = $info['content'];
-    	$newsEtt->source = $info['source'];
-    	$newsEtt->coverURL = $info['coverURL'];
+    	$newsEtt->title = empty($info['title']) ? '' : $info['title'];
+    	$newsEtt->content = empty($info['content']) ? '' : $info['content'];
+    	$newsEtt->source = empty($info['source']) ? '' : $info['source'];
+    	$newsEtt->coverURL = $url;
     	$newsEtt->createTime = $now;
     	$newsEtt->updateTime = $now;
     	$newsDao->create($newsEtt);

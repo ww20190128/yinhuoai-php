@@ -76,11 +76,25 @@ class News extends CtrlBase
     	if (isset($params['source'])) { // 来源
     		$info['source'] = $this->paramFilter('source', 'string');
     	}
-    	if (isset($params['coverURL'])) { // 封面
-    		$info['coverURL'] = $this->paramFilter('coverURL', 'string');
+   
+    	$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+    	$uploadFile = array();
+    	if (!empty($files)) {
+    		if (is_iteratable($files)) foreach ($files as $key => $file) {
+    			$fileInfo = pathinfo($file['name']);
+    			$uploadFile = array(
+    				'extension' => $fileInfo['extension'],
+    				'file' 		=> $file["tmp_name"],
+    				'name' 		=> $file["name"],
+    			);
+    		}
+    	}
+    
+    	if (!empty($uploadFile) && !in_array($uploadFile['extension'], array('png', 'jpg', 'PNG', 'JPG'))) {
+    		throw new $this->exception('请选择正确的图片');
     	}
     	$newsSv = \service\News::singleton();
-    	return $newsSv->reviseNews($this->userId, $id, $info);
+    	return $newsSv->reviseNews($this->userId, $id, $info, $uploadFile);
     }
     
     /**
@@ -98,16 +112,38 @@ class News extends CtrlBase
     	$info = array();
     	if (!empty($params['title'])) {
     		$info['title'] = $this->paramFilter('title', 'string');
+    	} else {
+    		throw new $this->exception('请编辑标题');
     	}
     	if (!empty($params['source'])) {
     		$info['source'] = $this->paramFilter('source', 'string');
     	}
     	if (!empty($params['content'])) {
     		$info['content'] = $this->paramFilter('content', 'string');
+    	} else {
+    		throw new $this->exception('请编辑内容');
+    	}
+    	$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+    	$uploadFile = array();
+    	if (!empty($files)) {
+    		if (is_iteratable($files)) foreach ($files as $key => $file) {
+    			$fileInfo = pathinfo($file['name']);
+    			$uploadFile = array(
+    				'extension' => $fileInfo['extension'],
+    				'file' 		=> $file["tmp_name"],
+    				'name' 		=> $file["name"],
+    			);
+    		}
+    	}
+    	if (empty($uploadFile)) {
+    		throw new $this->exception('请选择封面文件');
+    	}
+    	if (!in_array($uploadFile['extension'], array('png', 'jpg', 'PNG', 'JPG'))) {
+    		throw new $this->exception('请选择正确的图片');
     	}
     	
     	$newsSv = \service\News::singleton();
-    	return $newsSv->createNews($this->userId, $info);
+    	return $newsSv->createNews($this->userId, $info, $uploadFile);
     }
     
     /**

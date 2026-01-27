@@ -73,10 +73,7 @@ class Banner extends CtrlBase
     	if (!empty($goto)) {
     		$info['goto'] = $goto;
     	}
-    	$urlData = $this->paramFilter('urlData', 'string');
-    	if (!empty($urlData)) {
-    		$info['urlData'] = $urlData;
-    	}
+    
     	$bannerSv = \service\Banner::singleton();
     	return $bannerSv->reviseBanner($this->userId, $id, $info);
     }
@@ -101,12 +98,26 @@ class Banner extends CtrlBase
     	if (!empty($goto)) {
     		$info['goto'] = $goto;
     	}
-    	$urlData = $this->paramFilter('urlData', 'string');
-    	if (!empty($urlData)) {
-    		$info['urlData'] = $urlData;
-    	}
+    	$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+		$uploadFile = array();
+		if (!empty($files)) {
+			if (is_iteratable($files)) foreach ($files as $key => $file) {
+				$fileInfo = pathinfo($file['name']);
+				$uploadFile = array(
+					'extension' => $fileInfo['extension'],
+					'file' 		=> $file["tmp_name"],
+					'name' 		=> $file["name"],
+				);
+			}
+		}
+		if (empty($uploadFile)) {
+			throw new $this->exception('请选择图片文件');
+		}
+		if (!in_array($uploadFile['extension'], array('png', 'jpg', 'PNG', 'JPG'))) {
+			throw new $this->exception('请选择正确的图片');
+		}
     	$bannerSv = \service\Banner::singleton();
-    	return $bannerSv->createBanner($this->userId, $info);
+    	return $bannerSv->createBanner($this->userId, $info, $uploadFile);
     }
     
     /**
