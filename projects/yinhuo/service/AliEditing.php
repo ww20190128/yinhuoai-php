@@ -89,19 +89,19 @@ class AliEditing extends ServiceBase
 	 */
 	private static function captionToAudioTrackClipByUrl($captionRow, $editingInfo, $lensRow = array())
 	{
+
 		$folderSv = \service\Folder::singleton();
-		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0) || true) {
+		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0)) {
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
 			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
-		
 			if (!empty($ttsResult['url'])) {
 				$captionRow['url'] = $ttsResult['url'];
 				$captionRow['subtitles'] = $ttsResult['subtitles'];
 				$captionRow['duration'] = $ttsResult['duration'];
 			}
 		}
-	
+
 		if (empty($captionRow['url'])) {
 			return false;
 		}
@@ -123,7 +123,7 @@ class AliEditing extends ServiceBase
 				$startTime = 0; // 文本开始时间
 				$endTime = 0; // 文本结束时间
 				foreach ($sectionArr as $sectionRow) { // 段落
-					$subtitleTrackClip = self::dubSubtitleTrack($sectionRow, $captionRow);
+					$subtitleTrackClip = self::dubSubtitleTrack($sectionRow, $captionRow, $lensRow);
 					if (!empty($subtitleTrackClip)) {
 						$subtitleTrackClips[] = $subtitleTrackClip;
 					}
@@ -319,14 +319,16 @@ class AliEditing extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private static function dubSubtitleTrack($subtitle, $captionRow)
+	private static function dubSubtitleTrack($subtitle, $captionRow, $lensRow = array())
 	{
 		$subtitleTrackClip = array( // 文案1
 			'Type' => 'Text', // 类型
 			'Content' => $subtitle['text'], // 文案内容
 			'AdaptMode' => 'AutoWrap', // 自动换行
 		);
-
+		if (isset($lensRow['index'])) {
+			$subtitleTrackClip['lensIndex'] = $lensRow['index'];
+		}
 		if (!empty($subtitle['startTime'])) {
 			$subtitleTrackClip['startTime'] = $subtitle['startTime']; // 显示时长-开始
 		}
@@ -470,8 +472,9 @@ class AliEditing extends ServiceBase
 					unset($VideoTrackClip['mediaDuration']);
 					$lensMediaVideoTrackClips[$lensIndex] = $VideoTrackClip;
 				}
-				
+	
 				$timelineIn = 0;
+				$dubTimelineInMap = array(); // 配音时间轴（入点）
 				foreach ($lensDubAudioTrackClips as $lensIndex => $AudioTrackClip) {
 					if (empty($lensMediaVideoTrackClips[$lensIndex])) {
 						unset($lensDubAudioTrackClips[$lensIndex]);
@@ -480,18 +483,10 @@ class AliEditing extends ServiceBase
 					$AudioTrackClip['ClipId'] = $clipPrefix . $lensIndex;
 					$dubTimelineInMap[$lensIndex] = $timelineIn;
 					$timelineIn += $AudioTrackClip['mediaDuration'];
-					// 处理转场时长
-					$transitionDuration = 0; // 转场的时长
-					if (!empty($lensMediaVideoTrackClips[$lensIndex]['Effects'])) foreach ($lensMediaVideoTrackClips[$lensIndex]['Effects'] as $effect) {
-						if ($effect['Type'] == 'Transition') {
-							$transitionDuration = $effect['Duration'];
-						}
-					}
-					$timelineIn -= $transitionDuration;
 					unset($AudioTrackClip['mediaDuration']);
 					$lensDubAudioTrackClips[$lensIndex] = $AudioTrackClip;
 				}
-	
+				
 				ksort($lensMediaVideoTrackClips);
 				ksort($lensDubAudioTrackClips);
 				
@@ -519,10 +514,8 @@ class AliEditing extends ServiceBase
 				);
 			} elseif (!empty($lensDubAudioTrackClips)) { // 镜头配音
 				$timelineIn = 0;
+				$dubTimelineInMap = array(); // 配音时间轴（入点）
 				foreach ($lensMediaVideoTrackClips as $lensIndex => $VideoTrackClip) {
-					$VideoTrackClip['ClipId'] = $clipPrefix . $lensIndex;
-					$dubTimelineInMap[$lensIndex] = $timelineIn;
-					$timelineIn += $VideoTrackClip['mediaDuration'];
 					// 处理转场时长
 					$transitionDuration = 0; // 转场的时长
 					if (!empty($VideoTrackClip['Effects'])) foreach ($VideoTrackClip['Effects'] as $effect) {
@@ -530,9 +523,14 @@ class AliEditing extends ServiceBase
 							$transitionDuration = $effect['Duration'];
 						}
 					}
-					$timelineIn -= $transitionDuration;
+					$VideoTrackClip['ClipId'] = $clipPrefix . $lensIndex;
+					
+					$dubTimelineInMap[$lensIndex] = $timelineIn - max(0, ($lensIndex - 1) * $transitionDuration);
+					$timelineIn += $VideoTrackClip['mediaDuration'];
+
 					$lensMediaVideoTrackClips[$lensIndex] = $VideoTrackClip;
 				}
+			
 				foreach ($lensDubAudioTrackClips as $lensIndex => $AudioTrackClip) {
 					if (empty($lensMediaVideoTrackClips[$lensIndex])) {
 						unset($lensDubAudioTrackClips[$lensIndex]);
@@ -570,6 +568,8 @@ class AliEditing extends ServiceBase
 				'SubtitleTrackClips' => $subtitleTrackClips,
 			);
 		}
+		
+		
 		if (!empty($dubSubtitleTrackClipsMap)) { // 配音-字幕
 			// 将配音字幕和音频对齐
 			$dubSubtitleTrackClips = array();
@@ -620,6 +620,7 @@ class AliEditing extends ServiceBase
 				'VideoTrackClips' => array($editingBackgroundVideoTrackClip),
 			);
 		}
+
 		return $result;
 	}
 	
@@ -806,6 +807,7 @@ class AliEditing extends ServiceBase
 			// 配音 - 文本字幕
 			if (!empty($lensRow['dubCaptionInfo'])) { // 手动配音
 				$audioTrackClipResult = self::captionToAudioTrackClipByUrl($lensRow['dubCaptionInfo'], $editingInfo, $lensRow);
+
 				if (!empty($audioTrackClipResult['audioTrackClip'])) {
 					$lensAudioTrackClips[$lensKey] = $audioTrackClipResult['audioTrackClip'];
 					if (!empty($audioTrackClipResult['subtitleTrackClips']) && !empty($editingInfo['showCaption'])) { // 字幕
@@ -861,8 +863,10 @@ class AliEditing extends ServiceBase
 		$lensVideoTrackClips = array();
 		$folderSv = \service\Folder::singleton();
 		if (!empty($editingInfo['lensList'])) foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
-// 			$mediaInfo = $folderSv->getMediaInfoByUrl($lensRow['mediaInfo']['url']);
-// 			$lensRow['mediaInfo']['duration'] = $mediaInfo['duration'];
+			if ($lensRow['mediaInfo']['type'] == \constant\Folder::FOLDER_TYPE_VIDEO && $lensRow['mediaInfo']['duration'] <= 0) {
+				$mediaInfo = $folderSv->getMediaInfoByUrl($lensRow['mediaInfo']['url']);
+				$lensRow['mediaInfo']['duration'] = $mediaInfo['duration'];
+			}
 
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声

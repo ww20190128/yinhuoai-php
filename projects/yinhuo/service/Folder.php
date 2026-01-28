@@ -512,7 +512,6 @@ class Folder extends ServiceBase
     	$now = $this->frame->now;
     	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3'; // 配音源文件
     	$content = '';
-
     	if (!empty($dubFileEtt) && !empty($dubFileEtt->url) && $dubFileEtt->duration > 0) { // 有生成的远程链接，不需要重复生成
     		return array(
     			'id' 		=> $dubFileEtt->id,
@@ -562,12 +561,17 @@ class Folder extends ServiceBase
     		$extension = 'mp3';
     		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
-
     		if (!empty($ossResult)) {
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     			$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
     			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     			$dubFileEtt->set('url', $url);
+    			$dubFileEtt->set('duration', empty($mediaInfo['duration']) ? 0 : $mediaInfo['duration']);
+    			$dubFileDao->update($dubFileEtt);
+    		}
+    	} elseif (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {
+    		$mediaInfo = $this->getMediaInfoByUrl($dubFileEtt->url); // 注册到媒资
+    		if (!empty($mediaInfo)) {
     			$dubFileEtt->set('duration', empty($mediaInfo['duration']) ? 0 : $mediaInfo['duration']);
     			$dubFileDao->update($dubFileEtt);
     		}
