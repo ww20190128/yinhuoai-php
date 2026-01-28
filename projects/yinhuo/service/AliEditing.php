@@ -90,11 +90,11 @@ class AliEditing extends ServiceBase
 	private static function captionToAudioTrackClipByUrl($captionRow, $editingInfo, $lensRow = array())
 	{
 		$folderSv = \service\Folder::singleton();
-
-		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0)) {
+		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0) || true) {
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
 			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
+		
 			if (!empty($ttsResult['url'])) {
 				$captionRow['url'] = $ttsResult['url'];
 				$captionRow['subtitles'] = $ttsResult['subtitles'];
@@ -117,22 +117,16 @@ class AliEditing extends ServiceBase
 		$subtitles = empty($captionRow['subtitles']) ? array() : $captionRow['subtitles'];
 		$subtitleTrackClips = array();
 		if (!empty($subtitles)) {
-			foreach ($subtitles as $subtitle) {
-				$startTime = 0;
-				$endTime = 0;
-				foreach ($subtitle['words'] as $word) {
-					if ($word['startTime'] <= $startTime || empty($startTime)) {
-						$startTime = $word['startTime'];
+			foreach ($subtitles as $subtitleRow) {
+				$text = $subtitleRow['text'];
+				$sectionArr = empty($subtitleRow['subtitles']) ? array() : $subtitleRow['subtitles'];
+				$startTime = 0; // 文本开始时间
+				$endTime = 0; // 文本结束时间
+				foreach ($sectionArr as $sectionRow) { // 段落
+					$subtitleTrackClip = self::dubSubtitleTrack($sectionRow, $captionRow);
+					if (!empty($subtitleTrackClip)) {
+						$subtitleTrackClips[] = $subtitleTrackClip;
 					}
-					if ($word['endTime'] >= $endTime || empty($endTime)) {
-						$endTime = $word['endTime'];
-					}
-				}
-				$subtitle['startTime'] = $startTime;
-				$subtitle['endTime'] = $endTime;
-				$subtitleTrackClip = self::dubSubtitleTrack($subtitle, $captionRow);
-				if (!empty($subtitleTrackClip) && isset($lensRow['index'])) {
-					$subtitleTrackClips[] = $subtitleTrackClip;
 				}
 			}
 		} else { // 没有找到配音字幕

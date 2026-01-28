@@ -512,6 +512,7 @@ class Folder extends ServiceBase
     	$now = $this->frame->now;
     	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3'; // 配音源文件
     	$content = '';
+
     	if (!empty($dubFileEtt) && !empty($dubFileEtt->url) && $dubFileEtt->duration > 0) { // 有生成的远程链接，不需要重复生成
     		return array(
     			'id' 		=> $dubFileEtt->id,
@@ -529,6 +530,7 @@ class Folder extends ServiceBase
     		$tries = 3;
     		do {
     			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $ttsParams);
+ 
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
     			$content = $ttsResult['content'];
@@ -552,7 +554,7 @@ class Folder extends ServiceBase
     	}
 
     	// 需要生成音频链接
-    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content) || true) {
+    	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content)) {
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
@@ -586,10 +588,13 @@ class Folder extends ServiceBase
     public function getTtsByText($text, $speaker)
     {
     	$dubId = md5($speaker . $text);
+    	
+    	
+   
     	// 配音源文件
     	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3';
     	$content = '';
-    	if (file_exists($ttsFile)) {
+    	if (file_exists($ttsFile) && false) {
     		$content = @file_get_contents($ttsFile);	
     	} else {
     		$volcTTSSv = \service\reuse\VolcTTS::singleton();
@@ -600,7 +605,7 @@ class Folder extends ServiceBase
     		@file_put_contents($ttsFile, $ttsResult['content']);
     		$content = $ttsResult['content'];
     	}
-
+print_r(json_encode($ttsResult['subtitles'], JSON_UNESCAPED_UNICODE));exit;
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);

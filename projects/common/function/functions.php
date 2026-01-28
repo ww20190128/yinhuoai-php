@@ -2009,3 +2009,75 @@ function getStaticData($dir, $fileName, $suffixName = 'php')
 	}
 	return $data;
 }
+
+/**
+ * 处理字幕分段
+ * 
+ * @return array
+ */
+function processSubtitle($subtitleData)
+{
+	$punctuationChars = array('，', '。', '！', '？', '、', '；', '：', '.', '!', '?', ';', ':');
+	$result = array();
+	if (!empty($subtitleData)) foreach ($subtitleData as $item) {
+		$processedItem = array();
+		$processedItem['text'] = isset($item['text']) ? $item['text'] : '';
+		$processedItem['subtitles'] = array();
+		if (empty($item['words']) || !is_array($item['words'])) {  // 跳过无words字段的条目
+			$result[] = $processedItem;
+			continue;
+		}
+		$currentText = '';       // 当前分段的文本
+		$currentStartTime = 0;   // 当前分段的开始时间
+		$currentEndTime = 0;     // 当前分段的结束时间
+		// 遍历每个词语
+		if (!empty($item['words'])) foreach ($item['words'] as $word) {
+			if (empty($word['word'])) {
+				continue;
+			}
+			$wordText = $word['word'];
+			$startTime = isset($word['startTime']) ? $word['startTime'] : 0;
+			$endTime = isset($word['endTime']) ? $word['endTime'] : 0;
+			$hasPunctuation = false;
+			$pureWord = $wordText;
+			foreach ($punctuationChars as $punc) {
+				if (strpos($wordText, $punc) !== false) {
+					$hasPunctuation = true;
+					$pureWord = str_replace($punc, '', $wordText);
+					break;
+				}
+			}
+			if (empty($currentText) && !empty($pureWord)) {  // 如果是第一段，初始化开始时间
+				$currentStartTime = $startTime;
+			}
+			if (!empty($pureWord)) { // 拼接纯文字到当前分段
+				$currentText .= $pureWord;
+				$currentEndTime = $endTime;
+			}
+			 
+			// 遇到标点，完成当前分段
+			if ($hasPunctuation && !empty($currentText)) {
+				$processedItem['subtitles'][] = array(
+						'text' => $currentText,
+						'startTime' => $currentStartTime,
+						'endTime' => $currentEndTime
+				);
+				// 重置当前分段
+				$currentText = '';
+				$currentStartTime = 0;
+				$currentEndTime = 0;
+			}
+		}
+		 
+		// 处理最后一段（防止末尾无标点的情况）
+		if (!empty($currentText)) {
+			$processedItem['subtitles'][] = array(
+					'text' => $currentText,
+					'startTime' => $currentStartTime,
+					'endTime' => $currentEndTime
+			);
+		}
+		$result[] = $processedItem;
+	}
+	return $result;
+}

@@ -208,7 +208,7 @@ print_r($response);exit;
     		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
     		'cache_config' => array(
     			'text_type' => 1,
-    			'use_cache' => true,
+    			//'use_cache' => true,
     		),
     	);
     	if (!empty($ttsParams['language'])) { // 明确语种
@@ -237,7 +237,6 @@ print_r($response);exit;
     	$volcConf = self::$instance->frame->conf['volcengine'];
  
 		$apiUrl = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
-  
     	$responseContent = ''; // 请求的内容
     	$ch = curl_init();
     	curl_setopt_array($ch, [
@@ -312,6 +311,9 @@ print_r($response);exit;
     			$content .= $subContent;
     		}
     	}
+    	
+    	// 字幕分段
+    	$subtitles = processSubtitle($subtitles);
     	return array(
     		'size' => mb_strlen($content),
     		'content' => $content,

@@ -293,8 +293,10 @@ class Project extends CtrlBase
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
 		$projectSv = \service\Project::singleton();
-		return $projectSv->publicClip($this->userId);
+		return $projectSv->public+Clip($this->userId);
 	}
+	
+
 	
 	/**
 	 * 生成成片
@@ -303,6 +305,11 @@ class Project extends CtrlBase
 	 */
 	public function test()
 	{
+
+		
+		
+		
+		
 		
 // 		$uploadFiles = array();
 // 		$uploadFiles[] = array(
@@ -323,75 +330,14 @@ class Project extends CtrlBase
 		
 		
 		
-// 		$text = "作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
+		$text = "作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
 		
-// 		// 第一步：预处理文本（去除多余空格、换行，统一标点）
-// 		$text = trim($text);
-// 		$text = str_replace(["\r\n", "\r", "\n"], "。", $text); // 换行替换为句号，保证语义停顿
-// 		$text = preg_replace('/\s+/', '', $text); // 去除所有空格
 		
-// 		// 第二步：定义语义分割符（优先级从高到低）
-// 		$splitChars = ['。', '！', '？', '；', '，', '、'];
+// 		$folderSv = \service\Folder::singleton();
+// 		$url = $folderSv->getTtsByText($text, 'zh_female_gujie_mars_bigtts');
+	
 		
-// 		// 第三步：按语义分割符拆分文本为短句
-// 		$sentences = [];
-// 		$tempSentence = '';
-// 		for ($i = 0; $i < mb_strlen($text); $i++) {
-// 			$char = mb_substr($text, $i, 1);
-// 			$tempSentence .= $char;
 		
-// 			// 遇到分割符，拆分短句
-// 			if (in_array($char, $splitChars)) {
-// 				$sentences[] = $tempSentence;
-// 				$tempSentence = '';
-// 			}
-// 		}
-// 		// 处理最后一段无分割符的文本
-// 		if (!empty($tempSentence)) {
-// 			$sentences[] = $tempSentence;
-// 		}
-// 		$maxLen = 30;
-// 		// 第四步：合并短句为符合长度的文本段（避免单段过短/过长）
-// 		$result = [];
-// 		$currentSegment = '';
-// 		foreach ($sentences as $sentence) {
-// 			$sentenceLen = mb_strlen($sentence);
-// 			$currentLen = mb_strlen($currentSegment);
-		
-// 			// 情况1：当前段+新短句 ≤ 最大长度，直接合并
-// 			if ($currentLen + $sentenceLen <= $maxLen) {
-// 				$currentSegment .= $sentence;
-// 			}
-// 			// 情况2：新短句本身超过最大长度，先拆分当前段，再拆分超长短句
-// 			elseif ($sentenceLen > $maxLen) {
-// 				// 先把当前段存入结果
-// 				if (!empty($currentSegment)) {
-// 					$result[] = $currentSegment;
-// 					$currentSegment = '';
-// 				}
-// 				// 拆分超长短句（按最大长度兜底）
-// 				$longSentenceParts = str_split($sentence, $maxLen);
-// 				foreach ($longSentenceParts as $part) {
-// 					if (!empty($part)) {
-// 						$result[] = $part;
-// 					}
-// 				}
-// 			}
-// 			// 情况3：当前段+新短句超过最大长度，先存入当前段，再重置为新短句
-// 			else {
-// 				$result[] = $currentSegment;
-// 				$currentSegment = $sentence;
-// 			}
-// 		}
-// 		// 处理最后一段
-// 		if (!empty($currentSegment)) {
-// 			$result[] = $currentSegment;
-// 		}
-// 		print_r($result);exit;
-// // 		$folderSv = \service\Folder::singleton();
-// // 		$url = $folderSv->getTtsByText($answer, 'zh_female_gujie_mars_bigtts');
-		
-// // 		print_r($url);exit;
 		
 		
 		
@@ -399,7 +345,7 @@ class Project extends CtrlBase
 		
 		$params = $this->params;
 		$chipParam = <<<EOT
-{"id":11,"name":"20260114-剪辑","topic":"","title":"","ratio":"9:16","durationType":1,"fps":25,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1768572518,"createTime":1768376816,"lensList":[{"id":7,"name":"片头","index":-1,"type":1,"createTime":1768376816,"updateTime":1768468825,"mediaIds":[92],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[19],"dubMediaIds":[],"mediaInfo":{"id":92,"name":"入场.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/e8e915335017b622f9fb3ff0f6e5c218.mp4","updateTime":1768139695,"createTime":1768139695,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/3ac933175c6931d3a408f314c20df18f.jpg","duration":6,"size":8901923}},{"id":8,"name":"片中1","index":1,"type":2,"createTime":1768376816,"updateTime":1768468850,"mediaIds":[95],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[20],"dubMediaIds":[],"mediaInfo":{"id":95,"name":"自我介绍.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/6785bec3c9b1af42a5d5909030c8e939.mp4","updateTime":1768139772,"createTime":1768139772,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7bf2e2ddbb7fe740a46772fedafdc303.jpg","duration":12,"size":15491008}},{"id":15,"name":"片中2","index":2,"type":2,"createTime":1768468559,"updateTime":1768468890,"mediaIds":[95],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[21],"dubMediaIds":[],"mediaInfo":{"id":95,"name":"自我介绍.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/6785bec3c9b1af42a5d5909030c8e939.mp4","updateTime":1768139772,"createTime":1768139772,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7bf2e2ddbb7fe740a46772fedafdc303.jpg","duration":12,"size":15491008}},{"id":16,"name":"片中3","index":3,"type":2,"createTime":1768468695,"updateTime":1768468910,"mediaIds":[99],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[22],"dubMediaIds":[],"mediaInfo":{"id":99,"name":"退场","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/2\/915b97c0573b5356a0ba67066a0c4da1.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/2f669a07c56c9bc3974b06e9531abedd.jpg","duration":12,"size":12390712}},{"id":9,"name":"片尾","index":100,"type":3,"createTime":1768376816,"updateTime":1768468935,"mediaIds":[97],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[23],"dubMediaIds":[],"mediaInfo":{"id":97,"name":"答题","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/d39bbfef96dbd7a97e0f33959d22db01.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/058312b090943122736783722e66af2a.jpg","duration":100,"size":49026064}}],"actorInfo":{"name":"冷酷哥哥","id":"ICL_zh_male_lengkugege_v1_tob","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/portal\/bigtts\/冷酷哥哥.mp3","classify":"通用场景","resourceId":"seed-tts-1.0","language":""},"previewMediaId":92,"titleInfo":{"id":3,"updateTime":1768469193,"createTime":1768469193,"start":0,"end":5,"captionIds":[25,26],"title":"华图","captionList":[{"id":25,"editingId":11,"text":"华图","font":{"text-align":"center","position":80,"font-size":40,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768469193,"updateTime":1768469193},{"id":26,"editingId":11,"text":"华图","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768469193,"updateTime":1768469193}]}}
+{"id":11,"name":"20260114-剪辑","topic":"","title":"","ratio":"9:16","durationType":2,"fps":25,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1768572518,"createTime":1768376816,"lensList":[{"id":7,"name":"片头","index":-1,"type":1,"createTime":1768376816,"updateTime":1768468825,"mediaIds":[92],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[19],"dubMediaIds":[],"mediaInfo":{"id":92,"name":"入场.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/e8e915335017b622f9fb3ff0f6e5c218.mp4","updateTime":1768139695,"createTime":1768139695,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/3ac933175c6931d3a408f314c20df18f.jpg","duration":6,"size":8901923}},{"id":8,"name":"片中1","index":1,"type":2,"createTime":1768376816,"updateTime":1768468850,"mediaIds":[95],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[20],"dubMediaIds":[],"mediaInfo":{"id":95,"name":"自我介绍.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/6785bec3c9b1af42a5d5909030c8e939.mp4","updateTime":1768139772,"createTime":1768139772,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7bf2e2ddbb7fe740a46772fedafdc303.jpg","duration":12,"size":15491008}},{"id":15,"name":"片中2","index":2,"type":2,"createTime":1768468559,"updateTime":1768468890,"mediaIds":[95],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[21],"dubMediaIds":[],"mediaInfo":{"id":95,"name":"自我介绍.mp4","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/5\/6785bec3c9b1af42a5d5909030c8e939.mp4","updateTime":1768139772,"createTime":1768139772,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/7bf2e2ddbb7fe740a46772fedafdc303.jpg","duration":12,"size":15491008}},{"id":16,"name":"片中3","index":3,"type":2,"createTime":1768468695,"updateTime":1768468910,"mediaIds":[99],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[22],"dubMediaIds":[],"mediaInfo":{"id":99,"name":"退场","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/2\/915b97c0573b5356a0ba67066a0c4da1.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/2f669a07c56c9bc3974b06e9531abedd.jpg","duration":12,"size":12390712}},{"id":9,"name":"片尾","index":100,"type":3,"createTime":1768376816,"updateTime":1768468935,"mediaIds":[97],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[23],"dubMediaIds":[],"mediaInfo":{"id":97,"name":"答题","type":"video","url":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/video\/7\/d39bbfef96dbd7a97e0f33959d22db01.mp4","updateTime":1768140990,"createTime":1768140990,"coverURL":"https:\/\/wb-yinhuo.oss-cn-beijing.aliyuncs.com\/resources\/cover\/058312b090943122736783722e66af2a.jpg","duration":100,"size":49026064}}],"actorInfo":{"name":"冷酷哥哥","id":"ICL_zh_male_lengkugege_v1_tob","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/portal\/bigtts\/冷酷哥哥.mp3","classify":"通用场景","resourceId":"seed-tts-1.0","language":""},"previewMediaId":92,"titleInfo":{"id":3,"updateTime":1768469193,"createTime":1768469193,"start":0,"end":5,"captionIds":[25,26],"title":"华图","captionList":[{"id":25,"editingId":11,"text":"华图","font":{"text-align":"center","position":80,"font-size":40,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768469193,"updateTime":1768469193},{"id":26,"editingId":11,"text":"华图","font":{"text-align":"center","position":80,"font-size":40,"font-family":"FZFangSong-Z02S"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1768469193,"updateTime":1768469193}]}}
 EOT;
 		
 	
@@ -569,7 +515,7 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 		$aliEditingSv = \service\AliEditing::singleton();
 		$tries = 3;
 		do {
-			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam1);
+			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
 		} while (empty($jobId) && --$tries > 0);
 		//sleep(10);
 		//$jobId = 'ac33f7841bf84a5f8288505a260c5d49';
