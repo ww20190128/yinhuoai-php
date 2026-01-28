@@ -102,7 +102,7 @@ $conf = array(
 	),
 	// php CertificateDownloader.php -k APIv3Key -m merchantId -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s APICertificateKey -o /data/www/mood-php/Configs/xince/
 	
-	'aliEditing1' => array( // 阿里云剪辑
+	'aliEditing1' => array( // 阿里云剪辑(ww)
 		'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
 		'accessKeySecret' => 'p52taYKYaKAJpkaWqvbH2gWuZJDZcs',
 		'StorageType' => 'oss', // 仅支持 oss
@@ -110,14 +110,14 @@ $conf = array(
 		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 		'chipUrlBase' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/',
 	),
-		'aliEditing' => array( // 阿里云剪辑
-				'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
-				'accessKeySecret' => 'p52taYKYaKAJpkaWqvbH2gWuZJDZcs',
-				'StorageType' => 'oss', // 仅支持 oss
-				//oss-cn-beijing-internal.aliyuncs.com
-				'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
-				'chipUrlBase' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/',
-		),
+	'aliEditing' => array( // 阿里云剪辑(yinhuo)
+		'accessKeyId' => 'LTAI5tGXcM3Lvis6R3pZkzUH',
+		'accessKeySecret' => 'rWTzE3XhS1gvjJbFeI0VmXqeUWcI4B',
+		'StorageType' => 'oss', // 仅支持 oss
+		//oss-cn-beijing-internal.aliyuncs.com
+		'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+		'chipUrlBase' => 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/project/',		
+	),
 	'appConfig' => array(
 		'name' => '心测MBTI',
 		'logo' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/xince-logo.png',

@@ -29,7 +29,7 @@ class App extends ServiceBase
     }
     
     /**
-     * 
+     * 上传音乐
      *
      * @return array
      */
@@ -37,7 +37,7 @@ class App extends ServiceBase
     {
     	$aliEditingSv = \service\AliEditing::singleton();
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	$musicDao = \dao\Music::singleton();
     	$musicEttList = $musicDao->readListByWhere("url = ''");
@@ -61,7 +61,6 @@ class App extends ServiceBase
     		}
     	}
     	exit;
-	
     }
     
     /**

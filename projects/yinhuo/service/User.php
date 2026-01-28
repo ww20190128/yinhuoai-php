@@ -215,7 +215,7 @@ class User extends ServiceBase
     		$extension = $fileInfo['extension'];
     		$profileKey = "resources/userHeadImg/{$userId}.{$extension}"; // 上传的目录
     		$ossSv = \service\reuse\OSS::singleton();
-    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    		$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, file_get_contents($file));
     		if (empty($ossResult)) {

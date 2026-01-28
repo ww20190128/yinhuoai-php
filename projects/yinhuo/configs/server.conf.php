@@ -98,12 +98,12 @@ return array(
 			'OSS'               => 'oss-cn-beijing.aliyuncs.com',
 			'JSOSS'             => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/resources/',
 		),
-		'yinhuo' => array( // 外包-因火服务器（未配置）
-			'ACCESS_KEY_ID'     => 'LTAI5tPbtx6vVzHuymUoUcEM',
-			'ACCESS_KEY_SECRET' => '5Yql9pRUMiuLYD7lweR0AYa66xU4Ae',
-			'BUCKET'            => 'zhile-static',
+		'yinhuo' => array( // 外包-因火服务器(yinhuo 账号)
+			'ACCESS_KEY_ID'     => 'LTAI5tGXcM3Lvis6R3pZkzUH',
+			'ACCESS_KEY_SECRET' => 'rWTzE3XhS1gvjJbFeI0VmXqeUWcI4B',
+			'BUCKET'            => 'yinhuo-ai',
 			'OSS'               => 'oss-cn-beijing.aliyuncs.com',
-			'JSOSS'             => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/',
+			'JSOSS'             => 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/resources/',
 		),
 	)
 );

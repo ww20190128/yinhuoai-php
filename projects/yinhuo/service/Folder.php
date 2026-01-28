@@ -74,7 +74,7 @@ class Folder extends ServiceBase
     	$aliEditingSv = \service\AliEditing::singleton();
     	$mediaDao = \dao\Media::singleton();
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	if ($mediaEtt->type == \constant\Folder::FOLDER_TYPE_VIDEO && empty($mediaInfo['coverURL'])) { // 注册媒体资源
     		$mediaInfo = $this->getMediaInfoByUrl($mediaEtt->url);
     		if (!empty($mediaInfo)) {
@@ -94,7 +94,7 @@ class Folder extends ServiceBase
     {
     	$aliEditingSv = \service\AliEditing::singleton();
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$registerMediaId = $aliEditingSv->registerMediaInfo($url);
     	if (!empty($registerMediaId)) { // 获取资源信息
     		$mediaInfo = $aliEditingSv->getMediaInfo($registerMediaId);
@@ -199,7 +199,7 @@ class Folder extends ServiceBase
     	$now = $this->frame->now;
     	$folderMediaIds = empty($folderEtt->mediaIds) ? array() : explode(',', $folderEtt->mediaIds);
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET'], true);
     	$aliEditingSv = \service\AliEditing::singleton();
 
@@ -248,7 +248,7 @@ class Folder extends ServiceBase
     public function getUrlByFile($file, $fileName, $extension)
     {
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	$content = @file_get_contents($file);
     	if (empty($content) || strlen($content) <= 0) {
@@ -270,7 +270,7 @@ class Folder extends ServiceBase
     public function createAudio($content, $duration, $dubId)
     {
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	$aliEditingSv = \service\AliEditing::singleton();
     	$extension = 'mp3';
@@ -554,7 +554,7 @@ class Folder extends ServiceBase
     	// 需要生成音频链接
     	if (!empty($needUrl) && empty($dubFileEtt->url) && !empty($content) || true) {
     		$ossSv = \service\reuse\OSS::singleton();
-    		$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    		$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$aliEditingSv = \service\AliEditing::singleton();
     		$extension = 'mp3';
@@ -602,7 +602,7 @@ class Folder extends ServiceBase
     	}
 
     	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.zhile'); // 阿里云配置
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     	$aliEditingSv = \service\AliEditing::singleton();
     	$extension = 'mp3';

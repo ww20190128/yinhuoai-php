@@ -1069,6 +1069,8 @@ class AliEditing extends ServiceBase
 		    $request->userData = json_encode($userData, JSON_UNESCAPED_UNICODE);
 		    $response = self::$client->submitMediaProducingJob($request);
 		    $jobId = empty($response->body->jobId) ? array() : $response->body->jobId;
+		    
+
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {
@@ -1088,7 +1090,8 @@ class AliEditing extends ServiceBase
 			$request = new GetMediaProducingJobRequest();
    	 		$request->jobId = $jobId;
     		$response = self::$client->getMediaProducingJob($request);
-			$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
+
+    		$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {
