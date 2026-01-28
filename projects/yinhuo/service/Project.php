@@ -676,10 +676,9 @@ class Project extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
+    	$where = "`userId` = {$userId} and `status` = 1";
     	$projectDao = \dao\Project::singleton();
-    	$projectEttList = $projectDao->readListByIndex(array(
-    		'status' => 1,
-    	));
+    	$projectEttList = $projectDao->readListByWhere($where);
     	if (empty($projectEttList)) {
     		throw new $this->exception("当前没有设置可发布的工程");
     	}
