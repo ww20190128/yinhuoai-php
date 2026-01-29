@@ -1090,6 +1090,7 @@ class AliEditing extends ServiceBase
     		$response = self::$client->getMediaProducingJob($request);
 
     		$mediaProducingJob = empty($response->body->mediaProducingJob) ? array() : $response->body->mediaProducingJob;
+
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {

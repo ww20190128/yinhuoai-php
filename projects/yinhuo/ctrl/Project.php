@@ -295,8 +295,54 @@ class Project extends CtrlBase
 		$projectSv = \service\Project::singleton();
 		return $projectSv->public+Clip($this->userId);
 	}
+	// 数字人
+	public function avatarTest()
+	{
+		$requestParam = array(
+			'avatarName' => '数字人测试',	// 数字人名称
+			'avatarDescription' => '测试数字人001', // 数字人描述	
+			'avatarType' => '2DAvatar', // 数字人类型
+			'thumbnail' => '', // 缩略图 URL
+			'portrait' => '',	//  头像图片的媒资 Id
+			'video' => '', // 训练视频媒资 ID
+		);
+		$aliAvatarSv = \service\AliAvatar::singleton();
+		$jobId = $aliAvatarSv->createAvatarTraining($requestParam);
+		
+		// 提交训练任务
+		$jobId = $aliAvatarSv->submitAvatarTraining($jobId);
+		
+		// 获取数字人详情
+		$avatarId = $aliAvatarSv->getAvatarTraining($jobId);
+		
+		// 获取数字人详情
+		$info = $aliAvatarSv->getAvatar($avatarId);
+	}
 	
-
+	public function voiceTest()
+	{
+		$param = array(
+			'voiceId' => 'wjy',
+			'voiceName' => '王静怡',
+			'voiceDesc' => '声音克隆测试',
+			'gender' => 'female',
+			'scenario' => 'interaction',
+		);
+		$aliVoiceSv = \service\AliVoice::singleton();
+		//$jobId = $aliVoiceSv->createCustomizedVoiceJob($param);
+		// $jobId  9c322edb937943f1a7e758a448f09126
+		$param = array(
+			'voiceId' => 'wjy',
+			'demoAudioMediaURL' => 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/resources/video/5/492da053c4fefa4d84309ea5c7fa9d1b.mp4',
+				
+		);
+		$jobId = $aliVoiceSv->submitCustomizedVoiceJob($param);
+		$param = array(
+			'scenario' => 'interaction',
+		);
+// 		$jobId = $aliVoiceSv->getDemonstrationForCustomizedVoiceJob($param);
+		//https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/resources/video/5/492da053c4fefa4d84309ea5c7fa9d1b.mp4
+	}
 	
 	/**
 	 * 生成成片

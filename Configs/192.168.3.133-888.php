@@ -101,7 +101,7 @@ $conf = array(
 		'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
 		'arkApiKey' => '38078d13-166f-4194-8fa1-1c0bd4ba2084', // AI请求的 ARK_API_KEY
 	),
-		'aliEditing' => array( // 阿里云剪辑(ww)
+		'aliEditing1' => array( // 阿里云剪辑(ww)
 				'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
 				'accessKeySecret' => 'p52taYKYaKAJpkaWqvbH2gWuZJDZcs',
 				'StorageType' => 'oss', // 仅支持 oss
@@ -109,7 +109,7 @@ $conf = array(
 				'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 				'chipUrlBase' => 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/project/',
 		),
-	'aliEditing1' => array( // 阿里云剪辑(yinhuo)
+	'aliEditing' => array( // 阿里云剪辑(yinhuo)
 		'accessKeyId' => 'LTAI5tGXcM3Lvis6R3pZkzUH',
 		'accessKeySecret' => 'rWTzE3XhS1gvjJbFeI0VmXqeUWcI4B',
 		'StorageType' => 'oss', // 仅支持 oss
