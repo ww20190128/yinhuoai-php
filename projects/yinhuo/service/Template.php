@@ -43,6 +43,8 @@ class Template extends ServiceBase
     	$templateDao = \dao\Template::singleton();
     	$templateEttList = $templateDao->readListByWhere("`userId`={$userId}");
     	$templateModels = array();
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels(array($userId));
     	if (!empty($templateEttList)) foreach ($templateEttList as $templateEtt) {
     		if ($templateEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
@@ -50,6 +52,7 @@ class Template extends ServiceBase
     		$templateModels[$templateEtt->id] = array(
     			'id' 			=> intval($templateEtt->id),
     			'name'			=> $templateEtt->name,
+    			'userInfo'		=> empty($userModels[$userId]) ? array() : $userModels[$userId],
     			'editingId'		=> intval($templateEtt->editingId),
     			'createTime' 	=> intval($templateEtt->createTime),
     			'updateTime' 	=> intval($templateEtt->updateTime),

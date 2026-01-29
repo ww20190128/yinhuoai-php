@@ -192,19 +192,43 @@ class Project extends ServiceBase
     	$projectDao = \dao\Project::singleton();
     	$projectEttList = $projectDao->readListByWhere("`userId`={$userId}");
     	$projectModels = array();
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels(array($userId));
+
+    	$projectIds = array();
     	if (!empty($projectEttList)) foreach ($projectEttList as $projectEtt) {
     		if ($projectEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
     		}
     		$projectModels[$projectEtt->id] = array(
-    			'id' 			=> $projectEtt->id,
-    			'editingId' 	=> intval($projectEtt->editingId),
-    			'status' 		=> intval($projectEtt->status),
-    			'name'			=> $projectEtt->name,
-    			'createTime' 	=> intval($projectEtt->createTime),
-    			'updateTime' 	=> intval($projectEtt->updateTime),
+    			'id' 				=> $projectEtt->id,
+    			'editingId' 		=> intval($projectEtt->editingId),
+    			'status' 			=> intval($projectEtt->status),
+    			'name'				=> $projectEtt->name,
+    			'createTime' 		=> intval($projectEtt->createTime),
+    			'updateTime' 		=> intval($projectEtt->updateTime),
+    			'userInfo'			=> empty($userModels[$userId]) ? array() : $userModels[$userId],
+    			'projectClipNum' 	=> 0,
+    			'userId' 			=> intval($projectEtt->userId),
     		);
+    		$projectIds[] = $projectEtt->id;
     	}
+    	
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEttList = array();
+    	if (!empty($projectIds)) {
+    		$where = "`projectId` in ('" . implode("','", $projectIds) . "') and `status` != " . \constant\Common::DATA_DELETE;
+    		$projectClipEttList = $projectClipDao->readListByWhere($where);
+    	}
+    	$projectClipMap = array();
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		$projectClipMap[$projectClipEtt->projectId][$projectClipEtt->id] = $projectClipEtt->mediaURL;
+    	}
+    	if (!empty($projectModels)) foreach ($projectModels as $key => $projectModel) {
+    		$projectModel['projectClipNum'] = empty($projectClipMap[$projectModel['id']]) ? 0 : count($projectClipMap[$projectModel['id']]);
+    		$projectModels[$key] = $projectModel;
+    	}
+    	
     	$commonSv = \service\Common::singleton();
     	uasort($projectModels, array($commonSv, 'sortByCreateTime'));
     	return $projectModels;
@@ -308,10 +332,7 @@ class Project extends ServiceBase
     		}
     		$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
     		$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
-    		
-    		
-    		
-    		
+  
     		foreach ($chipParamList as $chipParam) {
     			$projectClipEtt = $projectClipDao->getNewEntity();
     			$projectClipEtt->projectId = $projectEtt->id;
@@ -392,7 +413,8 @@ class Project extends ServiceBase
     	$mediaEttList = empty($previewMediaIds) ? array() : $mediaDao->readListByPrimary($previewMediaIds);
     	$mediaEttList = $mediaDao->refactorListByKey($mediaEttList);
     	$folderSv = \service\Folder::singleton();
-
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels(array($userId));
     	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
     		if ($projectClipEtt->status == \constant\Common::DATA_DELETE) {
     			continue;
@@ -435,6 +457,7 @@ class Project extends ServiceBase
     			'duration' 		=> intval($projectClipEtt->duration),
     			'createTime' 	=> intval($projectClipEtt->createTime),
     			'updateTime' 	=> intval($projectClipEtt->updateTime),
+    			'userInfo'		=> empty($userModels[$userId]) ? array() : $userModels[$userId],
     		);
     	}
     	$commonSv = \service\Common::singleton();

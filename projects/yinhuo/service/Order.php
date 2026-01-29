@@ -287,6 +287,8 @@ class Order extends ServiceBase
     	$dataList = $orderDao->getList($info, $pageNum, $pageLimit);
     	$userIds = array_column($dataList, 'userId');
     	
+    	
+    	
     	$userSv = \service\User::singleton();
     	$userModels = $userSv->getUserModels($userIds);
     	// 获取查询总数
@@ -305,7 +307,7 @@ class Order extends ServiceBase
     	}
     	return array(
     		'list'     => array_values($models),
-    		'totalNum' => intval($dataList),
+    		'totalNum' => $totalNum,
     	);
     }
     

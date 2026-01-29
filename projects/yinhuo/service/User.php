@@ -274,4 +274,66 @@ class User extends ServiceBase
     	return $models;
     }
     
+    /**
+     * 获取用户列表
+     *
+     * @return array
+     */
+    public function getUserList($userId, $info, $pageNum, $pageLimit)
+    {
+    	$userDao = \dao\User::singleton();
+    	$dataList = $userDao->getList($info, $pageNum, $pageLimit);
+    	$userIds = array_column($dataList, 'userId');
+    	
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels($userIds);
+    	if (empty($userModels)) {
+    		return array(
+    			'list'     => array_values($userModels),
+    			'totalNum' => 0,
+    		);
+    	}
+    	// 剪辑工程
+    	$projectDao = \dao\Project::singleton();
+    	$where = "`userId` in (" . implode(',', $userIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
+    	$projectEttList = $projectDao->readListByWhere($where);
+    	$projectMap = array();
+    	$projectIds = array();
+    	if (!empty($projectEttList)) foreach ($projectEttList as $projectEtt) {
+    		$projectMap[$projectEtt->userId][$projectEtt->id] = $projectEtt->name;
+    		$projectIds[$projectEtt->id] = $projectEtt->userId;
+    	}
+    	// 剪辑模板
+    	$templateDao = \dao\Template::singleton();
+    	$where = "`userId` in (" . implode(',', $userIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
+    	$templateEttList = $templateDao->readListByWhere($where);
+    	$templateMap = array();
+    	if (!empty($templateEttList)) foreach ($templateEttList as $templateEtt) {
+    		$templateMap[$templateEtt->userId][$templateEtt->id] = $templateEtt->name;
+    	}
+    	// 剪辑视频
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$where = "`projectId` in ('" . implode("','", array_keys($projectIds)) . "') and `status` != " . \constant\Common::DATA_DELETE;
+    	$projectClipEttList = $projectClipDao->readListByWhere($where);
+    	$projectClipMap = array();
+    	if (!empty($projectClipEttList)) foreach ($projectClipEttList as $projectClipEtt) {
+    		$tmpUserId = $projectIds[$projectClipEtt->projectId];
+    		$projectClipMap[$tmpUserId][$projectClipEtt->id] = $projectClipEtt->mediaURL;
+    	}
+    	
+    	foreach ($userModels as $userId => $userModel) {
+    		$userModel['projectNum'] = empty($projectMap[$userId]) ? 0 : count($projectMap[$userId]);
+    		$userModel['templateNum'] = empty($templateMap[$userId]) ? 0 : count($templateMap[$userId]);
+    		$userModel['projectClipNum'] = empty($projectClipMap[$userId]) ? 0 : count($projectClipMap[$userId]);
+    		$userModels[$userId] = $userModel;
+    	}
+    
+    	// 获取查询总数
+    	$totalNum = $userDao->getList($info, -1);
+    	return array(
+    		'list'     => array_values($userModels),
+    		'totalNum' => $totalNum,
+    	);
+    }
+    
 }

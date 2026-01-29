@@ -96,4 +96,29 @@ class User extends CtrlBase
     	return $result;
     }
 
+    /**
+     * 获取用户列表
+     *
+     * @return array
+     */
+    public function getUserList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$searchStartTime = $this->paramFilter('searchStartTime', 'intval'); // 开始时间
+    	$searchEndTime = $this->paramFilter('searchEndTime', 'intval'); // 结束时间
+    	$searchStatus = $this->paramFilter('searchStatus', 'intval'); // 支付状态
+    	$info = array(
+    		'searchStatus' 	  => $searchStatus,
+    		'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
+    		'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
+    	);
+    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+    	$userSv = \service\User::singleton();
+    	return $userSv->getUserList($this->userId, $info, $pageNum, $pageLimit);
+    }
+    
 }
