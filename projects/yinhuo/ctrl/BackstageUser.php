@@ -170,8 +170,8 @@ class BackstageUser extends CtrlBase
 		$userName = $this->paramFilter('userName', 'string');
 		$password = $this->paramFilter('password', 'string');
 		$phone = $this->paramFilter('phone', 'intval');
-		$shareUserIds = $this->paramFilter('shareUserIds', 'string'); // 绑定的分享账号
-		$shareUserIds = empty($shareUserIds) ? array(): explode(',', $shareUserIds);
+		$appUserIds = $this->paramFilter('appUserIds', 'string'); // 绑定的app账号
+		$appUserIds = empty($appUserIds) ? array(): explode(',', $appUserIds);
 		if (empty($userName)) {
 			throw new $this->exception('请设置姓名');
 		}
@@ -179,8 +179,8 @@ class BackstageUser extends CtrlBase
 			throw new $this->exception('请设置密码');
 		}
 
-		if (empty($shareUserIds)) {
-			throw new $this->exception('请绑定分享的账号');
+		if (empty($appUserIds)) {
+			//throw new $this->exception('请绑定app账号');
 		}
 		// 检查手机号格式
 		if (empty($phone) || !preg_match(cfg('common.regular.phone'), $phone)) {
@@ -199,7 +199,7 @@ class BackstageUser extends CtrlBase
 			'phone'  			=> $phone, 			// 手机号
 			'startTime'			=> $startTime,
 			'endTime'			=> $endTime,
-			'shareUserIds'		=> $shareUserIds,
+			'appUserIds'		=> $appUserIds,
 			'type'				=> $type,
 		);
 		return $backstageUserSv->createUser($params->userId, $info);

@@ -238,15 +238,14 @@ class BackstageUser extends ServiceBase
 			throw new $this->exception('手机号已使用');
 		}
 		$userDao = \dao\User::singleton();
-		$shareUserEttList = $userDao->readListByPrimary($info['shareUserIds']);
-
-		foreach ($shareUserEttList as $shareUserEtt) {
-			if (empty($shareUserEtt->type) || $shareUserEtt->type == \constant\Common::DATA_DELETE) {
-				throw new $this->exception('请绑定正确的分享账号');
+		$appUserEttList = empty($info['appUserIds']) ? array() : $userDao->readListByPrimary($info['appUserIds']);
+		if (!empty($appUserEttList)) foreach ($appUserEttList as $appUserEtt) {
+			if ($appUserEtt->status == \constant\Common::DATA_DELETE) {
+				throw new $this->exception('请绑定正确的app账号');
 			}
 		}
-		if (count($info['shareUserIds']) != count($shareUserEttList)) {
-			throw new $this->exception('请绑定正确的分享账号');
+		if (count($info['appUserIds']) != count($appUserEttList)) {
+			throw new $this->exception('请绑定正确的app账号');
 		}
 	
 		$now = $this->frame->now;
@@ -258,7 +257,7 @@ class BackstageUser extends ServiceBase
 		$backstageUserEtt->password = md5($info['password']);
 		$backstageUserEtt->startTime = $info['startTime'];
 		$backstageUserEtt->endTime = $info['endTime'];
-		$backstageUserEtt->shareUserIds = implode(',', $info['shareUserIds']);
+		$backstageUserEtt->appUserIds = implode(',', $info['appUserIds']);
 		$backstageUserEtt->showPrivileges = empty($showControl) ? '' : implode(',', $showControl);
 		$backstageUserEtt->opPrivileges = empty($opControl) ? '' : implode(',', $opControl);
 		$backstageUserEtt->createTime = $now;
@@ -276,7 +275,7 @@ class BackstageUser extends ServiceBase
 	 *
 	 * @return array
 	 */
-	public function reviseShareUser($opBackstageUserId, $shareUserId, $info)
+	public function reviseShareUser($opBackstageUserId, $appUserId, $info)
 	{
 		// 操作者账号
 		$backstageUserDao = \dao\BackstageUser::singleton();
@@ -285,8 +284,8 @@ class BackstageUser extends ServiceBase
 			throw new $this->exception('账号权限不够');
 		}
 		$backstageUserModel = $opBackstageUserEtt->getModel();
-		$shareUserIds = $backstageUserModel['shareUserIds']; // 绑定的分享账号
-		if (!in_array($shareUserId, $shareUserIds)) {
+		$appUserIds = $backstageUserModel['appUserIds']; // 绑定的app账号
+		if (!in_array($appUserIds, $appUserIds)) {
 			throw new $this->exception('非法请求');
 		}
 	
@@ -381,12 +380,12 @@ class BackstageUser extends ServiceBase
 			$userDao = \dao\User::singleton();
 			$appUserEttList = $userDao->readListByPrimary($info['appUserIds']);
 			foreach ($appUserEttList as $appUserEtt) {
-				if (empty($appUserEtt->type) || $appUserEtt->status == \constant\Common::DATA_DELETE) {
+				if ($appUserEtt->status == \constant\Common::DATA_DELETE) {
 					throw new $this->exception('请绑定正确的APP账号');
 				}
 			}
 			if (count($info['appUserIds']) != count($appUserEttList)) {
-				throw new $this->exception('请绑定正确的分享账号');
+				throw new $this->exception('请绑定正确的APP账号');
 			}
 			$backstageUserEtt->set('appUserIds', implode(',', $info['appUserIds']));
 		}
