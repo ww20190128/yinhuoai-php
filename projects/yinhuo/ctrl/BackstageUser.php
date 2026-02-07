@@ -60,7 +60,7 @@ class BackstageUser extends CtrlBase
 		$info =  array(
 			'searchUserName' 		=> $this->paramFilter('searchUserName', 'string'),
 			'searchPhone' 			=> $this->paramFilter('searchPhone', 'string'),
-			'searchShareUserId' 	=> $this->paramFilter('searchShareUserId', 'intval'),
+			'searchAppUserId' 	=> $this->paramFilter('searchAppUserId', 'intval'),
 			'searchPrivilege' 		=> $this->paramFilter('searchPrivilege', 'string'),
 			'searchUserIds' 		=> $this->paramFilter('searchUserIds', 'array'),
 		);
@@ -258,8 +258,8 @@ class BackstageUser extends CtrlBase
 		// 			throw new $this->exception('请输入正确的手机号');
 		// 		}
 		$now = $this->frame->now;
-		$shareUserIds = $this->paramFilter('shareUserIds', 'string'); // 绑定的分享账号
-		$shareUserIds = empty($shareUserIds) ? array(): explode(',', $shareUserIds);
+		$appUserIds = $this->paramFilter('appUserIds', 'string'); // 绑定的分享账号
+		$appUserIds = empty($appUserIds) ? array(): explode(',', $appUserIds);
 		
 		$info = array(
 			'userName' 			=> $userName, 	// 姓名
@@ -270,7 +270,7 @@ class BackstageUser extends CtrlBase
 			'imageInfo'  		=> $imageInfo,
 			'startTime'			=> $startTime,
 			'endTime'			=> $endTime,
-			'shareUserIds'		=> $shareUserIds,
+			'appUserIds'		=> $appUserIds,
 		);
 		return $backstageUserSv->reviseUser($this->userId, $id, $info);
 	}

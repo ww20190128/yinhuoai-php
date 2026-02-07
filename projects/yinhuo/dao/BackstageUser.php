@@ -53,8 +53,8 @@ class BackstageUser extends DaoBase
     	if (!empty($info['searchOpPrivilegeId'])) {
     		$whereArr[] = "FIND_IN_SET({$info['searchOpPrivilegeId']}, `opPrivileges`)";
     	}
-    	if (!empty($info['searchShareUserId']) ) {
-    		$whereArr[] = "FIND_IN_SET({$info['searchShareUserId']}, `shareUserIds`)";
+    	if (!empty($info['searchAppUserId']) ) {
+    		$whereArr[] = "FIND_IN_SET({$info['searchAppUserId']}, `shareUserIds`)";
     	}
     	$where = empty($whereArr) ? 1 : implode(' AND ', $whereArr);
     	$sql = "SELECT * FROM `{$this->mainTable}` where {$where} ORDER BY `createTime` asc";

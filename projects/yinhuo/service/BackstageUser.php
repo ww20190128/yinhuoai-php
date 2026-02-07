@@ -102,16 +102,16 @@ class BackstageUser extends ServiceBase
 				}
 				$opControls[] = $privilegeModels[$opId]['name'];
 			}
-			$shareUsers = array();
-			foreach ($userModel['shareUserIds'] as $shareUserId) {
-				if (empty($userList[$shareUserId])) {
+			$appUsers = array();
+			foreach ($userModel['appUserIds'] as $appUserId) {
+				if (empty($userList[$appUserId])) {
 					continue;
 				}
-				$shareUsers[] = $userList[$shareUserId];
+				$appUsers[] = $userList[$appUserId];
 			}
 			$userModel['showControls'] = $showControls;
 			$userModel['opControls'] = $opControls;
-			$userModel['shareUsers'] = $shareUsers;
+			$userModel['appUsers'] = $appUsers;
 			if (!empty($createBackstageUserEttList[$backstageUserEtt->createUserId])) {
 				$userModel['createUserInfo'] = $createBackstageUserEttList[$backstageUserEtt->createUserId]->getModel();
 			}
@@ -377,18 +377,18 @@ class BackstageUser extends ServiceBase
 			$backstageUserEtt->set('showPrivileges', empty($showControl) ? '' : implode(',', $showControl));
 			$backstageUserEtt->set('opPrivileges', empty($opControl) ? '' : implode(',', $opControl));
 		}
-		if (!empty($info['shareUserIds'])) {
+		if (!empty($info['appUserIds'])) {
 			$userDao = \dao\User::singleton();
-			$shareUserEttList = $userDao->readListByPrimary($info['shareUserIds']);
-			foreach ($shareUserEttList as $shareUserEtt) {
-				if (empty($shareUserEtt->type) || $shareUserEtt->type == \constant\Common::DATA_DELETE) {
-					throw new $this->exception('请绑定正确的分享账号');
+			$appUserEttList = $userDao->readListByPrimary($info['appUserIds']);
+			foreach ($appUserEttList as $appUserEtt) {
+				if (empty($appUserEtt->type) || $appUserEtt->status == \constant\Common::DATA_DELETE) {
+					throw new $this->exception('请绑定正确的APP账号');
 				}
 			}
-			if (count($info['shareUserIds']) != count($shareUserEttList)) {
+			if (count($info['appUserIds']) != count($appUserEttList)) {
 				throw new $this->exception('请绑定正确的分享账号');
 			}
-			$backstageUserEtt->set('shareUserIds', implode(',', $info['shareUserIds']));
+			$backstageUserEtt->set('appUserIds', implode(',', $info['appUserIds']));
 		}
 
 		$backstageUserEtt->set('updateTime', $now);

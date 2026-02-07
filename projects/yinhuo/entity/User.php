@@ -127,14 +127,14 @@ class User extends ModelBase
      *
      * @var varchar
      */
-    public $gold = '';
+    public $gold = 0;
     
     /**
      * 奖励金
      *
      * @var varchar
      */
-    public $award = '';
+    public $award = 0;
  
     /**
      * 手机号

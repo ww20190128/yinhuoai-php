@@ -1,0 +1,407 @@
+CREATE TABLE IF NOT EXISTS `backstageUser` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
+  `userName` varchar(128) NOT NULL DEFAULT '' COMMENT '用户名',
+  `startTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '有效开始时间',
+  `endTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '有效期结束时间',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态 -1､删除 0､正常 1､禁用',
+  `type` int(11) NOT NULL DEFAULT '0' COMMENT '联系  666 超级管理员 1 管理员  0 普通推广',
+  `icon` varchar(256) NOT NULL DEFAULT '' COMMENT '头像',
+  `phone` varchar(32) NOT NULL DEFAULT '' COMMENT '手机号',
+  `password` varchar(128) NOT NULL DEFAULT '' COMMENT '密码',
+  `createUserId` int(11) NOT NULL DEFAULT '0' COMMENT '创建者用户id',
+  `showPrivileges` varchar(256) NOT NULL DEFAULT '' COMMENT '权限-可显示模块',
+  `opPrivileges` varchar(256) NOT NULL DEFAULT '' COMMENT '权限-可操作内容',
+  `loginKey` varchar(128) NOT NULL DEFAULT '' COMMENT '最近一次登录的key',
+  `lastLoginTime` int(11) NOT NULL DEFAULT '0' COMMENT '最近一次登录时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '上次更新的时间',
+  `appUserIds` varchar(256) NOT NULL DEFAULT '' COMMENT 'app账号Id',
+  PRIMARY KEY (`userId`) USING BTREE,
+  KEY `userName` (`userName`) USING BTREE,
+  KEY `status` (`status`) USING BTREE,
+  KEY `phone` (`phone`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='管理后台-用户';
+
+CREATE TABLE IF NOT EXISTS `backstagePrivilege` (
+  `id` smallint(6) NOT NULL AUTO_INCREMENT COMMENT '权限类型',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `treeId` int(11) NOT NULL DEFAULT '0' COMMENT '树id',
+  `parentId` int(11) NOT NULL DEFAULT '0' COMMENT '父id',
+  `index` int(11) NOT NULL DEFAULT '0' COMMENT '次序',
+  `level` int(11) NOT NULL DEFAULT '0' COMMENT '层级',
+  `defaultOpen` int(11) NOT NULL DEFAULT '1' COMMENT '是否默认开启',
+  `type` int(11) NOT NULL DEFAULT '1' COMMENT '类型 1 控制显示 2 控制操作',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='权限';
+
+--
+-- 转存表中的数据 `backstagePrivilege`
+--
+
+REPLACE INTO `backstagePrivilege` (`id`, `name`, `status`, `treeId`, `parentId`, `index`, `level`, `defaultOpen`, `type`) VALUES
+(1, '剪辑管理', 0, 0, 0, 1, 1, 0, 1),
+(2, '分销信息', 0, 0, 0, 2, 1, 0, 1),
+(80, '系统账号', 0, 0, 0, 3, 1, 1, 1),
+(101, '测评列表', 0, 0, 1, 1, 2, 0, 1),
+(102, '维护分类', 0, 0, 1, 2, 2, 0, 1),
+(201, '付费订单', 0, 0, 2, 1, 1, 0, 1),
+(202, '推广角色', 0, 0, 2, 2, 2, 0, 1),
+(801, '账号列表', 0, 0, 80, 1, 2, 0, 1),
+(8011, '账号管理', 0, 0, 801, 1, 3, 0, 2);
+
+CREATE TABLE IF NOT EXISTS `banner` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `name` varchar(64) DEFAULT NULL COMMENT '名称',
+  `userId` int(11) NOT NULL DEFAULT '11' COMMENT '用户id',
+  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '图片地址',
+  `goto` varchar(32) NOT NULL DEFAULT '' COMMENT '跳转',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态0 正常 1禁用',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='首页轮播图';
+
+CREATE TABLE IF NOT EXISTS `couponConfig` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '类型 1 现金券  2 赠送券 3 折扣券  4 VIP折扣券',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称',
+  `desc` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+  `targetIds` varchar(256) NOT NULL DEFAULT '' COMMENT '作用对象ID',
+  `value` int(11) NOT NULL DEFAULT '0' COMMENT '数量',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `effectiveDay` int(11) NOT NULL DEFAULT '0' COMMENT '生效天数',
+  `limitNum` int(11) NOT NULL DEFAULT '0' COMMENT '限制领取数量',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='优惠券配置' AUTO_INCREMENT=101 ;
+
+CREATE TABLE IF NOT EXISTS `dubFile` (
+  `id` char(64) NOT NULL COMMENT '主键ID',
+  `duration` decimal(10,6) NOT NULL DEFAULT '0.000000' COMMENT '时长',
+  `content` mediumtext NOT NULL COMMENT '内容',
+  `actorSpeaker` varchar(256) NOT NULL DEFAULT '' COMMENT '配音key',
+  `actorName` varchar(256) NOT NULL DEFAULT '256' COMMENT '配音名称',
+  `actorClassify` varchar(256) NOT NULL DEFAULT '' COMMENT '配音分类',
+  `resourceId` varchar(256) NOT NULL DEFAULT '' COMMENT '资源Id',
+  `text` text NOT NULL COMMENT '配音内容',
+  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '链接',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='配音文件';
+
+CREATE TABLE IF NOT EXISTS `editing` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `title` text NOT NULL COMMENT '标题',
+  `topic` text NOT NULL COMMENT '话题',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `type` char(8) NOT NULL DEFAULT '' COMMENT '类型',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `ratio` varchar(64) NOT NULL DEFAULT '9:16' COMMENT '视频比例 可选 9:16/16:9/1:1',
+  `durationType` varchar(256) NOT NULL DEFAULT '2' COMMENT '视频时长类型 1  按视频时长  2  按配音时长',
+  `fps` tinyint(8) NOT NULL DEFAULT '25' COMMENT '视频帧率 取值：25/30/60',
+  `volume` varchar(256) NOT NULL DEFAULT '' COMMENT '音量调节',
+  `transitionIds` varchar(256) NOT NULL DEFAULT '' COMMENT '选中的转场ID',
+  `filterIds` varchar(256) NOT NULL DEFAULT '' COMMENT '选中的滤镜ID',
+  `color` varchar(256) NOT NULL DEFAULT '' COMMENT '颜色调整',
+  `background` varchar(256) NOT NULL DEFAULT '' COMMENT '背景填充',
+  `showCaption` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否显示字幕',
+  `actorIds` varchar(256) NOT NULL DEFAULT '' COMMENT '演员列表',
+  `dubType` tinyint(4) NOT NULL DEFAULT '1' COMMENT '配音类型  1 手动设置  2  配音文件',
+  `dubCaptionIds` varchar(256) NOT NULL DEFAULT '' COMMENT '手动设置-字幕列表',
+  `dubMediaIds` varchar(256) NOT NULL DEFAULT '' COMMENT '配音文件',
+  `preview` varchar(256) NOT NULL DEFAULT '' COMMENT '预览信息',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑';
+
+CREATE TABLE IF NOT EXISTS `editingCaption` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `text` varchar(256) NOT NULL DEFAULT '' COMMENT '文本',
+  `font` varchar(256) NOT NULL DEFAULT '' COMMENT '字体',
+  `style` varchar(256) NOT NULL DEFAULT '' COMMENT '样式',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='字幕';
+
+CREATE TABLE IF NOT EXISTS `editingDecal` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '镜头ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '所属剪辑Id',
+  `useLensIds` varchar(256) NOT NULL DEFAULT '' COMMENT '适用的镜头ID列表',
+  `mediaId1` int(11) NOT NULL DEFAULT '0' COMMENT '素材1',
+  `mediaSize1` int(11) NOT NULL DEFAULT '0' COMMENT '素材1大小',
+  `mediaId2` int(11) NOT NULL DEFAULT '0' COMMENT '素材2',
+  `mediaSize2` int(11) NOT NULL DEFAULT '0' COMMENT '素材2大小',
+  `mediaPostion1` varchar(256) NOT NULL DEFAULT '' COMMENT '素材1位置',
+  `mediaPostion2` varchar(256) NOT NULL DEFAULT '' COMMENT '素材2位置',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `editingId` (`editingId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-贴纸';
+
+CREATE TABLE IF NOT EXISTS `editingLens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '镜头ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '镜头名称',
+  `index` int(11) NOT NULL DEFAULT '0' COMMENT '次序',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '所属剪辑Id',
+  `mediaIds` varchar(256) NOT NULL DEFAULT '' COMMENT '素材Id列表',
+  `originalSound` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否开启原声',
+  `duration` int(11) NOT NULL DEFAULT '0' COMMENT '选择时长',
+  `transitionType` tinyint(4) NOT NULL DEFAULT '1' COMMENT '转场类型 1 自选 2 随机',
+  `transitionIds` varchar(256) NOT NULL DEFAULT '' COMMENT '选择的转场ID',
+  `dubType` tinyint(2) NOT NULL DEFAULT '1' COMMENT '配音类型  1 手动设置  2 配音文件',
+  `dubCaptionIds` varchar(256) NOT NULL DEFAULT '' COMMENT '手动设置 字幕ID列表',
+  `dubMediaIds` varchar(256) NOT NULL DEFAULT '' COMMENT '配音文件 旁白素材ID列表',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `editingId` (`editingId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-镜头';
+
+CREATE TABLE IF NOT EXISTS `editingMusic` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '镜头ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '所属剪辑Id',
+  `type` int(11) NOT NULL DEFAULT '0' COMMENT '音乐类型',
+  `conId` int(11) NOT NULL DEFAULT '0' COMMENT '热门音乐id或素材Id',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `editingId` (`editingId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-音乐';
+
+CREATE TABLE IF NOT EXISTS `editingTitle` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '镜头ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `start` int(11) NOT NULL DEFAULT '0' COMMENT '开始时间',
+  `end` int(11) NOT NULL DEFAULT '0' COMMENT '结束时间',
+  `captionIds` varchar(256) NOT NULL DEFAULT '' COMMENT '字幕ID列表',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `editingId` (`editingId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-标题';
+
+CREATE TABLE IF NOT EXISTS `folder` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `type` char(8) NOT NULL DEFAULT '' COMMENT '类型',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `parentId` int(11) NOT NULL DEFAULT '0' COMMENT '父级文件夹Id',
+  `mediaIds` varchar(256) NOT NULL DEFAULT '' COMMENT '媒资Id列表',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`,`type`),
+  KEY `parentId` (`parentId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='文件夹';
+
+
+CREATE TABLE IF NOT EXISTS `media` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `type` char(8) NOT NULL DEFAULT '' COMMENT '类型',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '访问的URL',
+  `mediaInfo` text NOT NULL COMMENT '媒体信息',
+  `size` int(11) NOT NULL DEFAULT '0' COMMENT '文件大小',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='媒资';
+
+CREATE TABLE IF NOT EXISTS `music` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `duration` int(11) NOT NULL DEFAULT '0' COMMENT '时长',
+  `publishUrl` varchar(256) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '地址',
+  `playUrl` varchar(256) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '播放地址',
+  `classifyId` int(11) NOT NULL DEFAULT '0' COMMENT '分类ID',
+  `url` varchar(256) NOT NULL DEFAULT '' COMMENT '本地地址',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `classifyId` (`classifyId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='音乐';
+
+CREATE TABLE IF NOT EXISTS `musicClassify` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '分类名称',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='音乐分类';
+
+CREATE TABLE IF NOT EXISTS `news` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `title` varchar(256) DEFAULT NULL COMMENT '名称',
+  `content` text NOT NULL COMMENT '内容',
+  `source` varchar(256) NOT NULL DEFAULT '' COMMENT '来源',
+  `coverURL` varchar(256) NOT NULL DEFAULT '' COMMENT '封面',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '创建者ID',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态0 正常 1禁用',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='新闻资讯';
+
+CREATE TABLE IF NOT EXISTS `order` (
+  `id` bigint(22) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `outTradeNo` varchar(64) NOT NULL DEFAULT '' COMMENT '交易订单',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '支付状态',
+  `goodsType` tinyint(4) NOT NULL DEFAULT '0' COMMENT '商品类型',
+  `goodsId` int(11) NOT NULL DEFAULT '0' COMMENT '商品Id',
+  `price` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '实际支付价格',
+  `redPacketValue` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '红包金额',
+  `couponId` int(11) NOT NULL DEFAULT '0' COMMENT '消耗的优惠券ID',
+  `tradeInfo` text NOT NULL COMMENT '交易信息',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `outTradeNo` (`outTradeNo`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `project` (
+  `id` char(64) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '所属用户ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `numLimit` int(11) NOT NULL DEFAULT '0' COMMENT '成品数量限制',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `editingInfo` text NOT NULL COMMENT '剪辑信息',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='剪辑-工程';
+
+CREATE TABLE IF NOT EXISTS `projectClip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `projectId` char(64) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `previewUrl` varchar(256) NOT NULL DEFAULT '' COMMENT '预览地址',
+  `chipParam` text NOT NULL COMMENT '参数',
+  `jobId` char(64) NOT NULL DEFAULT '' COMMENT '任务Id',
+  `jobStatus` char(16) NOT NULL DEFAULT '' COMMENT '任务状态',
+  `mediaURL` varchar(256) NOT NULL DEFAULT '' COMMENT '地址',
+  `mediaId` char(64) NOT NULL DEFAULT '' COMMENT '媒资Id',
+  `duration` int(11) NOT NULL DEFAULT '0' COMMENT '时长',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `projectId` (`projectId`),
+  KEY `jobId` (`jobId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-成品';
+
+CREATE TABLE IF NOT EXISTS `task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `title` varchar(64) DEFAULT NULL COMMENT '名称',
+  `detail` varchar(256) NOT NULL DEFAULT '' COMMENT '详情',
+  `goto` varchar(256) NOT NULL DEFAULT '' COMMENT '跳转',
+  `award` int(11) NOT NULL DEFAULT '0' COMMENT '奖励积分',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '奖励积分',
+  `from` varchar(256) NOT NULL DEFAULT '' COMMENT '来源',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态0 正常 1禁用',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='任务';
+
+CREATE TABLE IF NOT EXISTS `template` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `projectId` varchar(256) NOT NULL DEFAULT '' COMMENT '工程ID',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '剪辑ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '所属用户ID',
+  `name` varchar(256) NOT NULL DEFAULT '' COMMENT '名称',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='剪辑-模板';
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `openid` varchar(64) NOT NULL DEFAULT '' COMMENT 'openid',
+  `headImgUrl` varchar(256) NOT NULL DEFAULT '' COMMENT '头像',
+  `userName` varchar(64) NOT NULL DEFAULT '' COMMENT '昵称',
+  `phone` varchar(256) NOT NULL DEFAULT '' COMMENT '手机号',
+  `signature` varchar(256) NOT NULL DEFAULT '' COMMENT '个性签名',
+  `gold` int(11) NOT NULL DEFAULT '0' COMMENT '火币',
+  `award` int(11) NOT NULL DEFAULT '0' COMMENT '奖励金',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
+  `sex` tinyint(4) NOT NULL DEFAULT '0' COMMENT '性别',
+  `country` varchar(64) NOT NULL DEFAULT '' COMMENT '国家',
+  `province` varchar(64) NOT NULL DEFAULT '' COMMENT '省份',
+  `city` varchar(64) NOT NULL DEFAULT '' COMMENT '城市',
+  `language` varchar(64) NOT NULL DEFAULT '' COMMENT '语言',
+  `editingId` int(11) NOT NULL DEFAULT '0' COMMENT '用户最近编辑的剪辑ID',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`userId`),
+  KEY `openid` (`openid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='用户信息表';
+
+CREATE TABLE IF NOT EXISTS `userCoupon` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户Id',
+  `couponId` int(11) NOT NULL DEFAULT '0' COMMENT '优惠券ID',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `createTime` int(11) DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='优惠券';
+
+
+CREATE TABLE IF NOT EXISTS `userVip` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `vipId` int(11) NOT NULL DEFAULT '0' COMMENT '购买的vipId',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `useGiveNum` int(11) NOT NULL DEFAULT '0' COMMENT '已赠送的次数',
+  `useTestIds` text NOT NULL COMMENT '已测试Id',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态',
+  `effectTime` int(11) NOT NULL DEFAULT '0' COMMENT '生效时间',
+  `createTime` int(11) DEFAULT '0' COMMENT '购买时间',
+  `updateTime` int(11) DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='vip购买记录';
+
+CREATE TABLE IF NOT EXISTS `vipConfig` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `name` varchar(32) NOT NULL DEFAULT '' COMMENT '名称',
+  `desc` varchar(256) NOT NULL DEFAULT '' COMMENT '描述',
+  `intro` varchar(256) NOT NULL DEFAULT '' COMMENT '简介',
+  `content` text NOT NULL COMMENT '内容描述',
+  `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '类型',
+  `originalPrice` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '原始价格',
+  `price` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '价格',
+  `testPaperNum` int(11) NOT NULL DEFAULT '0' COMMENT '可免费测试的数量',
+  `giveNum` int(11) NOT NULL DEFAULT '0' COMMENT '可赠送的次数',
+  `effectDay` int(11) NOT NULL DEFAULT '0' COMMENT '有效时长',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态0 正常 1禁用',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='vip-配置';

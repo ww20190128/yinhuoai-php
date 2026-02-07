@@ -135,11 +135,11 @@ class BackstageUser extends ModelBase
     public $updateTime = 0;
 
     /**
-     * 绑定的分享账号
+     * 绑定的app账号
      *
      * @var
      */
-    public $shareUserIds = 0;
+    public $appUserIds = 0;
 // 表结构end
     /**
      * 创建模型
@@ -167,7 +167,7 @@ class BackstageUser extends ModelBase
     		'endTime'       => (int)$this->endTime,                   // 有效结束时间
     		'opControl' 	=> $opPrivileges,
     		'showControl' 	=> $showPrivileges,
-    		'shareUserIds'	=> empty($this->shareUserIds) ? array() : array_map('intval', explode(',', $this->shareUserIds))
+    		'appUserIds'	=> empty($this->appUserIds) ? array() : array_map('intval', explode(',', $this->appUserIds))
     	);
     	return $item;
     }
