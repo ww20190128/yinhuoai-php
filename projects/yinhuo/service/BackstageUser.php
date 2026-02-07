@@ -376,7 +376,7 @@ class BackstageUser extends ServiceBase
 			$backstageUserEtt->set('showPrivileges', empty($showControl) ? '' : implode(',', $showControl));
 			$backstageUserEtt->set('opPrivileges', empty($opControl) ? '' : implode(',', $opControl));
 		}
-		if (!empty($info['appUserIds'])) {
+		if (!empty($info['appUserIds']) && false) {
 			$userDao = \dao\User::singleton();
 			$appUserEttList = $userDao->readListByPrimary($info['appUserIds']);
 			foreach ($appUserEttList as $appUserEtt) {
