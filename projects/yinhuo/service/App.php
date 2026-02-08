@@ -77,6 +77,7 @@ class App extends ServiceBase
     	$response = httpGetContents($url, null, 5, ["authorization: {$authorization}"]);
     	$response = empty($response) ? array() : json_decode($response, true);
     	$response = empty($response) ? array() : $response['data'];
+
     	$now = $this->frame->now;
     	foreach ($response as $row) {
     		$musicClassifyEtt = $musicClassifyDao->readByPrimary($row['id']);
@@ -239,6 +240,8 @@ class App extends ServiceBase
     				continue;
     			}
     			$url = 'https://wb-yinhuo.oss-cn-beijing.aliyuncs.com/audio_ai/' . $rowArr['1'] . ".wav";
+    			
+    			$url = 'https://zhile-static.oss-cn-beijing.aliyuncs.com/audio_ai/' . $rowArr['1'] . ".wav";
     			$one = array(
     				'name' 	=> $rowArr['0'],
     				'id' 	=> $rowArr['1'],

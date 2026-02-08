@@ -4,7 +4,8 @@
 *
 * @author wangwei
 */
-return array (
+return 
+array (
   '豆包大模型2.0' => 
   array (
     0 => 
