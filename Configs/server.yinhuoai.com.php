@@ -7,7 +7,7 @@
  * 服务器id段:测试{1, 10}, 正式  {100, 999}
  */
 $conf = array(
-    'id' 					=> 110, 							// *服务器id
+    'id' 					=> 100, 							// *服务器id
     'type' 					=> 1, 								// *服务器类型, 必须与[project_code]一一对应
     'mark' 					=> 'yinhuo-2', 				        // *服务器标识
     'project_code' 			=> 'yinhuo', 					        // *项目代号, 必须与projects对应的项目名称一致
