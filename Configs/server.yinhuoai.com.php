@@ -113,6 +113,14 @@ $conf = array(
 		'customerServiceQR' => 'https://zhile-static.oss-cn-beijing.aliyuncs.com/resources/xinlice_qrcode.jpg',
 		'customerServiceWechat' => 'zhilei', // 客服微信
 	),
+		'aliEditing' => array( // 阿里云剪辑(yinhuo)
+				'accessKeyId' => 'LTAI5tGXcM3Lvis6R3pZkzUH',
+				'accessKeySecret' => 'rWTzE3XhS1gvjJbFeI0VmXqeUWcI4B',
+				'StorageType' => 'oss', // 仅支持 oss
+				//oss-cn-beijing-internal.aliyuncs.com
+				'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
+				'chipUrlBase' => 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/project/',
+		),
 );
 
 $conf['dao'] = array( // dao数据库操作组件配置
