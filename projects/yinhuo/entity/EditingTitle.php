@@ -42,14 +42,14 @@ class EditingTitle extends EntityBase
      *
      * @var int
      */
-    public $start;
+    public $start = 0;
     
     /**
      * 结束时间
      *
      * @var int
      */
-    public $end;
+    public $end = 0;
     
     /**
      * 字幕ID列表

@@ -366,17 +366,6 @@ class Editing extends ServiceBase
  
 
 
-    
-
-
-
-
-
-
-
-
-   
-
     [dubCaptionIds] => 85,91
     [dubMediaIds] => 
 

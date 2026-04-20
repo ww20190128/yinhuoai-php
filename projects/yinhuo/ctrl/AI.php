@@ -9,6 +9,53 @@ namespace ctrl;
 class AI extends CtrlBase
 {
 	/**
+	 * 分镜字幕润色
+	 *
+	 * @return array
+	 */
+	public function lensCaptionTextPolish()
+	{
+		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$lensId = $this->paramFilter('lensId', 'intval', 0); // 镜头Id
+		if (empty($lensId)) {
+			throw new $this->exception('请求参数错误');
+		}
+		$dubCaptionId = $this->paramFilter('dubCaptionId', 'intval', 0); // 字幕ID
+		if (empty($dubCaptionId)) {
+			throw new $this->exception("请求参数错误");
+		}
+		$AISv = \service\AI::singleton();
+		return $AISv->captionTextPolish($this->userId, $lensId, $dubCaptionId);
+	}
+	
+	/**
+	 * 全局字幕润色
+	 *
+	 * @return array
+	 */
+	public function editingCaptionTextPolish()
+	{
+		$params = $this->params;
+		if (empty($this->userId)) {
+			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+		}
+		$editingId = $this->paramFilter('editingId', 'intval', 0); // 剪辑Id
+		if (empty($editingId)) {
+			throw new $this->exception('请求参数错误');
+		}
+		$dubCaptionId = $this->paramFilter('dubCaptionId', 'intval', 0); // 字幕ID
+		if (empty($dubCaptionId)) {
+			throw new $this->exception("请求参数错误");
+		}
+		$type = $this->paramFilter('type', 'intval', 1); // 类型
+		$AISv = \service\AI::singleton();
+		return $AISv->editingCaptionTextPolish($this->userId, $editingId, $dubCaptionId, $type);
+	}
+	
+	/**
 	 * 聊天
 	 *
 	 * @return array

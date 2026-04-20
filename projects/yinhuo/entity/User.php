@@ -142,6 +142,34 @@ class User extends ModelBase
      * @var varchar
      */
     public $phone = '';
+    
+    /**
+     * 上线用户ID
+     *
+     * @var varchar
+     */
+    public $parentUserId = 0;
+    
+    /**
+     * 推广收益
+     *
+     * @var varchar
+     */
+    public $shareYield = '0.00';
+    
+    /**
+     * 已提现金额
+     *
+     * @var varchar
+     */
+    public $withdrawAmount = '0.00';
+    
+    /**
+     * 分成比例
+     *
+     * @var int
+     */
+    public $commissionRate = 30;
 // 表结构end
 
     /**
@@ -162,6 +190,7 @@ class User extends ModelBase
     		'signature'     => $this->signature,
     		'gold'    		=> intval($this->gold),
     		'award'    		=> intval($this->award),
+    		'parentUserId'  => intval($this->parentUserId),
 //     	    'openid'        => $this->openid,
 //          'sex'           => intval($this->sex),
 //          'country'       => $this->country,

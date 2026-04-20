@@ -223,3 +223,42 @@ CREATE TABLE IF NOT EXISTS `order` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=80 ;
 
 
+ALTER TABLE `user` ADD `parentUserId` INT( 11 ) NOT NULL DEFAULT '0' COMMENT '上线用户Id' AFTER `editingId`;
+ALTER TABLE `user` ADD `commissionRate` DECIMAL( 6, 2 ) NOT NULL DEFAULT '0.00' COMMENT '分成比例' AFTER `parentUserId`;
+ALTER TABLE `user` ADD `shareYield` DECIMAL( 10, 2 ) NOT NULL DEFAULT '0.00' COMMENT '推广佣金' AFTER `commissionRate`;
+ALTER TABLE `user` ADD `withdrawAmount` DECIMAL( 10, 2 ) NOT NULL DEFAULT '0.00' COMMENT '提现金额' AFTER `shareYield`;
+
+CREATE TABLE IF NOT EXISTS `withdraw` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `userId` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态 1 申请状态 2 提现成功',
+  `amount` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '提现金额',
+  `outBillNo` varchar(256) NOT NULL DEFAULT '' COMMENT '提现订单号',
+  `transferNotifyInfo` text NOT NULL COMMENT '转账回调信息',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `transferInfo` text NOT NULL COMMENT '转账信息',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `yieldRecord`
+--
+
+CREATE TABLE IF NOT EXISTS `yieldRecord` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `shareUserId` int(11) NOT NULL DEFAULT '0' COMMENT '分享用户ID',
+  `testUserId` int(11) NOT NULL DEFAULT '0' COMMENT '测试用户Id',
+  `testPaperId` int(11) NOT NULL DEFAULT '0' COMMENT '测评ID',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态 1 申请状态 2 提现成功',
+  `code` varchar(256) NOT NULL DEFAULT '' COMMENT '分享码',
+  `testOrderId` int(11) NOT NULL DEFAULT '0' COMMENT '订单ID',
+  `amount` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '收益金额',
+  `updateTime` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `createTime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `userId` (`shareUserId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
