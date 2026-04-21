@@ -6,7 +6,7 @@ namespace ctrl;
  *
  * @author
  */
-class share extends CtrlBase
+class Share extends CtrlBase
 {
     /**
      * 抖音分享
@@ -23,7 +23,7 @@ class share extends CtrlBase
      *
      * @return array
      */
-    public function kuaishou()
+    public function kuaishouAccessToken()
     {
     	
     }
