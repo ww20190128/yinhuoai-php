@@ -43,6 +43,7 @@ class AI extends ServiceBase
     		throw new $this->exception('字幕不存在');
     	}
     	$text = $dubCaptionList[$dubCaptionId]['text'];
+
     	if (empty($text)) {
     		throw new $this->exception('字幕不存在');
     	}
@@ -57,11 +58,12 @@ class AI extends ServiceBase
 3.全程绑定用户输入的核心关键词，不跑题，保证闭环
 4.口语化、有情绪、带语气词，无书面语、无逻辑词
 #格式标准
--每行≤10 个字，单句换行，单条字数不低于100字，与用户输入重复率＜50%
+-与用户输入重复率＜50%
 -禁用要求
 -禁止首先 / 其次 / 综上，禁止硬广，禁止长句
 #输出指令
-直接输出开头文案，无多余说明
+-直接输出开头文案，无多余说明
+-每次输出1个完整润色后的文案
 EOT;
     	// 系统角色提示词（中间）
     	$systemPromptCenter = <<<EOT
@@ -74,11 +76,12 @@ EOT;
 4.基调匹配：流量型软种草｜转化型痛点 + 卖点｜人设型立场观点
 5.加人味儿：犹豫 / 吐槽 / 感叹，无刻板逻辑词
 #格式标准
--每行≤10 个字，单句换行，单条字数不低于100字，与用户输入重复率＜50%
+-与用户输入重复率＜50%
 -禁用要求
 -禁止跑题、禁止多卖点堆砌、禁止书面语
 #输出指令
-直接输出开头文案，无多余说明
+-直接输出开头文案，无多余说明
+-每次输出1个完整润色后的文案
 EOT;
     	// 系统角色提示词（结尾）
     	$systemPromptEnd = <<<EOT
@@ -90,12 +93,14 @@ EOT;
 3.全程对齐主线，与开头 + 中间风格统一，完成全片闭环
 4.情绪饱满，引导互动 / 收藏 / 关注，适配抖音算法
 #格式标准
--每行≤10 个字，单句换行，单条字数不低于100字，与用户输入重复率＜50%
+-与用户输入重复率＜50%
 -禁用要求
 -禁止长篇总结、禁止书面语、禁止无情绪中立句
 #输出指令
-直接输出开头文案，无多余说明
+-直接输出开头文案，无多余说明
+-每次输出1个完整润色后的文案
 EOT;
+
     	$systemPrompt = $systemPromptCenter; // 片中
     	if ($lensInfo['type'] == 1) { // 片头
     		$systemPrompt = $systemPromptBegin; 
@@ -105,7 +110,6 @@ EOT;
     	}
     	
     	$userPrompt = <<<EOT
-请对以下文本进行润色：
 待润色文本：{$text}
 EOT;
     	$apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/responses';
@@ -148,7 +152,7 @@ EOT;
     	CURLOPT_RETURNTRANSFER => true,
     	CURLOPT_SSL_VERIFYPEER => false,
     	CURLOPT_SSL_VERIFYHOST => false,
-    	CURLOPT_TIMEOUT        => 60,
+    	CURLOPT_TIMEOUT        => 360,
     	CURLOPT_CONNECTTIMEOUT => 10
     	));
     	$response = curl_exec($ch);
@@ -184,9 +188,6 @@ EOT;
      */
     public function editingCaptionTextPolish($userId, $editingId, $text, $type = 1)
     {
-    	$editingSv = \service\Editing::singleton();
-    	$editingInfo = $editingSv->editingInfo($userId, $editingId);
-    
     	$typeMap = array(
     		1 => '流量型',	
     		2 => '转化型',
@@ -195,7 +196,6 @@ EOT;
     	if (empty($typeMap[$type])) {
     		throw new $this->exception('请选择正确的类型');
     	}
-
     	// 系统角色提示词
     	$systemPrompt = <<<EOT
 #角色
@@ -218,19 +218,19 @@ EOT;
 5. 输出格式：完整口播文案（短句为主，无分段冗余，每句不超过15字）
 
 #要求
-1. 每次输出5个完整口播文案，单条文案字数对应正常语速60秒（约400字）
+1. 每次输出1个完整口播文案，单条文案字数对应正常语速60秒（约400字）
 2. 严格去除AI感，具体要求：
    - 加入人味儿噪点：添加真人说话的犹豫（如“嗯…让我想想”）、吐槽（如“真的烦死人了”）、感叹（如“绝了！”），带明确立场和情绪，避免中立
    - 打破规整结构：禁用“首先、其次、综上所述”等刻板逻辑词，用聊天式节奏推进内容
    - 预设性格：以ENFP性格创作——爱讲故事、善用比喻、情绪饱满活泼，如用“像喝了冰可乐一样爽”这类比喻
-
+   - 不要有标题，只需要文案内容
 #输出要求
-按以下格式输出，文案每句话用换行分隔，每行字不超过十个
+按以下格式输出，文案每句话用空格分隔，每行字不超过十个
 EOT;
     	
     	$userPrompt = <<<EOT
 类型：{$typeMap[$type]}
-待润色文本：{$text}
+类型描述：{$text}
 EOT;
     
     	$apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/responses';
@@ -274,7 +274,7 @@ EOT;
     	CURLOPT_RETURNTRANSFER => true,
     	CURLOPT_SSL_VERIFYPEER => false,
     	CURLOPT_SSL_VERIFYHOST => false,
-    	CURLOPT_TIMEOUT        => 60,
+    	CURLOPT_TIMEOUT        => 360,
     	CURLOPT_CONNECTTIMEOUT => 10
     	));
     	$response = curl_exec($ch);

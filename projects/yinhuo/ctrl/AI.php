@@ -28,7 +28,8 @@ class AI extends CtrlBase
 			throw new $this->exception("请求参数错误");
 		}
 		$AISv = \service\AI::singleton();
-		return $AISv->captionTextPolish($this->userId, $lensId, $dubCaptionId);
+		$result = $AISv->captionTextPolish($this->userId, $lensId, $dubCaptionId);
+		return $result;
 	}
 	
 	/**
@@ -52,7 +53,8 @@ class AI extends CtrlBase
 		}
 		$type = $this->paramFilter('type', 'intval', 1); // 类型
 		$AISv = \service\AI::singleton();
-		return $AISv->editingCaptionTextPolish($this->userId, $editingId, $text, $type);
+		$result = $AISv->editingCaptionTextPolish($this->userId, $editingId, $text, $type);
+		return $result;
 	}
 	
 	/**

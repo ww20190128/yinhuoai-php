@@ -293,8 +293,9 @@ class Project extends CtrlBase
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
 		$projectSv = \service\Project::singleton();
-		return $projectSv->public+Clip($this->userId);
+		return $projectSv->publicClip($this->userId);
 	}
+	
 	// 数字人
 	public function avatarTest()
 	{
