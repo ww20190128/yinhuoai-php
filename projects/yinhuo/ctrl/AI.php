@@ -46,13 +46,13 @@ class AI extends CtrlBase
 		if (empty($editingId)) {
 			throw new $this->exception('请求参数错误');
 		}
-		$dubCaptionId = $this->paramFilter('dubCaptionId', 'intval', 0); // 字幕ID
-		if (empty($dubCaptionId)) {
+		$text = $this->paramFilter('text', 'string'); // 字幕
+		if (empty($text)) {
 			throw new $this->exception("请求参数错误");
 		}
 		$type = $this->paramFilter('type', 'intval', 1); // 类型
 		$AISv = \service\AI::singleton();
-		return $AISv->editingCaptionTextPolish($this->userId, $editingId, $dubCaptionId, $type);
+		return $AISv->editingCaptionTextPolish($this->userId, $editingId, $text, $type);
 	}
 	
 	/**

@@ -182,19 +182,11 @@ EOT;
      *
      * @return array
      */
-    public function editingCaptionTextPolish($userId, $editingId, $dubCaptionId, $type = 1)
+    public function editingCaptionTextPolish($userId, $editingId, $text, $type = 1)
     {
     	$editingSv = \service\Editing::singleton();
     	$editingInfo = $editingSv->editingInfo($userId, $editingId);
-    	$dubCaptionList = empty($lensInfo['dubCaptionList']) ? array() : $lensInfo['dubCaptionList'];
-    	$dubCaptionList = array_column($dubCaptionList, null, 'id');
-    	if (empty($dubCaptionList[$dubCaptionId]) ) {
-    		throw new $this->exception('字幕不存在');
-    	}
-    	$text = $dubCaptionList[$dubCaptionId]['text'];
-    	if (empty($text)) {
-    		throw new $this->exception('字幕不存在');
-    	}
+    
     	$typeMap = array(
     		1 => '流量型',	
     		2 => '转化型',

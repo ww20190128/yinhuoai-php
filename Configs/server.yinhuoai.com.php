@@ -121,6 +121,11 @@ $conf = array(
 				'StorageLocation' => 'cn-beijing.oss.aliyuncs.com', // 仅支持 VOD 点播存储，不支持用户自有 OSS 存储。
 				'chipUrlBase' => 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/project/',
 		),
+		// 火山引擎
+		'volcengine' => array(
+			'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
+			'arkApiKey' => '38078d13-166f-4194-8fa1-1c0bd4ba2084', // AI请求的 ARK_API_KEY
+		),
 );
 
 $conf['dao'] = array( // dao数据库操作组件配置

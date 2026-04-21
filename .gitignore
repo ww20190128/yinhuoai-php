@@ -5,3 +5,4 @@ vendor
 .git
 .settings
 projects\publicAdmin\configs\server.conf.php
+Config/*
