@@ -262,3 +262,5 @@ CREATE TABLE IF NOT EXISTS `yieldRecord` (
   PRIMARY KEY (`id`),
   KEY `userId` (`shareUserId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+
+ALTER TABLE `user` ADD `shareKsAccess` VARCHAR( 256 ) NOT NULL DEFAULT '' COMMENT '分享到快手授权信息' AFTER `language`

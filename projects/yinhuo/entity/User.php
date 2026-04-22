@@ -170,6 +170,13 @@ class User extends ModelBase
      * @var int
      */
     public $commissionRate = 30;
+    
+    /**
+     * 快手-授权
+     *
+     * @var int
+     */
+    public $shareKsAccess = '';
 // 表结构end
 
     /**
