@@ -47,19 +47,25 @@ class ShareKs extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$conf = self::$conf;
-    	$url = "https://open.kuaishou.com/openapi/user_info?appid={$conf['app_id']}&app_secret={$conf['app_secret']}&code={$code}&grant_type=authorization_code";
-    	$response = httpGetContents($url);
+    	$url = "https://open.kuaishou.com/oauth2/access_token?app_id={$conf['app_id']}&app_secret={$conf['app_secret']}&code={$code}&grant_type=authorization_code";
+
+
+$response = httpGetContents($url);
     	$response = empty($response) ? array() : json_decode($response, true);
+
     	if (empty($response['access_token'])) {
     		throw new $this->exception('授权失败');
     	}
+
+
     	$shareKsAccess = array(
     		'access_token' => $response['access_token'],
     		'refresh_token' => $response['refresh_token'],
     	);
+
     	$userEtt->set('shareKsAccess', json_encode($shareKsAccess));
     	$userDao->update($userEtt);
-    	return $uploadInfo;
+    	return $shareKsAccess;
     }
     
     /**
@@ -79,7 +85,7 @@ class ShareKs extends ServiceBase
     		throw new $this->exception('未授权，请重新授权');
     	}
     	$conf = self::$conf;
-    	$url = "https://open.kuaishou.com/oauth2/refresh_token?appid={$conf['app_id']}&app_secret={$conf['app_secret']}&refresh_token={$shareKsAccess['refresh_token']}&grant_type=refresh_token";
+    	$url = "https://open.kuaishou.com/oauth2/refresh_token?app_id={$conf['app_id']}&app_secret={$conf['app_secret']}&refresh_token={$shareKsAccess['refresh_token']}&grant_type=refresh_token";
     	$response = httpGetContents($url);
     	$response = empty($response) ? array() : json_decode($response, true);
     	if (empty($response['refresh_token'])) {
