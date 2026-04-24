@@ -49,14 +49,12 @@ class ShareKs extends ServiceBase
     	$conf = self::$conf;
     	$url = "https://open.kuaishou.com/oauth2/access_token?app_id={$conf['app_id']}&app_secret={$conf['app_secret']}&code={$code}&grant_type=authorization_code";
 
-
-$response = httpGetContents($url);
+		$response = httpGetContents($url);
     	$response = empty($response) ? array() : json_decode($response, true);
 
     	if (empty($response['access_token'])) {
     		throw new $this->exception('授权失败');
     	}
-
 
     	$shareKsAccess = array(
     		'access_token' => $response['access_token'],
@@ -65,6 +63,7 @@ $response = httpGetContents($url);
 
     	$userEtt->set('shareKsAccess', json_encode($shareKsAccess));
     	$userDao->update($userEtt);
+    	$shareKsAccess['url'] = "http://localhost:5173/kuaishou-publish?userId={$userId}";
     	return $shareKsAccess;
     }
     
