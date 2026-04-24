@@ -63,7 +63,7 @@ class ShareKs extends ServiceBase
 
     	$userEtt->set('shareKsAccess', json_encode($shareKsAccess));
     	$userDao->update($userEtt);
-    	$shareKsAccess['url'] = "http://localhost:5173/kuaishou-publish?userId={$userId}";
+    	$shareKsAccess['url'] = "https://static.yinhuoai.com/kuaishou-publish?userId={$userId}";
     	return $shareKsAccess;
     }
     
