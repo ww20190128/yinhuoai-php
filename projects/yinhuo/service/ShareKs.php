@@ -113,7 +113,7 @@ class ShareKs extends ServiceBase
     	$url = "https://open.kuaishou.com/openapi/photo/start_upload";
     	$conf = self::$conf;
     	$data = array(
-    		'access_token' => $access_token,
+    		'access_token' => $accessToken,
     		'app_id' => $conf['app_id'],
     	);
     	$response = doPost($url, $data);
@@ -138,11 +138,13 @@ class ShareKs extends ServiceBase
     	}
     	// 授权信息
     	$shareKsAccess = empty($userEtt->shareKsAccess) ? array() : json_decode($userEtt->shareKsAccess, true);
+    
     	if (empty($shareKsAccess['refresh_token'])) {
     		throw new $this->exception('未授权，请重新授权');
     	}
     	if (empty($shareKsAccess['endpoint']) || empty($shareKsAccess['upload_token'])) {
     		$uploadResult = $this->startUpload($shareKsAccess['access_token']);
+  
     		$shareKsAccess['endpoint'] = $uploadResult['endpoint'];
     		$shareKsAccess['upload_token'] = $uploadResult['upload_token'];
     		$userEtt->set('shareKsAccess', json_encode($shareKsAccess));
@@ -151,43 +153,69 @@ class ShareKs extends ServiceBase
     	if (empty($shareKsAccess['endpoint']) || empty($shareKsAccess['upload_token'])) {
     		throw new $this->exception('未授权，请重新授权');
     	}
-    	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEtt = $projectClipDao->readByPrimary($clipId);
-    	if (empty($projectClipEtt->mediaURL) || $projectClipEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('成品不存在');
+    	$projectClipInfo = $this->getProjectClip($userId, $clipId);
+    	if (empty($projectClipInfo['clip'])) {
+    		throw new $this->exception('成品Id错误');
     	}
     	// 需要上传的文件内容
-    	$mediaURL = $projectClipEtt->mediaURL;
-    	$url = "http://{$shareKsAccess['endpoint']}/api/upload";
-    
-		// 读取远程视频文件，兼容快手上传格式
-		$videoContent = file_get_contents($mediaURL);
-		$tmpFile = tmpfile();
-		$tmpPath = stream_get_meta_data($tmpFile)['uri'];
-		fwrite($tmpFile, $videoContent);
-	
-		// 构建上传参数，新增视频文件
-		$data = array(
-			'upload_token' => $shareKsAccess['upload_token'],
-			'video' => new \CURLFile($tmpPath, 'video/mp4', 'upload.mp4')
-		);
+    	$mediaURL = $projectClipInfo['clip']['mediaURL'];
+
+    	$url = "http://{$shareKsAccess['endpoint']}/api/upload?upload_token={$shareKsAccess['upload_token']}";
+		$binaryData = file_get_contents($mediaURL);
+
 		$curlHandler = curl_init($url);
 		curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curlHandler, CURLOPT_POST, TRUE);
-		curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $binaryData);
 		curl_setopt($curlHandler, CURLOPT_CONNECTTIMEOUT, 3);
 		curl_setopt($curlHandler, CURLOPT_TIMEOUT, 600);
 		curl_setopt($curlHandler, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curlHandler, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($curlHandler, CURLOPT_HTTPHEADER, array(
-			'Content-Type: multipart/form-data'
+			'Content-Type: video/mp4'
 		));
 		$response = curl_exec($curlHandler);
 		curl_close($curlHandler);
-		// 关闭临时文件
-		fclose($tmpFile);
 		$response = empty($response) ? array() : json_decode($response, true);
 		return $response;
+    }
+    
+    /**
+     * 获取发布信息
+     *
+     * @return array
+     */
+    private function getProjectClip($userId, $clipId)
+    {
+    	$projectClipDao = \dao\ProjectClip::singleton();
+    	$projectClipEtt = $projectClipDao->readByPrimary($clipId);
+    	if (empty($projectClipEtt->mediaURL) || $projectClipEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('成品不存在');
+    	}
+    	$projectDao = \dao\Project::singleton();
+    	$projectEtt = $projectDao->readByPrimary($projectClipEtt->projectId);
+    	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('成品不存在');
+    	}
+    	$projectSv = \service\Project::singleton();
+    	$projectClipModels = $projectSv->getProjectClipList($userId, $projectEtt);
+    	$projectClipModels = array_column($projectClipModels, null, 'id');
+    	if (empty($projectClipModels[$clipId])) {
+    		throw new $this->exception('成品不存在');
+    	}
+    	$publicClipModel = $projectClipModels[$clipId];
+    	$editingSv = \service\Editing::singleton();
+    	$editingInfo = empty($projectEtt->editingInfo) ? array() : json_decode($projectEtt->editingInfo, true);
+    	if (empty($editingInfo)) {
+    		$editingInfo = $editingSv->editingInfo($userEtt, $projectEtt->editingId);
+    	}
+    	$result = array(
+    		'name'	=> $projectEtt->name, // 工程名称
+    		'topic'	=> $editingInfo['topic'], // 话题
+    		'title'	=> $editingInfo['title'], // 标题
+    		'clip'	=> $publicClipModel,
+    	);
+    	return $result;
     }
     
     /**
@@ -202,6 +230,7 @@ class ShareKs extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
+    
     	$shareKsAccess = empty($userEtt->shareKsAccess) ? array() : json_decode($userEtt->shareKsAccess, true);
     	if (empty($shareKsAccess['refresh_token'])) {
     		throw new $this->exception('未授权，请重新授权');
@@ -216,40 +245,27 @@ class ShareKs extends ServiceBase
     	if (empty($shareKsAccess['endpoint']) || empty($shareKsAccess['upload_token'])) {
     		throw new $this->exception('未授权，请重新授权');
     	}
-    	$projectClipDao = \dao\ProjectClip::singleton();
-    	$projectClipEtt = $projectClipDao->readByPrimary($clipId);
-    	if (empty($projectClipEtt->mediaURL) || $projectClipEtt->status == \constant\Common::DATA_DELETE) {
-    		throw new $this->exception('成品不存在');
+    	$projectClipInfo = $this->getProjectClip($userId, $clipId);
+    	if (empty($projectClipInfo['clip'])) {
+    		throw new $this->exception('成品Id错误');
     	}
     	// 需要上传的文件内容
-    	$mediaURL = $projectClipEtt->mediaURL;
-    	$cover = $projectClipEtt->previewUrl;
-    	$caption = '';
+    	$mediaURL = $projectClipInfo['clip']['mediaURL'];
+    	$cover =  $projectClipInfo['clip']['previewUrl']; // 封面
+    	$caption = $projectClipInfo['title']; // 标题
     	$conf = self::$conf;
-    	$postData = array(
-    		'access_token' => $shareKsAccess['access_token'],
-    		'app_id' => $conf['app_id'],
-    		'upload_token' => $shareKsAccess['upload_token'],
-    	);
-    	
-    
-    	
-    	// 发布接口调用（修正参数格式）
+
 	    $url = "https://open.kuaishou.com/openapi/photo/publish";
-	    // URL参数（官方要求直接放在url中）
-	    $urlParams = http_build_query([
+	    $urlParams = http_build_query(array(
 	        'access_token' => $shareKsAccess['access_token'],
 	        'app_id' => $conf['app_id'],
 	        'upload_token' => $shareKsAccess['upload_token']
-	    ]);
+	    ));
 	    $url .= '?' . $urlParams;
-	
-	    // 构建multipart/form-data格式的发布参数（封面和标题为必填）
 	    $postData = array(
-	        'cover' => new \CURLFile($cover, 'image/jpeg', 'cover.jpg'), // 封面文件
+	        'cover' => $cover, // 封面文件
 	        'caption' => $caption // 标题
 	    );
-	
 	    $curlHandler = curl_init($url);
 	    curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, TRUE);
 	    curl_setopt($curlHandler, CURLOPT_POST, TRUE);
@@ -258,10 +274,8 @@ class ShareKs extends ServiceBase
 	    curl_setopt($curlHandler, CURLOPT_TIMEOUT, 300);
 	    curl_setopt($curlHandler, CURLOPT_SSL_VERIFYPEER, false);
 	    curl_setopt($curlHandler, CURLOPT_SSL_VERIFYHOST, false);
-	    
 	    $response = curl_exec($curlHandler);
 	    curl_close($curlHandler);
-	
 	    $response = empty($response) ? array() : json_decode($response, true);
 	    return $response;
     }
