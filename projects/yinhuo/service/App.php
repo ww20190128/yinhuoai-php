@@ -1,6 +1,15 @@
 <?php
 namespace service;
 
+require_once('vendor/autoload.php');
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\Label\Alignment\LabelAlignmentCenter;
+use Endroid\QrCode\Label\Font\NotoSans;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\Writer\PngWriter;
+
 /**
  * 首页 逻辑类
  * 
@@ -335,4 +344,50 @@ class App extends ServiceBase
     	);
     }
 
+    /**
+     * 获取二维码
+     *
+     * @return array
+     */
+    public function getQrCode($url)
+    {
+
+    	// 生成二维码并保存到文件
+		$result = Builder::create()
+		    ->writer(new PngWriter())
+		    ->data($url)  // 二维码内容
+		    ->encoding(new Encoding('UTF-8'))
+		    ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())  // 高容错级别
+		    ->size(300)  // 二维码尺寸（像素）
+		    ->margin(10)  // 边距
+		    ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
+		    
+		    ->validateResult(false)
+		    ->build();
+		// 保存到文件
+		//$result->saveToFile(CACHE_PATH . 'qrcode.png');
+		// 输出图片到浏览器
+		header('Content-Type: ' . $result->getMimeType());
+		$content =  $result->getString();
+		if (empty($content)) {
+			throw new $this->exception('生成二维码失败');
+		}
+	
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET'], true);
+    	
+    	
+    	$fileName = md5($url);
+    	$extension = 'png';
+    	$profileKey = "resources/qrcode/{$fileName}.{$extension}"; // 上传的目录
+    	$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		throw new $this->exception('生成二维码失败');
+    	}
+    	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    	return array(
+    		'url' => $url,
+    	);
+    }
 }

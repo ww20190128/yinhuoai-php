@@ -182,4 +182,22 @@ EOT;
     		'vipInfo' => $vipInfo,
     	);
     }
+    
+    /**
+     * 获取二维码
+     *
+     * @return array
+     */
+    public function getQrCode()
+    {
+    	$params = $this->params;
+    	$url = $this->paramFilter('url', 'string'); // 链接
+$url = "https://docs.qq.com/desktop";
+    	if (empty($url)) {
+			throw new $this->exception('请求参数错误');
+		}
+    	$appSv = \service\App::singleton();
+    	return $appSv->getQrCode($url);
+    }
+    
 }

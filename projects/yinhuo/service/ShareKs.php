@@ -230,7 +230,6 @@ class ShareKs extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
     	}
-    
     	$shareKsAccess = empty($userEtt->shareKsAccess) ? array() : json_decode($userEtt->shareKsAccess, true);
     	if (empty($shareKsAccess['refresh_token'])) {
     		throw new $this->exception('未授权，请重新授权');
