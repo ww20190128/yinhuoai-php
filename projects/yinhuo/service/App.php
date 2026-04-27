@@ -387,7 +387,7 @@ class App extends ServiceBase
     	}
     	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     	return array(
-    		'url' => $url,
+    		'qrCode' => $url,
     	);
     }
 }

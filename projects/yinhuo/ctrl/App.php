@@ -192,7 +192,6 @@ EOT;
     {
     	$params = $this->params;
     	$url = $this->paramFilter('url', 'string'); // 链接
-$url = "https://docs.qq.com/desktop";
     	if (empty($url)) {
 			throw new $this->exception('请求参数错误');
 		}
