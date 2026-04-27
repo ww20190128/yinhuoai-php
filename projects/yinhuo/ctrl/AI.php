@@ -23,14 +23,15 @@ class AI extends CtrlBase
 		if (empty($lensId)) {
 			throw new $this->exception('请求参数错误');
 		}
-		$dubCaptionId = $this->paramFilter('dubCaptionId', 'intval', 0); // 字幕ID
-		if (empty($dubCaptionId)) {
+		$text = $this->paramFilter('text', 'string'); // 字幕
+		if (empty($text)) {
 			throw new $this->exception("请求参数错误");
 		}
 		$AISv = \service\AI::singleton();
-		$result = $AISv->captionTextPolish($this->userId, $lensId, $dubCaptionId);
+		$result = $AISv->lensCaptionTextPolish($this->userId, $lensId, $text);
 		return $result;
 	}
+
 	
 	/**
 	 * 全局字幕润色
