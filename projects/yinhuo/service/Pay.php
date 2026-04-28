@@ -249,6 +249,8 @@ class Pay extends ServiceBase
 			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
+			
+		print_r($e);
 			return false;
 		}
     	
