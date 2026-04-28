@@ -85,16 +85,16 @@ $conf = array(
 	),
 
     'fileDir' => '/data/www/static-kjs/file/',
+
 	'weChat' => array(
 		'appId' => 'wxde609c2255df3268',
-		'appSecret' => '341a3503556f33ccea14c02e442c3182',
-			
-			//=========================================
-		'merchantId' => '1708405300', // 微信支付分配的商户号
-		'APICertificateKey' => '407D6C1B24DBF31F53D46E20B4C76C38117C196D', // 商户API证书
-// 		'APIv2Key' => '1C4E4D3E89FFC9EAD0583AD6993A8ECBC6BFDC77', // 商户APIv2密钥
-		'RSA' => '1A96C3333AA1C9FEB368827F70A9A2E3C26BA9C3', // 平台证书
-		'APIv3Key' => 'F8F194CD3157F2330AE2D48DA6262514', // APIv3密钥
+		'appSecret' => '341a3503556f33ccea14c02e442c3182',		
+		//=========================================
+		'merchantId' => '1105591112', // yinhuo商户号
+		'APICertificateKey' => '77E994FDB61CDA61B3C64F7AF06936DB73770E07', // 商户API证书
+		// 		'APIv2Key' => 'J3XbRCLj6hKh3c3ieZiB92QtLeZwgZYE', // 商户APIv2密钥
+		'RSA' => '1B84A18252BFC94060DF9B551587288FC432AC84', // 平台证书
+		'APIv3Key' => '3UCb52tx4RMNhUQfAFXAqgHNNUV7ViV3', // APIv3密钥
 	),
 	// php CertificateDownloader.php -k F8F194CD3157F2330AE2D48DA6262514 -m 1708405300 -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s 407D6C1B24DBF31F53D46E20B4C76C38117C196D -o /data/www/mood-php/Configs/xince/
 	
