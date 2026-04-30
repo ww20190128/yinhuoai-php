@@ -52,15 +52,16 @@ class ShareKs extends CtrlBase
     public function upload()
     {
     	$params = $this->params;
-    	if (empty($this->userId)) {
-    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	$userId = $this->paramFilter('userId', 'intval');
+    	if (empty($userId)) {
+    		throw new $this->exception('请求参数错误');
     	}
     	$clipId = $this->paramFilter('id', 'string');
     	if (empty($clipId)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$shareKs = \service\ShareKs::singleton();
-    	return $shareKs->upload($this->userId, $clipId);
+    	return $shareKs->upload($userId, $clipId);
     }
 
     /**
@@ -71,15 +72,16 @@ class ShareKs extends CtrlBase
     public function publish()
     {
     	$params = $this->params;
-    	if (empty($this->userId)) {
-    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	$userId = $this->paramFilter('userId', 'intval');
+    	if (empty($userId)) {
+    		throw new $this->exception('请求参数错误');
     	}
     	$clipId = $this->paramFilter('id', 'string');
     	if (empty($clipId)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$shareKs = \service\ShareKs::singleton();
-    	return $shareKs->publish($this->userId, $clipId);
+    	return $shareKs->publish($userId, $clipId);
     }
     
 }
