@@ -102,7 +102,11 @@ class Folder extends CtrlBase
 		if (!empty($files)) foreach ($files as $file) {
 			$fileInfo = pathinfo($file['name']);
 			$fileTmp = '/tmp/' .  $file['name'];
-			move_uploaded_file($file['tmp_name'], $fileTmp);
+			$tries = 5;
+			do {
+				move_uploaded_file($file['tmp_name'], $fileTmp);
+			} while (!file_exists($fileTmp) && --$tries > 0);
+
 			if (!file_exists($fileTmp)) {
 				throw new $this->exception('文件上传失败');
 			}

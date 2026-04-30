@@ -352,7 +352,7 @@ class Project extends CtrlBase
 	 */
 	public function test()
 	{
-print_r( strtotime('2026-01-28 00:00:00'));exit;
+//print_r( strtotime('2026-01-28 00:00:00'));exit;
 // 		$uploadFiles = array();
 // 		$uploadFiles[] = array(
 // 				'extension' => 'mp4',
@@ -368,18 +368,18 @@ print_r( strtotime('2026-01-28 00:00:00'));exit;
 // 		$volcTTSSv = \service\reuse\VolcTTS::singleton();
 // 		$ttsResult = $volcTTSSv->runByV1($text, $speaker);
 		
-// print_r($ttsResult);exit;
+//  print_r($ttsResult);exit;
 		
 		
 		
 		$text = "作为一名执法队员，我肩负着维护社会秩序和公正执法的重任。因此，我会第一时间妥善解决：第一，保持冷静和理性，不被群众的情绪激动所影响。安抚好他们的情绪，我会认真倾听群众的投诉，了解他们的具体诉求，确保对他们的困扰和不满有充分的认识。同时，向群众真诚解释之前自己的沟通和规劝工作，表示我对他们再次投诉的理解和重视。第二，立即与施工方进行紧急沟通，详细了解施工项目的进展情况。询问是否存在施工扰民的情况，并且通过测音器进行检测，希望他们提供施工计划和噪音、尘土等污染控制措施。如果施工方确实存在违规行为，我们会依法办事，协助立即采取措施进行整改，确保施工不再对周边居民造成影响。同时，我们也会向施工方的上级部门或街道相关部门汇报这一情况，请求他们加强监管和指导，确保施工项目能够合规进行。我会与相关部门密切合作，共同制定解决方案，并督促施工方按照方案进行整改。最后，及时跟进施工方的整改情况，并定期对施工现场进行检查和监督。我会确保施工方的整改措施得到有效执行，并及时向群众反馈整改结果，确保群众的合法权益得到保障。";
 		
 		
-// 		$folderSv = \service\Folder::singleton();
-// 		$url = $folderSv->getTtsByText($text, 'zh_female_gujie_mars_bigtts');
+		$folderSv = \service\Folder::singleton();
+		$url = $folderSv->getTtsByText($text, 'zh_female_gujie_mars_bigtts');
 	
 		
-		
+	print_r($url);exit;
 		
 		
 		

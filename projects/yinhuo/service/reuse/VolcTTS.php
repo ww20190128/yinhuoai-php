@@ -228,6 +228,146 @@ print_r($response);exit;
     	$postParams = array(
     		'text' => $text,
     		'speaker' => $speaker,
+    		'additions' => json_encode($additions, JSON_UNESCAPED_UNICODE),
+    		'audio_params' => $audioParams,
+    	);
+    	$postParams = array(
+    		'req_params' => $postParams,
+    	);
+    	$volcConf = self::$instance->frame->conf['volcengine'];
+ 
+		$apiUrl = "https://openspeech.bytedance.com/api/v3/tts/unidirectional";
+    	$responseContent = ''; // 请求的内容
+    	$ch = curl_init();
+    	curl_setopt_array($ch, [
+    	CURLOPT_URL => $apiUrl,
+    	CURLOPT_POST => true,
+    	CURLOPT_POSTFIELDS => json_encode($postParams, JSON_UNESCAPED_UNICODE),
+    	CURLOPT_HTTPHEADER => [
+    		"Content-Type: application/json",
+    		"Accept: application/octet-stream", // 接收二进制流
+    		"x-api-key: {$volcConf['appId']}", // 使用火山引擎控制台获取的APP ID，
+    		"X-Api-Resource-Id: {$resourceId}", // 服务的资源信息 ID
+    		'Connection: keep-alive',
+    	],
+    	CURLOPT_HTTPHEADER     => [
+    		"Content-Type: application/json",
+    		"Accept: application/octet-stream",
+    		"X-Api-App-Id: 2103034181",
+    		"X-Api-Access-Key: {$volcConf['appId']}",
+    		"X-Api-Resource-Id: {$resourceId}",
+    		'Connection: keep-alive',
+    	],
+    	CURLOPT_RETURNTRANSFER => false, // 关闭自动拼接，启用流式回调
+    	CURLOPT_BINARYTRANSFER => true,  // 处理二进制数据（关键，音频是二进制）
+    	CURLOPT_WRITEFUNCTION => function ($ch, $chunkData) use (&$responseContent) {
+    		if (empty($chunkData)) {
+    			return strlen($chunkData); // 必须返回接收的字节数，否则 cURL 会中断
+    		}
+    		$responseContent .= $chunkData;
+    		return strlen($chunkData);
+    	}
+    	]);
+    	try {
+    		$response = curl_exec($ch);
+    		if (curl_errno($ch)) {
+    			return false;
+    		}
+    		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    		
+    		
+print_r($httpCode);exit;
+    		if ($httpCode !== 200) {
+    			return false;
+    		}
+    	} catch (Exception $e) {
+    		return false;
+    	} finally {
+    		curl_close($ch); // 关闭 cURL 资源
+    	}
+    	preg_match_all('/\{\s*"code":.*?\}(?=\s*\{|\s*$)/s', $responseContent, $ttsContentArr);
+    	$content = '';
+    	$subtitles = array();
+    	if (!empty($ttsContentArr['0'])) foreach ($ttsContentArr['0'] as $row) {
+    		$row = trim($row);
+    		$rowArr = empty($row) ? array() : json_decode($row, true);
+    		if (empty($rowArr)) {
+    			continue;
+    		}
+    		if (!empty($rowArr['sentence'])) { // 句子
+    			$words = empty($rowArr['sentence']['words']) ? array() : $rowArr['sentence']['words'];
+    			if (empty($words)) {
+    				continue;
+    			}
+    			$text = $rowArr['sentence']['text'];
+    			$wordArr = array();
+    			foreach ($words as $word) {
+    				$wordArr[] = array(
+    					'startTime' => $word['startTime'],
+    					'endTime' => $word['endTime'],
+    					'word' => $word['word'],
+    				);
+    			}
+    			$subtitles[] = array(
+    				'text' => $text,
+    				'words' => $wordArr,
+    			);
+    			
+    		} elseif (!empty($rowArr['data'])) {
+    			$subContent = base64_decode($rowArr['data']);
+    			if (empty($subContent)) {
+    				continue;
+    			}
+    			$content .= $subContent;
+    		}
+    	}
+    	
+    	// 字幕分段
+    	$subtitles = processSubtitle($subtitles);
+    	return array(
+    		'size' => mb_strlen($content),
+    		'content' => $content,
+    		'resourceId' => $resourceId,
+    		'speaker' => $speaker,
+    		'subtitles' => $subtitles,
+    	);
+    }
+    
+    /**
+     * 通过v3版本的接口合成
+     *
+     * @return string
+     */
+    public function runByV3bak($text, $speaker, $ttsParams = array(), $resourceId = 'seed-tts-1.0')
+    {
+    	$additions = array(
+    		'silence_duration' => 0, // 设置该参数可在句尾增加静音时长，范围0~30000ms。
+    		'enable_language_detector' => true, // 自动识别语种
+    		'disable_markdown_filter' => true, // 是否开启markdown解析过滤，
+    		'enable_latex_tn' => true,
+    		'max_length_to_filter_parenthesis' => 100, // 是否过滤括号内的部分，0为不过滤，100为过滤
+    		'cache_config' => array(
+    			'text_type' => 1,
+    			//'use_cache' => true,
+    		),
+    	);
+    	if (!empty($ttsParams['language'])) { // 明确语种
+    		$additions['explicit_language'] = $ttsParams['language'];
+    	}
+    	$audioParams = array(
+    		'format' 		=> 'mp3',
+    		'sample_rate'	=> 24000,
+    		'enable_timestamp' => true,
+    	);
+    	if (!empty($ttsParams['speechRate'])) { // 语速，取值范围[-50,100]，100代表2.0倍速，-50代表0.5倍数
+    		$audioParams['speech_rate'] = $ttsParams['speechRate'];
+    	}
+    	if (!empty($ttsParams['loudnessRate'])) { // 音量，取值范围[-50,100]，100代表2.0倍音量，-50代表0.5倍音量（mix音色暂不支持）
+    		$audioParams['loudness_rate'] = $ttsParams['loudnessRate'];
+    	}
+    	$postParams = array(
+    		'text' => $text,
+    		'speaker' => $speaker,
     		'additions' => json_encode($additions),
     		'audio_params' => $audioParams,
     	);
