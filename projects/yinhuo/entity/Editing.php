@@ -91,7 +91,7 @@ class Editing extends EntityBase
      *
      * @var tinyint
      */
-    public $fps = 25;
+    public $fps = 30;
 
     /**
      * 音量调节
