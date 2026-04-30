@@ -275,8 +275,7 @@ print_r($response);exit;
     		}
     		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     		
-    		
-print_r($httpCode);exit;
+
     		if ($httpCode !== 200) {
     			return false;
     		}
