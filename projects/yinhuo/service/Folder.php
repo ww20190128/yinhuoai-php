@@ -603,6 +603,8 @@ class Folder extends ServiceBase
     	} else {
     		$volcTTSSv = \service\reuse\VolcTTS::singleton();
     		$ttsResult = $volcTTSSv->runByV3($text, $speaker);
+    		
+   print_r($ttsResult);exit;
     		if (empty($ttsResult['content'])) {
     			return false;
     		}

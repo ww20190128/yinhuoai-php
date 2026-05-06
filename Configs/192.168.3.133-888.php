@@ -98,11 +98,10 @@ $conf = array(
 	),
 	// 火山引擎
 	'volcengine' => array(
-		'appId' => 'd294de9a-a197-42e4-8a00-e29eaa05a0df', // 控制台获取的APP ID，
+		'X-Api-Key' => 'a3e46e90-e3d8-4fcc-bcbc-ded163538359', // 控制台获取的APP ID，
 		'arkApiKey' => 'a3e46e90-e3d8-4fcc-bcbc-ded163538359', // AI请求的 ARK_API_KEY
 	),
 		
-
 		'aliEditing1' => array( // 阿里云剪辑(ww)
 				'accessKeyId' => 'LTAI5tLTC2fRsgwKXZP75Wow',
 				'accessKeySecret' => 'p52taYKYaKAJpkaWqvbH2gWuZJDZcs',

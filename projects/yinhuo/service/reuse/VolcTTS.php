@@ -246,18 +246,11 @@ print_r($response);exit;
     	CURLOPT_HTTPHEADER => [
     		"Content-Type: application/json",
     		"Accept: application/octet-stream", // 接收二进制流
-    		"x-api-key: {$volcConf['appId']}", // 使用火山引擎控制台获取的APP ID，
+    		"X-Api-Key: {$volcConf['X-Api-Key']}", // 使用火山引擎控制台获取的APP ID，
     		"X-Api-Resource-Id: {$resourceId}", // 服务的资源信息 ID
     		'Connection: keep-alive',
     	],
-    	CURLOPT_HTTPHEADER     => [
-    		"Content-Type: application/json",
-    		"Accept: application/octet-stream",
-    		"X-Api-App-Id: 2103034181",
-    		"X-Api-Access-Key: {$volcConf['appId']}",
-    		"X-Api-Resource-Id: {$resourceId}",
-    		'Connection: keep-alive',
-    	],
+    
     	CURLOPT_RETURNTRANSFER => false, // 关闭自动拼接，启用流式回调
     	CURLOPT_BINARYTRANSFER => true,  // 处理二进制数据（关键，音频是二进制）
     	CURLOPT_WRITEFUNCTION => function ($ch, $chunkData) use (&$responseContent) {
