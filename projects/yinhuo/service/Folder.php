@@ -592,9 +592,7 @@ class Folder extends ServiceBase
     public function getTtsByText($text, $speaker)
     {
     	$dubId = md5($speaker . $text);
-    	
-    	
-   
+
     	// 配音源文件
     	$ttsFile = CACHE_PATH . 'tts' . DS . $dubId . '.mp3';
     	$content = '';
@@ -603,15 +601,14 @@ class Folder extends ServiceBase
     	} else {
     		$volcTTSSv = \service\reuse\VolcTTS::singleton();
     		$ttsResult = $volcTTSSv->runByV3($text, $speaker);
-    		
-   print_r($ttsResult);exit;
+
     		if (empty($ttsResult['content'])) {
     			return false;
     		}
     		@file_put_contents($ttsFile, $ttsResult['content']);
     		$content = $ttsResult['content'];
     	}
-print_r(json_encode($ttsResult['subtitles'], JSON_UNESCAPED_UNICODE));exit;
+
     	$ossSv = \service\reuse\OSS::singleton();
     	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
