@@ -95,6 +95,7 @@ $file = CACHE_PATH . 'payNotify.txt';
     		'body' => $bodyJson,
     		'params' => $params,	
     	)));
+return ;
     	
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
