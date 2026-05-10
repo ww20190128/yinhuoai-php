@@ -344,7 +344,7 @@ echo "开始分账\n";
 			$receivers[] = array(
 				'type' 	=> 'PERSONAL_OPENID', // 个人openid
 				'account' => $row['openid'], // 个人OpenID
-				'amount' => array('total' => $row['amount'], 'currency' => 'CNY'), // 订单金额
+				'amount' => $row['amount'], // 订单金额
 				'description' => $row['description']
 			);
 		}

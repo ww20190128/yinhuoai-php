@@ -83,21 +83,21 @@ class Order extends CtrlBase
     	$header = empty($_SERVER) ? array() : $_SERVER;
     	$bodyJson = file_get_contents('php://input');
 
-$tmpData = '{"header":{"TEMP":"\/tmp","TMPDIR":"\/tmp","TMP":"\/tmp","PATH":"\/usr\/local\/bin:\/usr\/bin:\/bin","HOSTNAME":"iZ2zebb122t63qsoruf52iZ","USER":"www","HOME":"\/home\/www","HTTP_WECHATPAY_TIMESTAMP":"1778419218","HTTP_PRAGMA":"no-cache","HTTP_WECHATPAY_SIGNATURE_TYPE":"WECHATPAY2-SHA256-RSA2048","HTTP_WECHATPAY_SIGNATURE":"KWeECs\/OkRNpIXEzpUb0V9m\/bXdYOMTd6m287fpTm5G8MJ87\/FbmtV\/WOr93pfjIbTzG0SoLyQzIvyhGdE5Z5JQdUN1Zwrh48l9uVL8uAO4KH+21bksk371g2KAU\/edOYwgJz9lbdeOJdHsjEtFqmtBVpl\/IjoKqiwUB+IUIABzF2Q+yxoXy6HV3J5ukctYN6f+KNp9EjJ4+HcL4aBJPfqRi6TcPFt+QZNW5DYOdJBDgQKlBor\/52XmNbiOH0TpeFpGOyjQfVKQOaycbxusVQcWom5bhBmikg6H2WdGyXma3Ufu09Xf9paXnFB5O3SgeWY+GtgwiXMab2EMlYGlBaQ==","HTTP_WECHATPAY_SERIAL":"1B84A18252BFC94060DF9B551587288FC432AC84","HTTP_CONTENT_TYPE":"application\/json","HTTP_WECHATPAY_NONCE":"e8aVpQzF8UKFC5diaxzHzzA3cRMxWD1f","HTTP_HOST":"server.yinhuoai.com","HTTP_ACCEPT":"*\/*","HTTP_USER_AGENT":"Mozilla\/4.0","HTTP_CONNECTION":"Keep-Alive","HTTP_CONTENT_LENGTH":"919","REDIRECT_STATUS":"200","SERVER_NAME":"server.yinhuoai.com","SERVER_PORT":"443","SERVER_ADDR":"172.30.244.95","REMOTE_PORT":"20259","REMOTE_ADDR":"101.226.103.14","SERVER_SOFTWARE":"nginx\/1.27.0","GATEWAY_INTERFACE":"CGI\/1.1","HTTPS":"on","REQUEST_SCHEME":"https","SERVER_PROTOCOL":"HTTP\/1.1","DOCUMENT_ROOT":"\/data\/www\/yinhuoai-php\/Webroot","DOCUMENT_URI":"\/index.php","REQUEST_URI":"\/order\/payNotify","SCRIPT_NAME":"\/index.php","CONTENT_LENGTH":"919","CONTENT_TYPE":"application\/json","REQUEST_METHOD":"POST","QUERY_STRING":"","SCRIPT_FILENAME":"\/data\/www\/yinhuoai-php\/Webroot\/index.php","FCGI_ROLE":"RESPONDER","PHP_SELF":"\/index.php","REQUEST_TIME_FLOAT":1778419218.829979,"REQUEST_TIME":1778419218},"body":"{\"id\":\"29733627-1c87-5e8f-8e76-2e3567bf9186\",\"create_time\":\"2026-05-10T21:20:18+08:00\",\"resource_type\":\"encrypt-resource\",\"event_type\":\"TRANSACTION.SUCCESS\",\"summary\":\"\u652f\u4ed8\u6210\u529f\",\"resource\":{\"original_type\":\"transaction\",\"algorithm\":\"AEAD_AES_256_GCM\",\"ciphertext\":\"Bc5MFFbUL9Jw2l0jor5c2YC3pWx99LSQb4TwnONRdhlRFIasHCCVeXOk5irObQjREGFNa3GK9Hidi6CePDmC\/vjtratbKWG1r7UU6vxT+jcyVLu01o5ZHt9YH7WVTXsgKhNvU7FGEraDtKuKZOja\/A14qcZ+HtTiFQcOF9qHbjXcBN9TCGVx4WfknG1TCJK6UsLW+Pg+Svb+mQZrHayECef39p543FVaBOXUDZ4Qp\/J39URu22bkWH3zNyTU+61R00ep6S9B0rg8P3lT1c2raYIGs\/CjkZGqlJiMbqacJWb+bkDEY7oD+biLfG8UhpYaNJZzV65ORWXKyozD\/gsuN4x62DEYQ\/59inDfwvAX3oKLjZMizyuMwj\/akF6X+3dWxDJWGloFmXf4XDqkD3TsZqv9q1s0pu0DCMz6A9WddbOINLz48c5y3VzD8mj\/XoVMuscYX0fuDwNBT9cuzR5stcxM\/4mQ3VYnTkPchzq011eTEcqVWaEPH\/R989jq7rv5lSIUXxkqo6hAMgOqJPgBsJVd2cx29yFV8gBKZJaErzh\/oedh3dHLTd45aTf8w1janFk0SZfPrQoY+g==\",\"associated_data\":\"transaction\",\"nonce\":\"LzjXdbxYdctk\"}}","params":{"op":"Order.payNotify"}}';
+// $tmpData = '{"header":{"TEMP":"\/tmp","TMPDIR":"\/tmp","TMP":"\/tmp","PATH":"\/usr\/local\/bin:\/usr\/bin:\/bin","HOSTNAME":"iZ2zebb122t63qsoruf52iZ","USER":"www","HOME":"\/home\/www","HTTP_WECHATPAY_TIMESTAMP":"1778419218","HTTP_PRAGMA":"no-cache","HTTP_WECHATPAY_SIGNATURE_TYPE":"WECHATPAY2-SHA256-RSA2048","HTTP_WECHATPAY_SIGNATURE":"KWeECs\/OkRNpIXEzpUb0V9m\/bXdYOMTd6m287fpTm5G8MJ87\/FbmtV\/WOr93pfjIbTzG0SoLyQzIvyhGdE5Z5JQdUN1Zwrh48l9uVL8uAO4KH+21bksk371g2KAU\/edOYwgJz9lbdeOJdHsjEtFqmtBVpl\/IjoKqiwUB+IUIABzF2Q+yxoXy6HV3J5ukctYN6f+KNp9EjJ4+HcL4aBJPfqRi6TcPFt+QZNW5DYOdJBDgQKlBor\/52XmNbiOH0TpeFpGOyjQfVKQOaycbxusVQcWom5bhBmikg6H2WdGyXma3Ufu09Xf9paXnFB5O3SgeWY+GtgwiXMab2EMlYGlBaQ==","HTTP_WECHATPAY_SERIAL":"1B84A18252BFC94060DF9B551587288FC432AC84","HTTP_CONTENT_TYPE":"application\/json","HTTP_WECHATPAY_NONCE":"e8aVpQzF8UKFC5diaxzHzzA3cRMxWD1f","HTTP_HOST":"server.yinhuoai.com","HTTP_ACCEPT":"*\/*","HTTP_USER_AGENT":"Mozilla\/4.0","HTTP_CONNECTION":"Keep-Alive","HTTP_CONTENT_LENGTH":"919","REDIRECT_STATUS":"200","SERVER_NAME":"server.yinhuoai.com","SERVER_PORT":"443","SERVER_ADDR":"172.30.244.95","REMOTE_PORT":"20259","REMOTE_ADDR":"101.226.103.14","SERVER_SOFTWARE":"nginx\/1.27.0","GATEWAY_INTERFACE":"CGI\/1.1","HTTPS":"on","REQUEST_SCHEME":"https","SERVER_PROTOCOL":"HTTP\/1.1","DOCUMENT_ROOT":"\/data\/www\/yinhuoai-php\/Webroot","DOCUMENT_URI":"\/index.php","REQUEST_URI":"\/order\/payNotify","SCRIPT_NAME":"\/index.php","CONTENT_LENGTH":"919","CONTENT_TYPE":"application\/json","REQUEST_METHOD":"POST","QUERY_STRING":"","SCRIPT_FILENAME":"\/data\/www\/yinhuoai-php\/Webroot\/index.php","FCGI_ROLE":"RESPONDER","PHP_SELF":"\/index.php","REQUEST_TIME_FLOAT":1778419218.829979,"REQUEST_TIME":1778419218},"body":"{\"id\":\"29733627-1c87-5e8f-8e76-2e3567bf9186\",\"create_time\":\"2026-05-10T21:20:18+08:00\",\"resource_type\":\"encrypt-resource\",\"event_type\":\"TRANSACTION.SUCCESS\",\"summary\":\"\u652f\u4ed8\u6210\u529f\",\"resource\":{\"original_type\":\"transaction\",\"algorithm\":\"AEAD_AES_256_GCM\",\"ciphertext\":\"Bc5MFFbUL9Jw2l0jor5c2YC3pWx99LSQb4TwnONRdhlRFIasHCCVeXOk5irObQjREGFNa3GK9Hidi6CePDmC\/vjtratbKWG1r7UU6vxT+jcyVLu01o5ZHt9YH7WVTXsgKhNvU7FGEraDtKuKZOja\/A14qcZ+HtTiFQcOF9qHbjXcBN9TCGVx4WfknG1TCJK6UsLW+Pg+Svb+mQZrHayECef39p543FVaBOXUDZ4Qp\/J39URu22bkWH3zNyTU+61R00ep6S9B0rg8P3lT1c2raYIGs\/CjkZGqlJiMbqacJWb+bkDEY7oD+biLfG8UhpYaNJZzV65ORWXKyozD\/gsuN4x62DEYQ\/59inDfwvAX3oKLjZMizyuMwj\/akF6X+3dWxDJWGloFmXf4XDqkD3TsZqv9q1s0pu0DCMz6A9WddbOINLz48c5y3VzD8mj\/XoVMuscYX0fuDwNBT9cuzR5stcxM\/4mQ3VYnTkPchzq011eTEcqVWaEPH\/R989jq7rv5lSIUXxkqo6hAMgOqJPgBsJVd2cx29yFV8gBKZJaErzh\/oedh3dHLTd45aTf8w1janFk0SZfPrQoY+g==\",\"associated_data\":\"transaction\",\"nonce\":\"LzjXdbxYdctk\"}}","params":{"op":"Order.payNotify"}}';
 		
-				$tmpData = json_decode($tmpData, true);
-		$header = $tmpData['header'];
-		$bodyJson = $tmpData['body'];
+// 				$tmpData = json_decode($tmpData, true);
+// 		$header = $tmpData['header'];
+// 		$bodyJson = $tmpData['body'];
 
 
-// $file = CACHE_PATH . 'payNotify.txt';
-// @file_put_contents($file, json_encode(array(
-//     		'header' => $header,
-//     		'body' => $bodyJson,
-//     		'params' => $params,	
-//     	)));
+$file = CACHE_PATH . 'payNotify.txt';
+@file_put_contents($file, json_encode(array(
+    		'header' => $header,
+    		'body' => $bodyJson,
+    		'params' => $params,	
+    	)));
 
-// exit;
+exit;
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
     	$resource = empty($body['resource']) ? array() : $body['resource'];
