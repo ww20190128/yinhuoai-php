@@ -338,6 +338,8 @@ echo "开始分账\n";
 				);
 			}
 		}
+		
+		print_r($profitsharingArr);
 		// 处理分账
 		$weChatConf = $this->frame->conf['weChat'];
 		$receivers = array(); // 接收方信息
@@ -357,6 +359,8 @@ echo "开始分账\n";
 			'unfreeze_unsplit' 	=> true,
 			'receivers' 		=> $receivers,
 		);
+		
+		print_r($data);
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			//$response = empty($response) ? '' : $response->getBody()->getContents();
@@ -364,6 +368,8 @@ echo "开始分账\n";
 			$file = CACHE_PATH . 'new.txt';
 			@file_put_contents($file, $response);
 		} catch (\Exception $e) {
+			
+			print_r($e);
 			return false;
 		}
 exit;
