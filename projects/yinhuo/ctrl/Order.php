@@ -91,14 +91,13 @@ $tmpData = json_decode($tmpData, true);
 		$bodyJson = $tmpData['body'];
 
 
-$file = CACHE_PATH . 'payNotify.txt';
-@file_put_contents($file, json_encode(array(
-    		'header' => $header,
-    		'body' => $bodyJson,
-    		'params' => $params,	
-    	)));
+// $file = CACHE_PATH . 'payNotify.txt';
+// @file_put_contents($file, json_encode(array(
+//     		'header' => $header,
+//     		'body' => $bodyJson,
+//     		'params' => $params,	
+//     	)));
 
-exit;
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
     	$resource = empty($body['resource']) ? array() : $body['resource'];
