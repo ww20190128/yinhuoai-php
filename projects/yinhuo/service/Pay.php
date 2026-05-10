@@ -353,11 +353,11 @@ echo "开始分账\n";
 		}
 		$data = array(
 			'mchid' 	   		=> $weChatConf['merchantId'], // 服务商商户号  必填
-			'out_trade_no' 		=> $orderEtt->outTradeNo, // 商户订单号
+			'out_order_no' 		=> $orderEtt->outTradeNo, // 商户订单号
 			'appid'        		=> $weChatConf['appId'], // 服务商APPID
 			'transaction_id'  	=> $transactionId,
-			'unfreeze_unsplit' 	=> true,
 			'receivers' 		=> $receivers,
+			'unfreeze_unsplit' 	=> true,
 		);
 		
 		print_r($data);
