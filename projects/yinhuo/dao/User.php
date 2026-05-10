@@ -47,6 +47,16 @@ class User extends DaoBase
     	if (!empty($info['searchStatus'])) {
     		$whereArr[] = " `status` = {$info['searchStatus']}";
     	}
+    	if (!empty($info['searchUserLevel']) && $info['searchUserLevel'] == 1) {
+    		$whereArr[] = " `parentUserId` = 0";
+    	}
+    	if (!empty($info['searchUserLevel']) && $info['searchUserLevel'] == 2) {
+    		$whereArr[] = " `parentUserId` != 0";
+    	}
+    	
+    	if (!empty($info['searchParentUserId'])) {
+    		$whereArr[] = " `parentUserId` = {$info['searchParentUserId']}";
+    	}
     	// 开始时间
     	if (!empty($info['searchStartTime'])) {
     		$whereArr[] = " `createTime` >= {$info['searchStartTime']}";

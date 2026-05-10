@@ -116,10 +116,16 @@ class User extends CtrlBase
     	$searchStartTime = $this->paramFilter('searchStartTime', 'intval'); // 开始时间
     	$searchEndTime = $this->paramFilter('searchEndTime', 'intval'); // 结束时间
     	$searchStatus = $this->paramFilter('searchStatus', 'intval'); // 支付状态
+    	
+    	$searchUserLevel = $this->paramFilter('searchUserLevel', 'intval'); // 支付状态
+    	
+    	$searchParentUserId = $this->paramFilter('searchParentUserId', 'intval'); // 用户ID
     	$info = array(
     		'searchStatus' 	  => $searchStatus,
     		'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
     		'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
+    		'searchUserLevel' => $searchUserLevel,
+    		'searchParentUserId' => $searchParentUserId,
     	);
     	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
     	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制

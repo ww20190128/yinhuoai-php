@@ -83,7 +83,7 @@ class Task extends ServiceBase
     			continue;
     		}
     		if ($taskEtt->userId != $backstageUserEtt->userId) {
-    			throw new $this->exception('轮播图已删除');
+    			throw new $this->exception('任务已删除');
     		}
     		$removeEttList[] = $taskEtt;
     	}

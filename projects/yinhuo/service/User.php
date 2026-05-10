@@ -258,17 +258,68 @@ class User extends ServiceBase
     {
     	$userDao = \dao\User::singleton();
     	$userEttList = $userDao->readListByPrimary($userIds);
+    	$parentUserIds = array();
+    	if (!empty($userEttList)) foreach ($userEttList as $userEtt) {
+    		if (empty($userEtt->parentUserId)) {
+    			continue;
+    		}
+    		$parentUserIds[$userEtt->parentUserId] = intval($userEtt->parentUserId);
+    	}
+    	$parentUserEttList = empty($parentUserIds) ? array() : $userDao->readListByPrimary($parentUserIds);
+    	$parentUserEttList = $userDao->refactorListByKey($parentUserEttList);
+    	$parentUserIds2 = array();
+    	if (!empty($parentUserEttList)) foreach ($parentUserEttList as $parentUserEtt) {
+    		if (empty($parentUserEtt->parentUserId)) {
+    			continue;
+    		}
+    		$parentUserIds2[$parentUserEtt->parentUserId] = intval($parentUserEtt->parentUserId);
+    	}
+    	$parentUserEttList2 = empty($parentUserIds2) ? array() : $userDao->readListByPrimary($parentUserIds2);
+    	$parentUserEttList2 = $userDao->refactorListByKey($parentUserEttList2);
     	$models = array();
     	if (!empty($userEttList)) foreach ($userEttList as $userEtt) {
+    		$parentUser = array();
+    		$topParentUser = array();
+    		if (!empty($userEtt->parentUserId) && !empty($parentUserEttList[$userEtt->parentUserId])) {
+    			$parentUserEtt = $parentUserEttList[$userEtt->parentUserId];
+    			$parentUser = array(
+	    			'userId' => intval($parentUserEtt->userId),
+	    			'status' => intval($parentUserEtt->status),
+	    			'sex' => intval($parentUserEtt->sex),
+    				'gold' => intval($parentUserEtt->gold),
+	    			'userName' => $parentUserEtt->userName,
+	    			'headImgUrl' => $parentUserEtt->headImgUrl,
+	    			'phone' => $parentUserEtt->phone,
+	    			'updateTime' => intval($parentUserEtt->updateTime),
+	    			'createTime' => intval($parentUserEtt->createTime),
+    			);
+    			if (!empty($parentUserEtt->parentUserId) && !empty($parentUserEttList2[$parentUserEtt->parentUserId])) {
+    				$parentUserEtt2 = $parentUserEttList2[$parentUserEtt->parentUserId];
+    				$topParentUser = array(
+    					'userId' => intval($parentUserEtt2->userId),
+    					'status' => intval($parentUserEtt2->status),
+    					'sex' => intval($parentUserEtt2->sex),
+    					'gold' => intval($parentUserEtt2->gold),
+    					'userName' => $parentUserEtt2->userName,
+    					'headImgUrl' => $parentUserEtt2->headImgUrl,
+    					'phone' => $parentUserEtt2->phone,
+    					'updateTime' => intval($parentUserEtt2->updateTime),
+    					'createTime' => intval($parentUserEtt2->createTime),
+    				);
+    			}
+    		}
     		$models[$userEtt->userId] = array(
     			'userId' => intval($userEtt->userId),
     			'status' => intval($userEtt->status),
     			'sex' => intval($userEtt->sex),
+    			'gold' => intval($userEtt->gold),
     			'userName' => $userEtt->userName,
     			'headImgUrl' => $userEtt->headImgUrl,
     			'phone' => $userEtt->phone,
     			'updateTime' => intval($userEtt->updateTime),
     			'createTime' => intval($userEtt->createTime),
+    			'parentUser' => $parentUser, // 上级用户信息
+    			'topParentUser' => $topParentUser, // 上上级用户信息
     		);
     	}
     	return $models;
