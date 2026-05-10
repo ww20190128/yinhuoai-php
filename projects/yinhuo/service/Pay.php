@@ -104,12 +104,13 @@ class Pay extends ServiceBase
             // 触发分账
             $this->profitsharing($orderEtt, $transaction_id);
             // 完结订单
-            $orderSv = \service\Order::singleton();
-            $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
-        } else {
+//             $orderSv = \service\Order::singleton();
+//             $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
+//         } else {
             // 调用微信查询订单API
             return false;
         }
+        exit;
         return true;
 	}
 	
@@ -365,7 +366,7 @@ echo "开始分账\n";
 		} catch (\Exception $e) {
 			return false;
 		}
-
+exit;
 		return true;
 	}
 }
