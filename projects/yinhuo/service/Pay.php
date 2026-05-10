@@ -301,6 +301,36 @@ class Pay extends ServiceBase
 	}
 	
 	/**
+	 * 添加分账关系
+	 *
+	 * @return array
+	 */
+	private function profitsharingReceiversAdd($openid)
+	{
+		$weChatConf = $this->frame->conf['weChat'];
+		$data = array(
+			'appid' => $weChatConf['appId'], // 服务商APPID
+			'type' => 'PERSONAL_OPENID',
+			'account'  	=> $openid,
+			'relation_type' => 'DISTRIBUTOR',
+		);
+	
+		try {
+			$response = self::$weChatPayInstance->chain('v3/profitsharing/receivers/add')->post(array('json' => $data));
+			$response = empty($response) ? '' : $response->getBody()->getContents();
+			print_r($response);exit;
+			$file = CACHE_PATH . 'new.txt';
+			@file_put_contents($file, $response);
+		} catch (\Exception $e) {
+				
+			print_r($e);
+			return false;
+		}
+		exit;
+		return true;
+	}
+	
+	/**
 	 * 处理分账
 	 *
 	 * @return array
@@ -337,6 +367,10 @@ echo "开始分账\n";
 					'description' => "{$userEtt->userName}的充值分账",
 				);
 			}
+		}
+		// 添加分账关系
+		foreach ($profitsharingArr as $row) {
+			$this->profitsharingReceiversAdd($row['openid']);
 		}
 		
 		print_r($profitsharingArr);
