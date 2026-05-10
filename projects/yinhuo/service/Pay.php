@@ -321,7 +321,7 @@ class Pay extends ServiceBase
 			'userId' => $userEtt->parentUserId,
 			'amount' => 0.02,
 			'openid' => $userEtt->openid,
-			'description' => "{$userEtt->name}的充值分账",
+			'description' => "{$userEtt->userName}的充值分账",
 		);
 		if (!empty($parentUserEtt->parentUserId)) {
 			$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
@@ -331,7 +331,7 @@ class Pay extends ServiceBase
 					'userId' => $parentUserEtt2->parentUserId,
 					'amount' => 0.01,
 					'openid' => $parentUserEtt2->openid,
-					'description' => "{$userEtt->name}的充值分账",
+					'description' => "{$userEtt->userName}的充值分账",
 				);
 			}
 		}
@@ -364,6 +364,7 @@ class Pay extends ServiceBase
 			@file_put_contents($file, json_encode($e));
 			return false;
 		}
+		print_r($response);exit;
 		return true;
 	}
 }
