@@ -29,7 +29,13 @@ class Task extends EntityBase
      * @var int
      */
     public $id;
-
+    
+    /**
+     * 封面
+     *
+     * @var varchar
+     */
+    public $coverURL = '';
     /**
      * 名称
      *

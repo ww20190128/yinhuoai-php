@@ -53,6 +53,7 @@ class Task extends ServiceBase
     			'from' => $taskEtt->from,
     			'status' => intval($taskEtt->status),
     			'updateTime' => intval($taskEtt->updateTime),
+    			'coverURL' => $taskEtt->coverURL,
     			'createTime' => intval($taskEtt->createTime),
     			'userInfo' => empty($backstageUserModels[$taskEtt->userId]) 
     				? array() : $backstageUserModels[$taskEtt->userId],
@@ -100,7 +101,7 @@ class Task extends ServiceBase
      *
      * @return array
      */
-    public function reviseTask($backstageUserId, $id, $info)
+    public function reviseTask($backstageUserId, $id, $info, $uploadFile)
     {
     	$backstageUserDao = \dao\BackstageUser::singleton();
     	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
@@ -130,6 +131,15 @@ class Task extends ServiceBase
     	if (!empty($info['from'])) {
     		$taskEtt->set('from', $info['from']);
     	}
+    	$coverURL = '';
+    	if (!empty($uploadFile['file'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$coverURL = $folderSv->getUrlByFile($uploadFile['file'], time() . rand(0, 9999), 'png');
+    	}
+    	 
+    	if (!empty($coverURL)) {
+    		$taskEtt->set('coverURL', $coverURL);
+    	}
     	$now = $this->frame->now;
     	$taskEtt->set('updateTime', $now);
     	$taskDao->update($taskEtt);
@@ -143,12 +153,17 @@ class Task extends ServiceBase
      *
      * @return array
      */
-    public function createTask($backstageUserId, $info)
+    public function createTask($backstageUserId, $info, $uploadFile)
     {
     	$backstageUserDao = \dao\BackstageUser::singleton();
     	$backstageUserEtt = $backstageUserDao->readByPrimary($backstageUserId);
     	if (empty($backstageUserEtt) || $backstageUserEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('用户不存在');
+    	}
+    	$url = '';
+    	if (!empty($uploadFile['file'])) { // 上传图片
+    		$folderSv = \service\Folder::singleton();
+    		$url = $folderSv->getUrlByFile($uploadFile['file'], time() . rand(0, 9999), 'png');
     	}
     	$now = $this->frame->now;
     	$taskDao = \dao\Task::singleton();
@@ -159,6 +174,7 @@ class Task extends ServiceBase
     	$taskEtt->goto = empty($info['goto']) ? '' : $info['goto'];
     	$taskEtt->award = empty($info['award']) ? 0 : $info['award'];
     	$taskEtt->from = empty($info['from']) ? '' : $info['from'];
+    	$taskEtt->coverURL = $url;
     	$taskEtt->createTime = $now;
     	$taskEtt->updateTime = $now;
     	$taskDao->create($taskEtt);
@@ -187,6 +203,7 @@ class Task extends ServiceBase
     		'detail' => $taskEtt->detail,
     		'goto' => $taskEtt->goto,
     		'award' => intval($taskEtt->award),
+    		'coverURL' => intval($taskEtt->coverURL),
     		'from' => $taskEtt->from,
     		'status' => intval($taskEtt->status),
     		'updateTime' => intval($taskEtt->updateTime),
