@@ -104,13 +104,12 @@ class Pay extends ServiceBase
             // 触发分账
             $this->profitsharing($orderEtt, $transaction_id);
             // 完结订单
-//             $orderSv = \service\Order::singleton();
-//             $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
-//         } else {
+            $orderSv = \service\Order::singleton();
+            $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
+        } else {
             // 调用微信查询订单API
             return false;
         }
-        exit;
         return true;
 	}
 	
@@ -314,7 +313,6 @@ class Pay extends ServiceBase
 			'account'  	=> $openid,
 			'relation_type' => 'DISTRIBUTOR',
 		);
-	
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/receivers/add')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
@@ -336,8 +334,6 @@ class Pay extends ServiceBase
 		if (empty($userEtt) || empty($userEtt->parentUserId)) { // 不需要分账
 			return false;
 		}
-		
-echo "开始分账\n";
 		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
 		if (empty($parentUserEtt)) { // 不需要分账
 			return false;
@@ -347,7 +343,7 @@ echo "开始分账\n";
 		$profitsharingArr[] = array(
 			'userId' => $userEtt->parentUserId,
 			'amount' => 2,
-			'openid' => $userEtt->openid,
+			'openid' => $parentUserEtt->openid,
 			'description' => "{$userEtt->userName}的充值分账",
 		);
 		if (!empty($parentUserEtt->parentUserId)) {
@@ -364,11 +360,8 @@ echo "开始分账\n";
 		}
 		// 添加分账关系
 		foreach ($profitsharingArr as $row) {
-			echo "添加关系\n";
 			$this->profitsharingReceiversAdd($row['openid']);
 		}
-		
-		print_r($profitsharingArr);
 		// 处理分账
 		$weChatConf = $this->frame->conf['weChat'];
 		$receivers = array(); // 接收方信息
@@ -388,20 +381,13 @@ echo "开始分账\n";
 			'receivers' 		=> $receivers,
 			'unfreeze_unsplit' 	=> true,
 		);
-		
-		print_r($data);
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
-			//$response = empty($response) ? '' : $response->getBody()->getContents();
-		print_r($response);exit;	
-			$file = CACHE_PATH . 'new.txt';
-			@file_put_contents($file, $response);
+			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
-			
-			print_r($e);
 			return false;
 		}
-exit;
 		return true;
 	}
+	
 }
