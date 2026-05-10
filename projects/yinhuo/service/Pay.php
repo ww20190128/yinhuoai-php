@@ -355,13 +355,12 @@ class Pay extends ServiceBase
 			'receivers' 		=> $receivers,
 		);
 		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/profitsharing/orders')->post(array('json' => $data));
+			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			//$response = empty($response) ? '' : $response->getBody()->getContents();
 			
 			$file = CACHE_PATH . 'new.txt';
 			@file_put_contents($file, $response);
 		} catch (\Exception $e) {
-
 			return false;
 		}
 
