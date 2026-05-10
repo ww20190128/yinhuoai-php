@@ -311,6 +311,8 @@ class Pay extends ServiceBase
 		if (empty($userEtt) || empty($userEtt->parentUserId)) { // 不需要分账
 			return false;
 		}
+		
+echo "开始分账\n";
 		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
 		if (empty($parentUserEtt)) { // 不需要分账
 			return false;
@@ -319,7 +321,7 @@ class Pay extends ServiceBase
 		// 1级
 		$profitsharingArr[] = array(
 			'userId' => $userEtt->parentUserId,
-			'amount' => 0.02,
+			'amount' => 2,
 			'openid' => $userEtt->openid,
 			'description' => "{$userEtt->userName}的充值分账",
 		);
@@ -329,7 +331,7 @@ class Pay extends ServiceBase
 				// 2级
 				$profitsharingArr[] = array(
 					'userId' => $parentUserEtt2->parentUserId,
-					'amount' => 0.01,
+					'amount' => 1,
 					'openid' => $parentUserEtt2->openid,
 					'description' => "{$userEtt->userName}的充值分账",
 				);
@@ -357,7 +359,7 @@ class Pay extends ServiceBase
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			//$response = empty($response) ? '' : $response->getBody()->getContents();
-			
+		print_r($response);exit;	
 			$file = CACHE_PATH . 'new.txt';
 			@file_put_contents($file, $response);
 		} catch (\Exception $e) {
