@@ -101,6 +101,8 @@ class Pay extends ServiceBase
             if (empty($orderEtt)) {
             	return false;
             }
+            // 触发分账
+            $this->profitsharing($orderEtt, $transaction_id);
             // 完结订单
             $orderSv = \service\Order::singleton();
             $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
@@ -230,7 +232,7 @@ class Pay extends ServiceBase
 	 *
 	 * @return array
 	 */
-	public function prepare($userEtt, $orderEtt, $description)
+	public function prepare($userEtt, $orderEtt, $description, $needProfitSharing = false)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
@@ -243,15 +245,16 @@ class Pay extends ServiceBase
 			'notify_url'   => $notify_url, // 商户回调地址
 			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
 			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
-
 		);
+		if (!empty($needProfitSharing)) { // 分账
+			$data['settle_info'] = array(
+				'profit_sharing' => true,
+			);
+		}
 		try {
 			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
-	$file = CACHE_PATH . 'test.txt';
-@file_put_contents($file, $e);
-	
 			return false;
 		}
     	
@@ -294,4 +297,67 @@ class Pay extends ServiceBase
 		return $ip;
 	}
 	
+	/**
+	 * 处理分账
+	 *
+	 * @return array
+	 */
+	private function profitsharing($orderEtt, $transactionId)
+	{
+		$userDao = \dao\User::singleton();
+		$userEtt = $userDao->readByPrimary($orderEtt->userId);
+		if (empty($userEtt) || empty($userEtt->parentUserId)) { // 不需要分账
+			return false;
+		}
+		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
+		if (empty($parentUserEtt)) { // 不需要分账
+			return false;
+		}
+		$profitsharingArr = array();
+		// 1级
+		$profitsharingArr[] = array(
+			'userId' => $userEtt->parentUserId,
+			'amount' => 0.02,
+			'openid' => $userEtt->openid,
+			'description' => "{$userEtt->name}的充值分账",
+		);
+		if (!empty($parentUserEtt->parentUserId)) {
+			$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
+			if (!empty($parentUserEtt2)) { // 不需要分账
+				// 2级
+				$profitsharingArr[] = array(
+					'userId' => $parentUserEtt2->parentUserId,
+					'amount' => 0.01,
+					'openid' => $parentUserEtt2->openid,
+					'description' => "{$userEtt->name}的充值分账",
+				);
+			}
+		}
+		// 处理分账
+		$weChatConf = $this->frame->conf['weChat'];
+		$receivers = array(); // 接收方信息
+		foreach ($profitsharingArr as $row) {
+			$receivers[] = array(
+				'type' 	=> 'PERSONAL_OPENID', // 个人openid
+				'account' => $row['openid'], // 个人OpenID
+				'amount' => array('total' => $row['amount'], 'currency' => 'CNY'), // 订单金额
+				'description' => $row['description']
+			);
+		}
+		$data = array(
+			'mchid' 	   		=> $weChatConf['merchantId'], // 服务商商户号  必填
+			'out_trade_no' 		=> $orderEtt->outTradeNo, // 商户订单号
+			'appid'        		=> $weChatConf['appId'], // 服务商APPID
+			'transaction_id'  	=> $transactionId,
+			'unfreeze_unsplit' 	=> true,
+			'receivers' 		=> $receivers,
+		);
+		try {
+			$response = self::$weChatPayInstance->chain('v3/pay/profitsharing/orders')->post(array('json' => $data));
+			$response = empty($response) ? '' : $response->getBody()->getContents();
+		} catch (\Exception $e) {
+			return false;
+		}
+		return true;
+	}
 }

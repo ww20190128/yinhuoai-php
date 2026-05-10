@@ -183,13 +183,21 @@ class Order extends ServiceBase
     	}
 
     	// ！！！！开始预支付
+    	// 判断是否需要分账
+    	$needProfitSharing = false;
+    	if (!empty($userEtt->parentUserId)) { // 有分账
+    		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
+    		if (!empty($parentUserEtt) && $parentUserEtt->status != \constant\Common::DATA_DELETE) {
+    			$needProfitSharing = true;
+    		}
+    	}
     	
     	// 生成订单号
     	$outTradeNo = self::createOutTradeNo($userId, $orderEtt->id);
     	$orderEtt->set('outTradeNo', $outTradeNo);
     	// 执行微信支付
     	$paySv = \service\Pay::singleton();
-    	$payResult = $paySv->prepare($userEtt, $orderEtt, $vipConfigEtt->name);
+    	$payResult = $paySv->prepare($userEtt, $orderEtt, $vipConfigEtt->name, $needProfitSharing);
     	if (empty($payResult)) {
     		throw new $this->exception('支付失败，请重新下单！');
     	}
@@ -238,6 +246,7 @@ class Order extends ServiceBase
     		$userVipEtt->updateTime = $now;
     		$userVipDao->create($userVipEtt);
     	} 
+    	
     	return true;
     }
 
@@ -308,5 +317,5 @@ class Order extends ServiceBase
     		'totalNum' => $totalNum,
     	);
     }
-    
+     
 }

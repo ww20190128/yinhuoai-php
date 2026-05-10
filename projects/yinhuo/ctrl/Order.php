@@ -208,6 +208,11 @@ class Order extends CtrlBase
 		$userEtt->add('withdrawAmount', $notifyResult['transfer_amount'] * 0.01);
 		$userEtt->set('updateTime', $now);
 		$userDao->update($userEtt);
+		
+		
+		// 处理分账
+		$orderSv = \service\Order::singleton();
+		$orderSv->profitsharing($this->userId, $info, $pageNum, $pageLimit);
 		return true;
     }
     
