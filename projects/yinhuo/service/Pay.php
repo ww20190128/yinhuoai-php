@@ -76,7 +76,7 @@ class Pay extends ServiceBase
             $platformPublicKeyInstance
         );
 
-        if ($timeOffsetStatus && $verifiedStatus || true) {
+        if ($timeOffsetStatus && $verifiedStatus) {
             // 加密文本消息解密
             $bodyResource = AesGcm::decrypt($resourceArr['ciphertext'], $weChatConf['APIv3Key'], $resourceArr['nonce'], $resourceArr['associated_data']);
             $bodyResource = empty($bodyResource) ? array() : json_decode($bodyResource, true);
@@ -317,16 +317,10 @@ class Pay extends ServiceBase
 	
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/receivers/add')->post(array('json' => $data));
-			//$response = empty($response) ? '' : $response->getBody()->getContents();
-print_r($response);exit;
-			$file = CACHE_PATH . 'new.txt';
-			@file_put_contents($file, $response);
+			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
-				
-			print_r($e);
 			return false;
 		}
-		exit;
 		return true;
 	}
 	

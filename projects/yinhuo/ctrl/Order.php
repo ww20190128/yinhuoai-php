@@ -86,18 +86,18 @@ class Order extends CtrlBase
 $tmpData = '{"header":{"TEMP":"\/tmp","TMPDIR":"\/tmp","TMP":"\/tmp","PATH":"\/usr\/local\/bin:\/usr\/bin:\/bin","HOSTNAME":"iZ2zebb122t63qsoruf52iZ","USER":"www","HOME":"\/home\/www","HTTP_WECHATPAY_TIMESTAMP":"1778420615","HTTP_PRAGMA":"no-cache","HTTP_WECHATPAY_SIGNATURE_TYPE":"WECHATPAY2-SHA256-RSA2048","HTTP_WECHATPAY_SIGNATURE":"J409csDCno9v\/l8DEZJJ+bGSv604BSXL+k9Ads8qNtyLsEYYXAThjV5rdQporm6hGr\/Vs+PHzYCXug\/gBhd3F3VkblPRgRw7mFiK9wmpuFw9uYf96MjendgQuyIJpJLgJs\/8TQkCsPcPs9U+8M8fKOgiV1Qu\/tEH7EmrW2pC03PmWOFy4c28FlIocoMO5GkT9yi4+BOaZznMhz8GOC\/vzo7QIJ9PhcUKBRj0D0spipKeQR5MharS63ybMEYp9jTfo8K+TLGa3LaEfnwjKjlHbqdr5EkTVJdto8JSHBSjI2kiLBx2g+dW2pbv9nyPH3+\/iRzkptNPF\/s0seORmb\/b8A==","HTTP_WECHATPAY_SERIAL":"1B84A18252BFC94060DF9B551587288FC432AC84","HTTP_CONTENT_TYPE":"application\/json","HTTP_WECHATPAY_NONCE":"O0TJR1yPiUctCH75Aj4mcXHDIpisIldl","HTTP_HOST":"server.yinhuoai.com","HTTP_ACCEPT":"*\/*","HTTP_USER_AGENT":"Mozilla\/4.0","HTTP_CONNECTION":"Keep-Alive","HTTP_CONTENT_LENGTH":"919","REDIRECT_STATUS":"200","SERVER_NAME":"server.yinhuoai.com","SERVER_PORT":"443","SERVER_ADDR":"172.30.244.95","REMOTE_PORT":"17399","REMOTE_ADDR":"101.226.103.17","SERVER_SOFTWARE":"nginx\/1.27.0","GATEWAY_INTERFACE":"CGI\/1.1","HTTPS":"on","REQUEST_SCHEME":"https","SERVER_PROTOCOL":"HTTP\/1.1","DOCUMENT_ROOT":"\/data\/www\/yinhuoai-php\/Webroot","DOCUMENT_URI":"\/index.php","REQUEST_URI":"\/order\/payNotify","SCRIPT_NAME":"\/index.php","CONTENT_LENGTH":"919","CONTENT_TYPE":"application\/json","REQUEST_METHOD":"POST","QUERY_STRING":"","SCRIPT_FILENAME":"\/data\/www\/yinhuoai-php\/Webroot\/index.php","FCGI_ROLE":"RESPONDER","PHP_SELF":"\/index.php","REQUEST_TIME_FLOAT":1778420615.860372,"REQUEST_TIME":1778420615},"body":"{\"id\":\"d662649e-6c22-5138-b097-5748bf993b75\",\"create_time\":\"2026-05-10T21:43:35+08:00\",\"resource_type\":\"encrypt-resource\",\"event_type\":\"TRANSACTION.SUCCESS\",\"summary\":\"\u652f\u4ed8\u6210\u529f\",\"resource\":{\"original_type\":\"transaction\",\"algorithm\":\"AEAD_AES_256_GCM\",\"ciphertext\":\"0bhHN9Qpc8T81OBpjOAEusR2ta4fGIzfBybMtUeY6iSHxMorIC96FdA\/nEcyugA2rlVXZeqSHSfyHQyJuv5GGtKJjwyhFRSRTnURltxxvQ70csiejdhgt001vJByePOTd\/WreuptrTBZPlm6cTfwKA+InHJacZFb8hDOEw4g3NGlG+VZ2LmBpFYFWmtxmMfOGAO5bGo5Qal15Bj0GKsf070QHAHV7YoWGjKfnLm4k1+Sg\/U7cIOivfaeo8UqGGPoacwjxxpcI0Bmh6bXbnGH\/LTCt6RstBkVkuMlt0yZvgBPObU1VPF\/GrEa6MILMHYXZ+heuM8dmIXHln8rIzhxoBTtPzshyFlkQw5BI+7hDHMHEabMycu2XJ85pDklPfsZys5vkASdKZVAxbC+IQ+zy\/oaSkAgOkO1PB4A0w8kG33a9qV\/AcLl61z0QhNKKpVhTniCEEFiaT81hIpRxGI35nYrTNEN4S6PolvI\/KdNVCOc\/Ue1+jf3kYmvI5lsyQWdhzBPYwk8EuPGAZGAWRda6SsVIsTu+vVrhJ4Ny2iOMvuOFKSpBJ0G0g7NuB+Zy\/gvC91LbDSMTkzopA==\",\"associated_data\":\"transaction\",\"nonce\":\"gHtxZBbCmLS6\"}}","params":{"op":"Order.payNotify"}}';
 
 		
-$tmpData = json_decode($tmpData, true);
-		$header = $tmpData['header'];
-		$bodyJson = $tmpData['body'];
+// $tmpData = json_decode($tmpData, true);
+// 		$header = $tmpData['header'];
+// 		$bodyJson = $tmpData['body'];
 
 
-// $file = CACHE_PATH . 'payNotify.txt';
-// @file_put_contents($file, json_encode(array(
-//     		'header' => $header,
-//     		'body' => $bodyJson,
-//     		'params' => $params,	
-//     	)));
-
+$file = CACHE_PATH . 'payNotify.txt';
+@file_put_contents($file, json_encode(array(
+    		'header' => $header,
+    		'body' => $bodyJson,
+    		'params' => $params,	
+    	)));
+exit;
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
     	$resource = empty($body['resource']) ? array() : $body['resource'];
