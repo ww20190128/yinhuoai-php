@@ -317,8 +317,8 @@ class Pay extends ServiceBase
 	
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/receivers/add')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-			print_r($response);exit;
+			//$response = empty($response) ? '' : $response->getBody()->getContents();
+print_r($response);exit;
 			$file = CACHE_PATH . 'new.txt';
 			@file_put_contents($file, $response);
 		} catch (\Exception $e) {
@@ -370,6 +370,7 @@ echo "开始分账\n";
 		}
 		// 添加分账关系
 		foreach ($profitsharingArr as $row) {
+			echo "添加关系\n";
 			$this->profitsharingReceiversAdd($row['openid']);
 		}
 		
