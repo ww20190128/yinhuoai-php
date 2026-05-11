@@ -32,7 +32,6 @@ class User extends CtrlBase
     public function userInfo()
     {
         $params = $this->params;
-       
     	if (empty($this->userId)) {
     		$userId = $this->paramFilter('userId', 'intval');
     	} else {

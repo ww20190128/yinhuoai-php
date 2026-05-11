@@ -288,6 +288,7 @@ class User extends ServiceBase
 	    			'sex' => intval($parentUserEtt->sex),
     				'gold' => intval($parentUserEtt->gold),
 	    			'userName' => $parentUserEtt->userName,
+    				'openid' => $parentUserEtt->openid,
 	    			'headImgUrl' => $parentUserEtt->headImgUrl,
 	    			'phone' => $parentUserEtt->phone,
 	    			'updateTime' => intval($parentUserEtt->updateTime),

@@ -60,6 +60,13 @@ class User extends ModelBase
     public $status = 0;
 
     /**
+     * 级别
+     *
+     * @var int
+     */
+    public $level = 1;
+    
+    /**
      * 创建时间
      *
      * @var int
@@ -198,7 +205,8 @@ class User extends ModelBase
     		'gold'    		=> intval($this->gold),
     		'award'    		=> intval($this->award),
     		'parentUserId'  => intval($this->parentUserId),
-//     	    'openid'        => $this->openid,
+			'openid'        => $this->openid,
+    		'level'  		=> intval($this->level),
 //          'sex'           => intval($this->sex),
 //          'country'       => $this->country,
 //          'province'      => $this->province,

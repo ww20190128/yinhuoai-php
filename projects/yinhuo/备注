@@ -313,3 +313,6 @@ CREATE TABLE IF NOT EXISTS `vipConfig` (
 
 REPLACE INTO `vipConfig` (`id`, `name`, `desc`, `intro`, `content`, `type`, `originalPrice`, `price`, `topProfitSharing1`, `topProfitSharing2`, `topGold1`, `topGold2`, `effectDay`, `status`, `createTime`, `updateTime`) VALUES
 (4, 'VIP年卡', '年卡', '会员可任意测试平台内所有付费测评（包含未来推出的新测评），有效期为1年，并可享受赠送好友99次付费测评福利。', '{"使用期限":"自购买之日起一年内有效","使用范围":"本平台内所有的付费测评","使用次数":"可测试所有付费测评","附赠权益":"可免费赠送99次好友，收到赠送的好友可免费测试1次该测评"}', 3, '0.10', '0.10', '0.04', '0.02', 400, 200, 365, 0, 0, 0);
+
+
+ALTER TABLE `user` ADD `level` INT( 11 ) NOT NULL DEFAULT '0' COMMENT '级别' AFTER `editingId`
