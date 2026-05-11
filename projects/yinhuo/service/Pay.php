@@ -397,6 +397,15 @@ class Pay extends ServiceBase
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
+			// 添加火币
+			$profitSharingUserEtt = $userDao->readByPrimary($profitSharingEtt->userId);
+			if (empty($profitSharingUserEtt)) { // 不需要分账
+				continue;
+			}
+			$profitSharingUserEtt->add('gold', $profitSharingEtt->addGold);
+			$profitSharingUserEtt->set('updateTime', $now);
+			$userDao->update($profitSharingUserEtt);
+			// 修改分账状态
 			$profitSharingEtt->set('status', 1);
 			$profitSharingEtt->set('updateTime', $now);
 			$profitSharingDao->update($profitSharingEtt);
