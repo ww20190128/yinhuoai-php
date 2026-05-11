@@ -102,7 +102,8 @@ class Pay extends ServiceBase
             	return false;
             }
             // 触发分账
-            $this->profitsharing($orderEtt, $transaction_id);
+$this->profitsharing($orderEtt, $transaction_id);
+echo "完成分账";exit;
             // 完结订单
             $orderSv = \service\Order::singleton();
             $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
@@ -377,6 +378,9 @@ class Pay extends ServiceBase
 				'description' => $description
 			);
 		}
+		
+print_r($receivers);
+
 		if (empty($receivers)) {
 			return false;
 		}
@@ -390,12 +394,18 @@ class Pay extends ServiceBase
 			'receivers' 		=> $receivers,
 			'unfreeze_unsplit' 	=> true,
 		);
+		
+print_r($data);
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
+			
+			print_r($response);
 		} catch (\Exception $e) {
+			print_r($e);
 			return false;
 		}
+print_r($response);
 		foreach ($profitSharingEttList as $profitSharingEtt) {
 			// 添加火币
 			$profitSharingUserEtt = $userDao->readByPrimary($profitSharingEtt->userId);
