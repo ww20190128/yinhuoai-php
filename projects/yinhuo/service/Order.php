@@ -460,7 +460,7 @@ class Order extends ServiceBase
     				$topLevel = 2;
     			}
     		}
-    		$models[$profitSharingEtt->orderId][$profitSharingEtt->id] = array(
+    		$models[$profitSharingEtt->orderId][] = array(
     			'id' => intval($profitSharingEtt->id),
     			'receiverAddOpenId' => $profitSharingEtt->receiverAddOpenId,
     			'currentGold' => intval($profitSharingEtt->currentGold),
