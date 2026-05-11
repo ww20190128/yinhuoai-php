@@ -76,11 +76,13 @@ class User extends CtrlBase
     	if (!empty($phone) && !preg_match(cfg('common.regular.phone'), $phone)) {
     		throw new $this->exception('请输入正确的手机号');
     	}
+    	$parentUserId = $this->paramFilter('parentUserId', 'intval');
     	$now = $this->frame->now;
     	$info = array(
     		'userName' 			=> $userName, 	// 姓名
     		'phone'  			=> $phone, 		// 手机号
     		'imageInfo'  		=> $imageInfo,
+    		'parentUserId'  	=> $parentUserId,
     	);
     	return $userSv->reviseUser($this->userId, $info);
     }

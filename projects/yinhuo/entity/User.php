@@ -193,6 +193,7 @@ class User extends ModelBase
      */
     protected function createModel()
     {
+    	$shareUrl = "https://app.yinhuoai.com/share?userId=" . $this->userId . "&openid=" . $this->openid;
     	return array(
     		'userId'        => intval($this->userId),
     		'headImgUrl'    => $this->headImgUrl,
@@ -206,6 +207,7 @@ class User extends ModelBase
     		'award'    		=> intval($this->award),
     		'parentUserId'  => intval($this->parentUserId),
 			'openid'        => $this->openid,
+    		'shareUrl'      => $this->level >= 3 ? '' : $shareUrl,
     		'level'  		=> intval($this->level),
 //          'sex'           => intval($this->sex),
 //          'country'       => $this->country,

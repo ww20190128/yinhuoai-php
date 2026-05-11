@@ -208,6 +208,26 @@ class User extends ServiceBase
     	if (!empty($info['phone']) && $info['phone'] != $userEtt->phone) {
     		$userEtt->set('phone', $info['phone']);
     	}
+
+    	// 绑定分享用户
+    	$level = empty($userEtt->parentUserId) ? 1 : $userEtt->level;
+    	if (!empty($info['parentUserId']) && $info['parentUserId'] != $userEtt->parentUserId) {
+    		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId); // 上级
+    		if (!empty($parentUserEtt) && $userEtt->status != \constant\Common::DATA_DELETE) {
+    			if (!empty($parentUserEtt->parentUserId)) {
+    				$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
+    				if (empty($parentUserEtt2->parentUserId)) {
+    					$level = 3;
+    				} else {
+    					throw new $this->exception('3级分销无法绑定');
+    				}
+    			} else {
+    				$level = 2;
+    			}
+    			$userEtt->set('level', $level);
+    			$userEtt->set('parentUserId', $info['parentUserId']);
+    		}
+    	}
     	if (!empty($info['imageInfo'])) {
     		$file = $info['imageInfo']['file']; // 文件内容
     		$fileSize = filesize($file); // 文件大小
