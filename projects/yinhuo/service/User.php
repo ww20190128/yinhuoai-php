@@ -285,6 +285,7 @@ class User extends ServiceBase
     			$parentUser = array(
 	    			'userId' => intval($parentUserEtt->userId),
 	    			'status' => intval($parentUserEtt->status),
+    				'level' => intval($parentUserEtt->level),
 	    			'sex' => intval($parentUserEtt->sex),
     				'gold' => intval($parentUserEtt->gold),
 	    			'userName' => $parentUserEtt->userName,
@@ -298,10 +299,12 @@ class User extends ServiceBase
     				$parentUserEtt2 = $parentUserEttList2[$parentUserEtt->parentUserId];
     				$topParentUser = array(
     					'userId' => intval($parentUserEtt2->userId),
+    					'level' => intval($parentUserEtt2->level),
     					'status' => intval($parentUserEtt2->status),
     					'sex' => intval($parentUserEtt2->sex),
     					'gold' => intval($parentUserEtt2->gold),
     					'userName' => $parentUserEtt2->userName,
+    					'openid' => $parentUserEtt2->openid,
     					'headImgUrl' => $parentUserEtt2->headImgUrl,
     					'phone' => $parentUserEtt2->phone,
     					'updateTime' => intval($parentUserEtt2->updateTime),
@@ -314,6 +317,8 @@ class User extends ServiceBase
     			'status' => intval($userEtt->status),
     			'sex' => intval($userEtt->sex),
     			'gold' => intval($userEtt->gold),
+    			'level' => intval($userEtt->level),
+    			'openid' => $userEtt->openid,
     			'parentUserId' => intval($userEtt->parentUserId),
     			'userName' => $userEtt->userName,
     			'headImgUrl' => $userEtt->headImgUrl,
