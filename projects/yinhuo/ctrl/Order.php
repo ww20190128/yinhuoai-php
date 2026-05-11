@@ -70,8 +70,7 @@ class Order extends CtrlBase
     	$orderSv = \service\Order::singleton();
     	return $orderSv->checkVipOrderPay($this->userId, $orderId);
     }
-    
-    
+
     /**
      * 支付通知（腾讯）
      *
@@ -89,12 +88,12 @@ class Order extends CtrlBase
 // 		$bodyJson = $tmpData['body'];
 
 
-$file = CACHE_PATH . 'payNotify.txt';
-@file_put_contents($file, json_encode(array(
-    		'header' => $header,
-    		'body' => $bodyJson,
-    		'params' => $params,	
-    	)));
+// $file = CACHE_PATH . 'payNotify.txt';
+// @file_put_contents($file, json_encode(array(
+//     		'header' => $header,
+//     		'body' => $bodyJson,
+//     		'params' => $params,	
+//     	)));
 
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
@@ -112,11 +111,21 @@ $file = CACHE_PATH . 'payNotify.txt';
     		'serial' => $header['HTTP_WECHATPAY_SERIAL'],
     		'nonce' => $header['HTTP_WECHATPAY_NONCE'],
     	);
-
     	$paySv = \service\Pay::singleton();
     	return $paySv->wxPayNotify($resource, $bodyJson, $info);
     }
 
+    /**
+     * 处理订单分账
+     *
+     * @return array
+     */
+    public function doProfitSharing()
+    {
+    	$orderSv = \service\Order::singleton();
+    	return $orderSv->doProfitSharing();
+    }
+    
     /**
      * 申请提现，发起转账（微信）
      *

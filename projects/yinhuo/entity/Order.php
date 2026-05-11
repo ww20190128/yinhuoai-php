@@ -100,6 +100,13 @@ class Order extends ModelBase
     public $outTradeNo = '';
     
     /**
+     * 交易ID
+     *
+     * @var string
+     */
+    public $transactionId = '';
+    
+    /**
      * 交易信息
      *
      * @var string

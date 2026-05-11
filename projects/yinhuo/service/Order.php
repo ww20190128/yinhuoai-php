@@ -382,4 +382,24 @@ class Order extends ServiceBase
     	);
     }
      
+    /**
+     * 处理订单分账
+     *
+     * @return array
+     */
+    public function doProfitSharing()
+    {
+    	$paySv = \service\Pay::singleton();
+    	$info = array();
+    	$orderDao = \dao\Order::singleton();
+    	$orderEttList = $orderDao->getList($info, 1, 9999);
+    	foreach ($orderEttList as $orderEtt) {
+    		if (empty($orderEtt->transactionId)) {
+    			continue;
+    		}
+    		// 触发分账
+    		$profitsharingResult = $paySv->profitsharing($orderEtt);
+    	}
+    	echo "执行完成";
+    }
 }

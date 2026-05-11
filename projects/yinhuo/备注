@@ -267,7 +267,7 @@ ALTER TABLE `user` ADD `shareKsAccess` VARCHAR( 256 ) NOT NULL DEFAULT '' COMMEN
 
 
 
-
+ALTER TABLE `order` ADD `transactionId` VARCHAR( 256 ) NOT NULL DEFAULT '' COMMENT '交易ID' AFTER `outTradeNo`
 
 CREATE TABLE IF NOT EXISTS `profitSharing` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',

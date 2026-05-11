@@ -101,8 +101,9 @@ class Pay extends ServiceBase
             if (empty($orderEtt)) {
             	return false;
             }
-            // 触发分账
-			$this->profitsharing($orderEtt, $transaction_id);
+            $orderEtt->set('transactionId', $transaction_id);
+            $orderDao->update($orderEtt);
+     
             // 完结订单
             $orderSv = \service\Order::singleton();
             $orderSv->finishOrder($orderEtt, array_merge(json_decode($bodyJson, true), $resourceArr, $info), \constant\Order::PAY_STATUS_COMPLETE);
@@ -325,8 +326,11 @@ class Pay extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private function profitsharing($orderEtt, $transactionId)
+	public function profitsharing($orderEtt)
 	{
+		if (empty($orderEtt->transactionId)) {
+			return false;
+		}
 		$userDao = \dao\User::singleton();
 		$userEtt = $userDao->readByPrimary($orderEtt->userId);
 		if (empty($userEtt) || empty($userEtt->parentUserId)) { // 不需要分账
@@ -347,14 +351,16 @@ class Pay extends ServiceBase
 		$now = $this->frame->now;
 		// 添加分账关系
 		$receivers = array();
-		foreach ($profitSharingEttList as $profitSharingEtt) {
+		foreach ($profitSharingEttList as $key => $profitSharingEtt) {
 			$profitSharingUserEtt = $userDao->readByPrimary($profitSharingEtt->userId);
 			if (empty($profitSharingUserEtt)) { // 不需要分账
+				unset($profitSharingEttList[$key]);
 				continue;
 			}
 			if (empty($profitSharingEtt->receiverAddOpenId)) {
 				$receiverAddOpenId = $this->profitsharingReceiversAdd($profitSharingUserEtt->receiverAddOpenId);
 				if (empty($receiverAddOpenId)) {
+					unset($profitSharingEttList[$key]);
 					continue;
 				}
 				$profitSharingEtt->set('updateTime', $now);
@@ -370,6 +376,10 @@ class Pay extends ServiceBase
 				$amount = intval($vipConfigEtt->topProfitSharing2 * 100);
 				$description = '间接分账';
 			}
+			if ($profitSharingEtt->status == 1) { // 已完成分账
+				unset($profitSharingEttList[$key]);
+				continue;
+			}
 			$receivers[] = array(
 				'type' 	=> 'PERSONAL_OPENID', // 个人openid
 				'account' => $profitSharingEtt->receiverAddOpenId, // 个人OpenID
@@ -377,7 +387,6 @@ class Pay extends ServiceBase
 				'description' => $description
 			);
 		}
-
 		if (empty($receivers)) {
 			return false;
 		}
@@ -387,21 +396,19 @@ class Pay extends ServiceBase
 			'mchid' 	   		=> $weChatConf['merchantId'], // 服务商商户号  必填
 			'out_order_no' 		=> $orderEtt->outTradeNo, // 商户订单号
 			'appid'        		=> $weChatConf['appId'], // 服务商APPID
-			'transaction_id'  	=> $transactionId,
+			'transaction_id'  	=> $orderEtt->transactionId,
 			'receivers' 		=> $receivers,
 			'unfreeze_unsplit' 	=> true,
 		);
-
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 			
-			$file = CACHE_PATH . 'profitsharing.txt';
-			@file_put_contents($file, $response);
+			
+			print_r($response);exit;
 		} catch (\Exception $e) {
 			
-			$file = CACHE_PATH . 'profitsharing.txt';
-			@file_put_contents($file, $e);
+			print_r($e);
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
@@ -410,9 +417,11 @@ class Pay extends ServiceBase
 			if (empty($profitSharingUserEtt)) { // 不需要分账
 				continue;
 			}
-			$profitSharingUserEtt->add('gold', $profitSharingEtt->addGold);
-			$profitSharingUserEtt->set('updateTime', $now);
-			$userDao->update($profitSharingUserEtt);
+			if ($profitSharingEtt->status == 0) {
+				$profitSharingUserEtt->add('gold', $profitSharingEtt->addGold);
+				$profitSharingUserEtt->set('updateTime', $now);
+				$userDao->update($profitSharingUserEtt);
+			}
 			// 修改分账状态
 			$profitSharingEtt->set('status', 1);
 			$profitSharingEtt->set('updateTime', $now);
