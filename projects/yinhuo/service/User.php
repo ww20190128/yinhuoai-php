@@ -313,6 +313,7 @@ class User extends ServiceBase
     			'status' => intval($userEtt->status),
     			'sex' => intval($userEtt->sex),
     			'gold' => intval($userEtt->gold),
+    			'parentUserId' => intval($userEtt->parentUserId),
     			'userName' => $userEtt->userName,
     			'headImgUrl' => $userEtt->headImgUrl,
     			'phone' => $userEtt->phone,

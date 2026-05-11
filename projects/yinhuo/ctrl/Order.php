@@ -250,4 +250,31 @@ class Order extends CtrlBase
     	return $orderSv->getOrderList($this->userId, $info, $pageNum, $pageLimit);
     }
     
+    /**
+     * 获取返利订单列表
+     *
+     * @return array
+     */
+    public function getProfitSharingList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$searchStartTime = $this->paramFilter('searchStartTime', 'intval'); // 开始时间
+    	$searchEndTime = $this->paramFilter('searchEndTime', 'intval'); // 结束时间
+    	$searchStatus = $this->paramFilter('searchStatus', 'intval'); // 返利状态
+    	$searchTopLevel = $this->paramFilter('searchTopLevel', 'intval'); // 返利等级
+    	$info = array(
+    		'searchStatus' 	  => $searchStatus,
+    		'searchTopLevel' => $searchTopLevel,
+    		'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
+    		'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
+    	);
+    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+    	$orderSv = \service\Order::singleton();
+    	return $orderSv->getProfitSharingList($this->userId, $info, $pageNum, $pageLimit);
+    }
+    
 }
