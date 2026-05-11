@@ -108,6 +108,7 @@ class Order extends ServiceBase
 			$userCouponEtt->set('updateTime', $now);
 			$userCouponDao->update($userCouponEtt);
 		}
+		
         return array(
             'orderId' => intval($orderId), // 订单ID
         );
@@ -185,13 +186,78 @@ class Order extends ServiceBase
     	// ！！！！开始预支付
     	// 判断是否需要分账
     	$needProfitSharing = false;
+    	$profitSharingEtt1 = null;
+    	$profitSharingEtt2 = null;
+    	$profitSharingDao = \dao\ProfitSharing::singleton();
+    	$paySv = \service\Pay::singleton();
     	if (!empty($userEtt->parentUserId)) { // 有分账
     		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
     		if (!empty($parentUserEtt) && $parentUserEtt->status != \constant\Common::DATA_DELETE) {
     			$needProfitSharing = true;
     		}
+    		$profitSharingEtt1 = $profitSharingDao->getNewEntity();
+    		$profitSharingEtt1->userId = $parentUserEtt->userId;
+    		$profitSharingEtt1->orderId = $orderEtt->id;
+    		$profitSharingEtt1->status = 0;
+    		$profitSharingEtt1->addGold = intval($vipConfigEtt->topGold1);
+    		$profitSharingEtt1->currentGold = intval($parentUserEtt->gold);
+    		$profitSharingEtt1->parentUserId = intval($parentUserEtt->parentUserId);
+    		$profitSharingEtt1->fromUserId = $userEtt->userId;
+    		$profitSharingEtt1->receiverAddOpenId = '';
+    		$profitSharingEtt1->updateTime = $now;
+    		$profitSharingEtt1->createTime = $now;
+    		// 查询是否添加过收账关系
+    		$where = "`receiverAddOpenId` = {$parentUserEtt->openid}";
+    		$haveProfitSharingEtt = $profitSharingDao->readListByWhere($where);
+    		if (empty($haveProfitSharingEtt)) {
+    			$receiverAddOpenId = $paySv->profitsharingReceiversAdd($parentUserEtt->openid);
+    			if (!empty($receiverAddOpenId)) {
+    				$profitSharingEtt1->receiverAddOpenId = $receiverAddOpenId;
+    			}
+    		} else {
+    			$profitSharingEtt1->receiverAddOpenId = $parentUserEtt->openid;
+    		}
+    		// 有上上级
+    		if (!empty($parentUserEtt->parentUserId)) {
+    			$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
+    			if (!empty($parentUserEtt2) && $parentUserEtt2->status != \constant\Common::DATA_DELETE) {
+    				$needProfitSharing = true;
+    			}
+    			if (!empty($parentUserEtt2->parentUserId)) { // 不允许有3级分账
+    				$needProfitSharing = false;
+    			}
+    			$profitSharingEtt2 = $profitSharingDao->getNewEntity();
+    			$profitSharingEtt2->userId = intval($parentUserEtt2->userId);
+    			$profitSharingEtt2->orderId = $orderEtt->id;
+    			$profitSharingEtt2->status = 0;
+    			$profitSharingEtt2->addGold = intval($vipConfigEtt->topGold2);
+    			$profitSharingEtt2->currentGold = intval($parentUserEtt2->gold);
+    			$profitSharingEtt2->parentUserId = intval($parentUserEtt2->parentUserId);
+    			$profitSharingEtt2->fromUserId = $parentUserEtt->userId;
+    			$profitSharingEtt2->receiverAddOpenId = '';
+    			// 查询是否添加过收账关系
+    			$where = "`receiverAddOpenId` = {$parentUserEtt->openid}";
+    			$haveProfitSharingEtt = $profitSharingDao->readListByWhere($where);
+    			if (empty($haveProfitSharingEtt)) {
+    				$receiverAddOpenId = $paySv->profitsharingReceiversAdd($parentUserEtt2->openid);
+    				if (!empty($receiverAddOpenId)) {
+    					$profitSharingEtt2->receiverAddOpenId = $receiverAddOpenId;
+    				}
+    			} else {
+    				$profitSharingEtt2->receiverAddOpenId = $parentUserEtt2->openid;
+    			}
+    			$profitSharingEtt2->updateTime = $now;
+    			$profitSharingEtt2->createTime = $now;
+    		}
     	}
-    	
+    	if (!empty($needProfitSharing)) {
+    		if (!empty($profitSharingEtt1)) {
+    			$profitSharingDao->create($profitSharingEtt1);
+    		}
+    		if (!empty($profitSharingEtt2)) {
+    			$profitSharingDao->create($profitSharingEtt2);
+    		}
+    	}
     	// 生成订单号
     	$outTradeNo = self::createOutTradeNo($userId, $orderEtt->id);
     	$orderEtt->set('outTradeNo', $outTradeNo);
@@ -209,7 +275,6 @@ class Order extends ServiceBase
     	);
     }
     
-
     /**
      * 完结订单
      *

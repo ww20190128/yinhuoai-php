@@ -108,18 +108,32 @@ class VipConfig extends ModelBase
     public $effectDay = 0;
     
     /**
-     * 赠送次数
+     * 上级收益
      *
      * @var int
      */
-    public $giveNum = 0;
+    public $topProfitSharing1 = '0.00';
     
     /**
-     * 测评数
+     * 上上级收益
      *
      * @var int
      */
-    public $testPaperNum = 0;
+    public $topProfitSharing2 = '0.00';
+    
+    /**
+     * 上级火币收益
+     *
+     * @var int
+     */
+    public $topGold1 = 0;
+    
+    /**
+     * 上上级火币收益
+     *
+     * @var int
+     */
+    public $topGold2 = 0;
 
 // 表结构end
 
@@ -150,8 +164,10 @@ class VipConfig extends ModelBase
             'originalPrice'     => $this->originalPrice, // 原始价格
             'price'             => $this->price, // 价格
             'effectDay'         => intval($this->effectDay), // 
-            'giveNum'           => intval($this->giveNum), // 可赠送次数
-            'testPaperNum'      => intval($this->testPaperNum), // 可测试数量
+        	'topProfitSharing1' => $this->topProfitSharing1, // 上级收益
+        	'topProfitSharing2' => $this->topProfitSharing2, // 上上级收益
+        	'topGold1'          => intval($this->topGold1),
+            'topGold2'          => intval($this->topGold2),
             'createTime'        => intval($this->createTime),
         );
     }

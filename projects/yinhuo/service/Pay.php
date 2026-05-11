@@ -255,8 +255,6 @@ class Pay extends ServiceBase
 			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
-			
-			print_r($e);exit;
 			return false;
 		}
     	
@@ -304,13 +302,13 @@ class Pay extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private function profitsharingReceiversAdd($openid)
+	public function profitsharingReceiversAdd($openid)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
 		$data = array(
 			'appid' => $weChatConf['appId'], // 服务商APPID
 			'type' => 'PERSONAL_OPENID',
-			'account'  	=> $openid,
+			'account' => $openid,
 			'relation_type' => 'DISTRIBUTOR',
 		);
 		try {
@@ -319,7 +317,7 @@ class Pay extends ServiceBase
 		} catch (\Exception $e) {
 			return false;
 		}
-		return true;
+		return $openid;
 	}
 	
 	/**
@@ -334,45 +332,56 @@ class Pay extends ServiceBase
 		if (empty($userEtt) || empty($userEtt->parentUserId)) { // 不需要分账
 			return false;
 		}
-		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId);
-		if (empty($parentUserEtt)) { // 不需要分账
+		$profitSharingDao = \dao\ProfitSharing::singleton();
+		$profitSharingEttList = $profitSharingDao->readListByIndex(array(
+			'orderId' => $orderEtt->id,
+		));
+		if (empty($profitSharingEttList)) {
 			return false;
 		}
-		$profitsharingArr = array();
-		// 1级
-		$profitsharingArr[] = array(
-			'userId' => $userEtt->parentUserId,
-			'amount' => 2,
-			'openid' => $parentUserEtt->openid,
-			'description' => "{$userEtt->userName}的充值分账",
-		);
-		if (!empty($parentUserEtt->parentUserId)) {
-			$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
-			if (!empty($parentUserEtt2)) { // 不需要分账
-				// 2级
-				$profitsharingArr[] = array(
-					'userId' => $parentUserEtt2->parentUserId,
-					'amount' => 1,
-					'openid' => $parentUserEtt2->openid,
-					'description' => "{$userEtt->userName}的充值分账",
-				);
-			}
+		$vipConfigDao = \dao\VipConfig::singleton();
+		$vipConfigEtt = $vipConfigDao->readByPrimary($orderEtt->goodsId);
+		if (empty($vipConfigEtt) || $vipConfigEtt->status == \constant\Common::DATA_DELETE) {
+			return false;
 		}
+		$now = $this->frame->now;
 		// 添加分账关系
-		foreach ($profitsharingArr as $row) {
-			$this->profitsharingReceiversAdd($row['openid']);
+		$receivers = array();
+		foreach ($profitSharingEttList as $profitSharingEtt) {
+			$profitSharingUserEtt = $userDao->readByPrimary($profitSharingEtt->userId);
+			if (empty($profitSharingUserEtt)) { // 不需要分账
+				continue;
+			}
+			if (empty($profitSharingEtt->receiverAddOpenId)) {
+				$receiverAddOpenId = $this->profitsharingReceiversAdd($profitSharingUserEtt->receiverAddOpenId);
+				if (empty($receiverAddOpenId)) {
+					continue;
+				}
+				$profitSharingEtt->set('updateTime', $now);
+				$profitSharingEtt->set('receiverAddOpenId', $receiverAddOpenId);
+				$profitSharingDao->update($profitSharingEtt);
+			}
+			$amount = 0;
+			$description = '';
+			if ($profitSharingEtt->fromUserId == $orderEtt->userId) { // 上级
+				$amount = intval($vipConfigEtt->topProfitSharing1 * 100);
+				$description = '直接分账';
+			} else { // 上上级
+				$amount = intval($vipConfigEtt->topProfitSharing2 * 100);
+				$description = '间接分账';
+			}
+			$receivers[] = array(
+				'type' 	=> 'PERSONAL_OPENID', // 个人openid
+				'account' => $profitSharingEtt->receiverAddOpenId, // 个人OpenID
+				'amount' => $amount,
+				'description' => $description
+			);
+		}
+		if (empty($receivers)) {
+			return false;
 		}
 		// 处理分账
 		$weChatConf = $this->frame->conf['weChat'];
-		$receivers = array(); // 接收方信息
-		foreach ($profitsharingArr as $row) {
-			$receivers[] = array(
-				'type' 	=> 'PERSONAL_OPENID', // 个人openid
-				'account' => $row['openid'], // 个人OpenID
-				'amount' => $row['amount'], // 订单金额
-				'description' => $row['description']
-			);
-		}
 		$data = array(
 			'mchid' 	   		=> $weChatConf['merchantId'], // 服务商商户号  必填
 			'out_order_no' 		=> $orderEtt->outTradeNo, // 商户订单号
@@ -386,6 +395,11 @@ class Pay extends ServiceBase
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
 			return false;
+		}
+		foreach ($profitSharingEttList as $profitSharingEtt) {
+			$profitSharingEtt->set('status', 1);
+			$profitSharingEtt->set('updateTime', $now);
+			$profitSharingDao->update($profitSharingEtt);
 		}
 		return true;
 	}
