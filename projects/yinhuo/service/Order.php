@@ -108,7 +108,6 @@ class Order extends ServiceBase
 			$userCouponEtt->set('updateTime', $now);
 			$userCouponDao->update($userCouponEtt);
 		}
-		
         return array(
             'orderId' => intval($orderId), // 订单ID
         );
@@ -207,7 +206,7 @@ class Order extends ServiceBase
     		$profitSharingEtt1->updateTime = $now;
     		$profitSharingEtt1->createTime = $now;
     		// 查询是否添加过收账关系
-    		$where = "`receiverAddOpenId` = {$parentUserEtt->openid}";
+    		$where = "`receiverAddOpenId` = '{$parentUserEtt->openid}'";
     		$haveProfitSharingEtt = $profitSharingDao->readListByWhere($where);
     		if (empty($haveProfitSharingEtt)) {
     			$receiverAddOpenId = $paySv->profitsharingReceiversAdd($parentUserEtt->openid);
@@ -236,7 +235,7 @@ class Order extends ServiceBase
     			$profitSharingEtt2->fromUserId = $parentUserEtt->userId;
     			$profitSharingEtt2->receiverAddOpenId = '';
     			// 查询是否添加过收账关系
-    			$where = "`receiverAddOpenId` = {$parentUserEtt->openid}";
+    			$where = "`receiverAddOpenId` = '{$parentUserEtt->openid}'";
     			$haveProfitSharingEtt = $profitSharingDao->readListByWhere($where);
     			if (empty($haveProfitSharingEtt)) {
     				$receiverAddOpenId = $paySv->profitsharingReceiversAdd($parentUserEtt2->openid);
