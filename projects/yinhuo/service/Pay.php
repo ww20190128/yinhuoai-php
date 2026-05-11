@@ -395,7 +395,13 @@ class Pay extends ServiceBase
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
+			
+			$file = CACHE_PATH . 'profitsharing.txt';
+			@file_put_contents($file, $response);
 		} catch (\Exception $e) {
+			
+			$file = CACHE_PATH . 'profitsharing.txt';
+			@file_put_contents($file, $e);
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {

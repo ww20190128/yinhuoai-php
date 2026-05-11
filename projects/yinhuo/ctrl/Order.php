@@ -89,12 +89,12 @@ class Order extends CtrlBase
 // 		$bodyJson = $tmpData['body'];
 
 
-// $file = CACHE_PATH . 'payNotify.txt';
-// @file_put_contents($file, json_encode(array(
-//     		'header' => $header,
-//     		'body' => $bodyJson,
-//     		'params' => $params,	
-//     	)));
+$file = CACHE_PATH . 'payNotify.txt';
+@file_put_contents($file, json_encode(array(
+    		'header' => $header,
+    		'body' => $bodyJson,
+    		'params' => $params,	
+    	)));
 
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
