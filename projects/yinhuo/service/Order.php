@@ -432,12 +432,12 @@ class Order extends ServiceBase
     	$parentUserIds = array_column($dataList, 'parentUserId');
     	$profitSharingUserIds = array_column($dataList, 'userId');
     	$orderIds = array_column($dataList, 'orderId');
-    	
+    	$fromUserIds = array_column($dataList, 'fromUserId');
     	$orderDao = \dao\Order::singleton();
     	$orderEttList = $orderDao->readListByPrimary($orderIds);
     	$orderEttList = $orderDao->refactorListByKey($orderEttList);
     	$userSv = \service\User::singleton();
-    	$userModels = $userSv->getUserModels(array_merge($parentUserIds, $profitSharingUserIds, $userIds));
+    	$userModels = $userSv->getUserModels(array_merge($fromUserIds, $parentUserIds, $profitSharingUserIds, $userIds));
     	 
     	$models = array();
     	foreach ($dataList as $profitSharingEtt) {
