@@ -267,7 +267,7 @@ class Order extends CtrlBase
     	$searchTopLevel = $this->paramFilter('searchTopLevel', 'intval'); // 返利等级
     	$info = array(
     		'searchStatus' 	  => $searchStatus,
-    		'searchTopLevel' => $searchTopLevel,
+    		'searchTopLevel'  => $searchTopLevel,
     		'searchStartTime' => empty($searchStartTime) ? 0 : strtotime($searchStartTime),
     		'searchEndTime'   => empty($searchEndTime) ? 0 : strtotime($searchEndTime) + 86399,
     	);
