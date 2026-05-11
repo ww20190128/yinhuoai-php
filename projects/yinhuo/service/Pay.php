@@ -405,7 +405,7 @@ class Pay extends ServiceBase
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 			
 			
-			print_r($response);exit;
+			print_r($response);
 		} catch (\Exception $e) {
 			
 			print_r($e);
