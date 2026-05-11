@@ -378,11 +378,20 @@ class User extends ServiceBase
     		$tmpUserId = $projectIds[$projectClipEtt->projectId];
     		$projectClipMap[$tmpUserId][$projectClipEtt->id] = $projectClipEtt->mediaURL;
     	}
+    	// 获取分销下线
+    	$subUserMap = array();
+    	$where = "`parentUserId` in (" . implode(',', $userIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
+    	$subUserEttList = $userDao->readListByWhere($where);
+    	if (!empty($subUserEttList)) foreach ($subUserEttList as $subUserEtt) {
+    		$subUserMap[$subUserEtt->parentUserId][$subUserEtt->userId] = $subUserEtt->userName;
+    	}
     	
     	foreach ($userModels as $userId => $userModel) {
     		$userModel['projectNum'] = empty($projectMap[$userId]) ? 0 : count($projectMap[$userId]);
     		$userModel['templateNum'] = empty($templateMap[$userId]) ? 0 : count($templateMap[$userId]);
     		$userModel['projectClipNum'] = empty($projectClipMap[$userId]) ? 0 : count($projectClipMap[$userId]);
+    		
+    		$userModel['subUserNum'] = empty($subUserMap[$userId]) ? 0 : count($subUserMap[$userId]);
     		$userModels[$userId] = $userModel;
     	}
     
