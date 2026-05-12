@@ -42,10 +42,13 @@ class ProfitSharing extends DaoBase
     	$deleteStatus = \constant\Common::DATA_DELETE;
     	// 根据标签id搜索
     	$whereArr = array(
-    			"`status` != {$deleteStatus}"
+    		"`status` != {$deleteStatus}"
     	);
     	if (!empty($info['searchStatus'])) {
     		$whereArr[] = " `status` = {$info['searchStatus']}";
+    	}
+    	if (!empty($info['searchUserId'])) {
+    		$whereArr[] = " `userId` = {$info['searchUserId']}";
     	}
     	// 开始时间
     	if (!empty($info['searchStartTime'])) {
@@ -60,7 +63,7 @@ class ProfitSharing extends DaoBase
     	$mainTable = $this->mainTable;
     	 
     	$sql = "SELECT {$fieldStr} FROM `{$mainTable}` where {$where}
-    	ORDER BY `createTime` DESC
+    		ORDER BY `createTime` DESC
     	";
     	if ($pageNum > 0) {
     	$startLimit = ($pageNum - 1) * $limitNum;

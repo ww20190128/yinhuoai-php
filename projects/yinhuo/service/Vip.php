@@ -42,7 +42,7 @@ class Vip extends ServiceBase
         $modelList = array();
         if (is_iteratable($vipConfigEttList)) foreach ($vipConfigEttList as $vipConfigEtt) {
             $model = $vipConfigEtt->getModel();
-            $model['offerld'] =  1450532043;
+            $model['offerId'] =  1450532043;
             $model['productld'] =  'vip_t';
             $model['goodsPrice'] =  0.1;
             $modelList[$model['id']] = $model;

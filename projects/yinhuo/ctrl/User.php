@@ -133,5 +133,20 @@ class User extends CtrlBase
     	$userSv = \service\User::singleton();
     	return $userSv->getUserList($this->userId, $info, $pageNum, $pageLimit);
     }
+
+    /**
+     * 获取返利订单列表
+     *
+     * @return array
+     */
+    public function getProfitSharingList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$userSv = \service\User::singleton();
+    	return $userSv->getProfitSharingList($this->userId);
+    }
     
 }

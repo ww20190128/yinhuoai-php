@@ -427,4 +427,81 @@ class User extends ServiceBase
     	);
     }
     
+    /**
+     * 获取返利列表
+     *
+     * @return array
+     */
+    public function getProfitSharingList($userId)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('账号不存在');
+    	}
+    	$info = array(
+    		'searchUserId' => $userId,
+    		'searchStatus' => 1,
+    	);
+    	$profitSharingDao = \dao\ProfitSharing::singleton();
+    	$dataList = $profitSharingDao->getList($info, 1, 9999);
+    	$userIds = array_column($dataList, 'userId');
+    	$parentUserIds = array_column($dataList, 'parentUserId');
+    	$profitSharingUserIds = array_column($dataList, 'userId');
+    	$orderIds = array_column($dataList, 'orderId');
+    	$fromUserIds = array_column($dataList, 'fromUserId');
+    	$orderDao = \dao\Order::singleton();
+    	$orderEttList = $orderDao->readListByPrimary($orderIds);
+    	$orderEttList = $orderDao->refactorListByKey($orderEttList);
+    	$userSv = \service\User::singleton();
+    	$userModels = $userSv->getUserModels(array_merge($fromUserIds, $parentUserIds, $profitSharingUserIds, $userIds));
+    
+    	$models = array();
+    	foreach ($dataList as $profitSharingEtt) {
+    		$orderEtt = empty($orderEttList[$profitSharingEtt->orderId]) ? array() : $orderEttList[$profitSharingEtt->orderId];
+    		$orderInfo = array();
+    		$topLevel = 1;
+    		if (!empty($orderEtt)) {
+    			$orderInfo = array(
+    				'id' => intval($orderEtt->id),
+    				'outTradeNo' => $orderEtt->outTradeNo,
+    				'status' => intval($orderEtt->status),
+    				'userId' => intval($orderEtt->userId),
+    				'price' => $orderEtt->price,
+    				'updateTime' => intval($orderEtt->updateTime),
+    				'createTime' => intval($orderEtt->createTime),
+    				'userInfo' => empty($userModels[$orderEtt->userId]) ? array() : $userModels[$orderEtt->userId],
+    			);
+    			if (!empty($orderInfo['userInfo']) && $orderInfo['userInfo']['parentUserId'] != $profitSharingEtt->userId) {
+    				$topLevel = 2;
+    			}
+    		}
+    		$models[] = array(
+    			'id' => intval($profitSharingEtt->id),
+    			'receiverAddOpenId' => $profitSharingEtt->receiverAddOpenId,
+    			'currentGold' => intval($profitSharingEtt->currentGold),
+    			'orderId' => intval($profitSharingEtt->orderId),
+    			'outTradeNo' => empty($orderInfo['outTradeNo']) ? '' : $orderInfo['outTradeNo'],
+    			'orderInfo' => $orderInfo,
+    			'addGold' => intval($profitSharingEtt->addGold),
+    			'status' => intval($profitSharingEtt->status),
+    			'parentUserId' => intval($profitSharingEtt->parentUserId),
+    			'topLevel' => $topLevel,
+    			'userId' => intval($profitSharingEtt->userId),
+    			'fromUserId' => intval($profitSharingEtt->fromUserId),
+    			'updateTime' => intval($profitSharingEtt->updateTime),
+    			'createTime' => intval($profitSharingEtt->createTime),
+    			'userInfo' => empty($userModels[$profitSharingEtt->userId]) ? array() : $userModels[$profitSharingEtt->userId],
+    			'fromUserInfo' => empty($userModels[$profitSharingEtt->fromUserId]) ? array() : $userModels[$profitSharingEtt->fromUserId],
+    			'parentUserInfo' => empty($userModels[$profitSharingEtt->parentUserId]) ? array() : $userModels[$profitSharingEtt->parentUserId],
+    		);
+    	}
+    	// 获取查询总数
+    	$totalNum = $profitSharingDao->getList($info, -1);
+    	return array(
+    		'list'     => array_values($models),
+    		'totalNum' => $totalNum,
+    	);
+    	
+    }
 }
