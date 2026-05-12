@@ -69,7 +69,7 @@ class Task extends CtrlBase
     	if (!empty($title)) {
     		$info['title'] = $title;
     	}
-    	$detail = $this->paramFilter('detail', 'string');
+    	$detail = $this->paramFilter('contentHtml', 'string');
     	if (!empty($detail)) {
     		$info['detail'] = $detail;
     	}
@@ -123,7 +123,7 @@ class Task extends CtrlBase
     	} else {
     		throw new $this->exception('请编辑标题');
     	}
-    	$detail = $this->paramFilter('detail', 'string');
+    	$detail = $this->paramFilter('contentHtml', 'string');
     	if (!empty($detail)) {
     		$info['detail'] = $detail;
     	} else {
