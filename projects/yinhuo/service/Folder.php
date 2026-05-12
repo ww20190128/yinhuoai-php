@@ -197,7 +197,7 @@ class Folder extends ServiceBase
     
     	$extension = $fileInfo['extension'];
     	$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
-    	$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
+    	$profileKey = "resources/image/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
     	//$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
     	$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     	if (empty($ossResult)) {
