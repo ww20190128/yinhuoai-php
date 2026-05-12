@@ -263,6 +263,28 @@ class Folder extends ServiceBase
     }
     
     /**
+     * 上传文件
+     *
+     * @return array
+     */
+    public function getUrlByContent($content, $fileName)
+    {
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
+    	if (empty($content) || strlen($content) <= 0) {
+    		return '';
+    	}
+    	$extension = 'jpg';
+    	$profileKey = "resources/other/{$fileName}.{$extension}"; // 上传的目录
+    	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		return '';
+    	}
+    	return trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    }
+    
+    /**
      * 创建音频
      *
      * @return array
