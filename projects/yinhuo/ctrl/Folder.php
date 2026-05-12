@@ -192,4 +192,40 @@ class Folder extends CtrlBase
 		return $info;
 	}
 	
+	/**
+	 * 上传图片
+	 * 
+	 * @return array
+	 */
+	public function uploadImg()
+	{
+		$params = $this->params;
+		$folderSv = \service\Folder::singleton();
+		$uploadFiles = array();
+		$files = empty($_FILES) ? array() : $_FILES; // 上传的图片信息
+
+		if (!empty($files)) foreach ($files as $file) {
+			$fileInfo = pathinfo($file['name']);
+			$fileTmp = '/tmp/' .  $file['name'];
+			$tries = 5;
+			do {
+				move_uploaded_file($file['tmp_name'], $fileTmp);
+			} while (!file_exists($fileTmp) && --$tries > 0);
+			if (!file_exists($fileTmp)) {
+				throw new $this->exception('文件上传失败');
+			}
+			$pictureFile = '';
+			@copy($fileTmp, '/data/www/yinhuo-static/' . $file['name']);
+			$uploadFile = array(
+				'extension' => $fileInfo['extension'],
+				'file' 		=> $fileTmp,
+				'name' 		=> $file['name'],
+			);
+			$url = $folderSv->uploadFile($uploadFile);
+			return array(
+				'url' => $url,
+			);
+		}
+		return ;
+	}
 }

@@ -125,26 +125,6 @@ class Task extends CtrlBase
     	}
     	$detail = $this->paramFilter('detail', 'string');
     	if (!empty($detail)) {
-    		$folderSv = \service\Folder::singleton();
-    		// 处理图片
-    		preg_match_all('/src="(data:image\/[^;]+;base64,[^"]+)"/i', $detail, $matches);
-    		if (!empty($matches['1'])) {
-    			foreach ($matches['1'] as $oldSrc) {
-    				// 只处理 base64 图片
-    				if (strpos($oldSrc, 'data:image') !== 0) {
-    					continue;
-    				}
-        			$base64 = substr($oldSrc, strpos($oldSrc, ',') + 1);
-    				$imageContent = base64_decode($base64);
-    				if (empty($imageContent)) {
-    					continue;
-    				}
-    				$imgUrl = $folderSv->getUrlByContent($imageContent, uniqid('img_') . rand(1, 99999));
-    				if (!empty($newUrl)) {
-    					$detail = str_replace($oldSrc, $newUrl, $detail);
-    				}
-    			}
-    		}
     		$info['detail'] = $detail;
     	} else {
     		throw new $this->exception('请编辑详情');
@@ -169,9 +149,9 @@ class Task extends CtrlBase
     		if (is_iteratable($files)) foreach ($files as $key => $file) {
     			$fileInfo = pathinfo($file['name']);
     			$uploadFile = array(
-    					'extension' => $fileInfo['extension'],
-    					'file' 		=> $file["tmp_name"],
-    					'name' 		=> $file["name"],
+    				'extension' => $fileInfo['extension'],
+    				'file' 		=> $file["tmp_name"],
+    				'name' 		=> $file["name"],
     			);
     		}
     	}

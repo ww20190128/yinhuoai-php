@@ -183,6 +183,34 @@ class Folder extends ServiceBase
      *
      * @return array
      */
+    public function uploadFile($uploadFile)
+    {
+    	$now = $this->frame->now;
+    	$ossSv = \service\reuse\OSS::singleton();
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
+    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET'], true);
+    	$file = $uploadFile['file']; // 文件内容
+    	$fileSize = filesize($file); // 文件大小
+    	$fileInfo = pathInfo($file);
+    	$fileName = md5(implode('', file($file)));
+    	$content = @file_get_contents($file);
+    
+    	$extension = $fileInfo['extension'];
+    	$subFolder = (ord(substr($fileName, 0, 1)) + ord(substr($fileName, 1, 1))) % 8;
+    	$profileKey = "resources/{$folderEtt->type}/{$subFolder}/{$fileName}.{$extension}"; // 上传的目录
+    	//$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    	if (empty($ossResult)) {
+    		return false;
+    	}
+    	return trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
+    }
+    
+    /**
+     * 文件夹上传素材
+     *
+     * @return array
+     */
     public function uploadMedias($userId, $id, $uploadFiles)
     {
     	$userDao = \dao\User::singleton();
@@ -254,28 +282,6 @@ class Folder extends ServiceBase
     	if (empty($content) || strlen($content) <= 0) {
     		return '';
     	}
-    	$profileKey = "resources/other/{$fileName}.{$extension}"; // 上传的目录
-    	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
-    	if (empty($ossResult)) {
-    		return '';
-    	}
-    	return trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-    }
-    
-    /**
-     * 上传文件
-     *
-     * @return array
-     */
-    public function getUrlByContent($content, $fileName)
-    {
-    	$ossSv = \service\reuse\OSS::singleton();
-    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
-    	$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
-    	if (empty($content) || strlen($content) <= 0) {
-    		return '';
-    	}
-    	$extension = 'jpg';
     	$profileKey = "resources/other/{$fileName}.{$extension}"; // 上传的目录
     	$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
     	if (empty($ossResult)) {
