@@ -300,7 +300,6 @@ class Pay extends ServiceBase
 $uri = '/xpay/query_order';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
 		$paySig = self::getVirtualPaySig($signData, $weChatConf['appKey'], $uri);
-		// 用户态签名, 详见$sessionKey
 		$signature = self::getVirtualSignature($signData, $sessionKey);
 		return array(
 			'signData' => $signData,

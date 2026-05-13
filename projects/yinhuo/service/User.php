@@ -435,7 +435,7 @@ class User extends ServiceBase
     }
     
     /**
-     * 获取返利列表
+     * 获取用户的等级，返利关系
      *
      * @return array
      */
@@ -446,6 +446,16 @@ class User extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('账号不存在');
     	}
+    	// 获取分销下线
+    	$subUserMap = array();
+    	$where = "`parentUserId` = {$userId} and `status` != " . \constant\Common::DATA_DELETE;
+    	$subUserEttList = $userDao->readListByWhere($where);
+    	if (!empty($subUserEttList)) foreach ($subUserEttList as $subUserEtt) {
+    		$subUserMap[$subUserEtt->parentUserId][$subUserEtt->userId] = $subUserEtt->userName;
+    	}
+    	 
+    	
+    	
     	$info = array(
     		'searchUserId' => $userId,
     		'searchStatus' => 1,
