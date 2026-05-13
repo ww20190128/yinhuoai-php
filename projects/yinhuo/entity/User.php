@@ -184,6 +184,13 @@ class User extends ModelBase
      * @var int
      */
     public $commissionRate = 30;
+
+    /**
+     * 支付token
+     *
+     * @var int
+     */
+    public $accessToken = '';
     
     /**
      * 快手-授权

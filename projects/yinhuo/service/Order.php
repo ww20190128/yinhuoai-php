@@ -508,4 +508,44 @@ class Order extends ServiceBase
     	}
     	echo "执行完成";
     }
+    
+    /**
+     * 查询创建的订单
+     *
+     * @return array
+     */
+    public function xpayQueryOrder($userId, $info = array())
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$accessTokenArr = empty($userEtt->accessToken) ? array() : json_decode($userEtt->accessToken, true);
+    	$now = $this->frame->now;
+    	$accessToken = '';
+    	if (!empty($accessTokenArr['access_token']) && $now - $accessTokenArr['createTime'] <= $accessTokenArr['expires_in']) {
+    		$accessToken = $accessTokenArr['access_token'];
+    	} else {
+    		$weChat = empty($this->frame->conf['weChat']) ? array() : $this->frame->conf['weChat'];
+    		if (empty($weChat)) {
+    			throw new $this->exception('获取微信配置失败！');
+    		}
+    		$appId = $weChat['appId'];
+    		$appSecret = $weChat['appSecret'];
+    		$url = "https://api.weixin.qq.com/cgi-bin/token?appid={$appId}&secret={$appSecret}&grant_type=client_credential";
+    		$response = httpGetContents($url);
+    		$response = empty($response) ? array() : json_decode($response, true);
+    		if (empty($response['access_token'])) {
+    			throw new $this->exception("获取access_token失败！");
+    		}
+    		$response['createTime'] = $now;
+    		$userEtt->set('accessToken', json_encode($response));
+    		$userDao->update($userEtt);
+    		$accessToken = $response['access_token'];
+    	}
+    	$info['accessToken'] = $accessToken;
+    	$paySv = \service\Pay::singleton();
+    	$paySv->xpayQueryOrder($userEtt, $info);
+    }
 }

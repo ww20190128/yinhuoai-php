@@ -264,13 +264,33 @@ $uri = 'requestVirtualPayment';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
 		$paySig = bin2hex(hash_hmac('sha256', $uri . '&' . $signDataStr, $weChatConf['appKey'], true));
 		$signature = bin2hex(hash_hmac('sha256', $signDataStr, $sessionKey, true));
-		return array(
+		$result = array(
 			'signData' => $signData,
 			'mode' => $mode,
 			'paySig' => $paySig,
 			'signature' => $signature,
 			'sessionKey' => $sessionKey,
 			'signDataStr' => $signDataStr,
+		);
+		return $result;
+	}
+	
+	/**
+	 * 查询创建的订单
+	 *
+	 * @return array
+	 */
+	public function xpayQueryOrder($info)
+	{
+		$PAY_SIG = '';
+		
+		$url = "https://api.weixin.qq.com/xpay/query_order?access_token={$info['accessToken']}&pay_sig=PAY_SIG";
+		$pay_sig = '';
+		$data = array(
+			'openid' => $userEtt->openid,
+			'env' => $info['env'],
+				'order_id' => $info['order_id'],
+				'wx_order_id' => $info['wx_order_id'],
 		);
 	}
 	
@@ -313,6 +333,9 @@ $uri = 'requestVirtualPayment';
 //$prepayId = 'wx13142238646189f86b2285607b13f10001';
 		// 获取sign
 		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data, $userEtt->session_key);
+		$tradeInfo = empty($orderEtt->tradeInfo) ? $result : json_decode($orderEtt->tradeInfo, true);
+		$tradeInfo = array_merge($tradeInfo, $result);
+		$orderEtt->set('tradeInfo', json_encode($tradeInfo));
 		return $result;
 	}
 

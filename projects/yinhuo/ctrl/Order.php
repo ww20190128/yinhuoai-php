@@ -56,16 +56,16 @@ class Order extends CtrlBase
     }
     
     /**
-     * vip订单支付
+     * 查询创建的订单
      *
      * @return array
      */
-    public function test()
+    public function xpayQueryOrder()
     {
-    	echo "x";exit;
-
-    	$paySv = \service\Pay::singleton();
-    	return $paySv->xpayQueryOrder();
+    	$params = $this->params;
+    	$userId = empty($this->userId) ? 0 : $this->userId;
+    	$orderSv = \service\Order::singleton();
+    	return $orderSv->xpayQueryOrder($userId);
     }
    
     /**
