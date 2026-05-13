@@ -279,7 +279,7 @@ class Pay extends ServiceBase
 	 *
 	 * @return array
 	 */
-	private function getPaySignVirtual($weChatConf, $prepayId, $data)
+	private function getPaySignVirtual($weChatConf, $prepayId, $data, $sessionKey)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
 		$buyQuantity = ($data['amount']['total'] * 0.01) / $weChatConf['goodsPrice']; // 购买数量
@@ -301,7 +301,6 @@ $uri = '/xpay/query_order';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
 		$paySig = self::getVirtualPaySig($signData, $weChatConf['appKey'], $uri);
 		// 用户态签名, 详见$sessionKey
-$sessionKey = '';
 		$signature = self::getVirtualSignature($signData, $sessionKey);
 		return array(
 			'signData' => $signData,
@@ -349,7 +348,7 @@ $sessionKey = '';
 		}
 //$prepayId = 'wx13142238646189f86b2285607b13f10001';
 		// 获取sign
-		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data);
+		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data, $userEtt->session_key);
 		return $result;
 	}
 

@@ -72,6 +72,7 @@ class User extends ServiceBase
     	if (empty($userEtt)) { // 写入用户信息
     	    $userEtt = $userDao->getNewEntity();
     	    $userEtt->openid = $openid;
+    	    $userEtt->session_key = $session_key;
     	    $userEtt->userName = $userName;
     	    $userEtt->headImgUrl = $headImgUrl;
     	    $userEtt->sex = $sex;
@@ -89,6 +90,12 @@ class User extends ServiceBase
 //     	    $userEtt->set('userName', $userName);
 //     	    $userEtt->set('headImgUrl', $headImgUrl);
     	    $userEtt->set('sex', $sex);
+    	    if (!empty($openid)) {
+    	    	$userEtt->set('openid', $openid);
+    	    }
+    	    if (!empty($session_key)) {
+    	    	$userEtt->set('session_key', $session_key);
+    	    }
     	    $userEtt->set('language', $language);
     	    $userEtt->set('country', $country);
     	    $userEtt->set('province', $province);
