@@ -95,6 +95,11 @@ $conf = array(
 		// 		'APIv2Key' => 'J3XbRCLj6hKh3c3ieZiB92QtLeZwgZYE', // 商户APIv2密钥
 		'RSA' => '1B84A18252BFC94060DF9B551587288FC432AC84', // 平台证书
 		'APIv3Key' => '3UCb52tx4RMNhUQfAFXAqgHNNUV7ViV3', // APIv3密钥
+			// 虚拟支付相关
+			'offerId' => 1450532043,
+			'productId' => 'vip_t',
+			'goodsPrice' => 0.1, // 道具单价(元)
+			'appKey' => 'tUqCmiByFWslXwBP6QBFf9HUtXM5Ahg1', // 沙箱AppKey：
 	),
 	// php CertificateDownloader.php -k F8F194CD3157F2330AE2D48DA6262514 -m 1708405300 -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s 407D6C1B24DBF31F53D46E20B4C76C38117C196D -o /data/www/mood-php/Configs/xince/
 	

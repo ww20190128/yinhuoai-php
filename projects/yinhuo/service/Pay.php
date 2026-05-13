@@ -335,18 +335,18 @@ $sessionKey = '';
 				'profit_sharing' => true,
 			);
 		}
-// 		try {
-// 			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
-// 			$response = empty($response) ? '' : $response->getBody()->getContents();
-// 		} catch (\Exception $e) {
-// 			return false;
-// 		}
+		try {
+			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
+			$response = empty($response) ? '' : $response->getBody()->getContents();
+		} catch (\Exception $e) {
+			return false;
+		}
 
-// 		$response = empty($response) ? '' : json_decode($response, true);
-// 		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
-// 		if (empty($prepayId)) {
-// 			return false;
-// 		}
+		$response = empty($response) ? '' : json_decode($response, true);
+		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
+		if (empty($prepayId)) {
+			return false;
+		}
 //$prepayId = 'wx13142238646189f86b2285607b13f10001';
 		// 获取sign
 		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data);
