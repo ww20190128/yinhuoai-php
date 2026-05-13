@@ -319,12 +319,14 @@ $uri = '/xpay/query_user_balance';
 		curl_close($response);
 		$response = json_decode($response, true);
 		$order = empty($response['order']) ? array() : $response['order'];
-		
 		$tradeInfo = array_merge($order, $tradeInfo);
 		$orderEtt->set('tradeInfo', json_encode($tradeInfo));
 		$orderDao = \dao\Order::singleton();
 		$orderDao->update($orderEtt);
-		return $order;
+		if (empty($order['status']) || !in_array($order['status'], array(2,3,4))) {
+			return false;
+		}
+		return $tradeInfo;
 	}
 	
 	/**

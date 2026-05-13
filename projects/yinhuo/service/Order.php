@@ -555,7 +555,12 @@ class Order extends ServiceBase
     	}
     	$info['accessToken'] = $accessToken;
     	$paySv = \service\Pay::singleton();
-    	return $paySv->xpayQueryOrder($userEtt, $orderEtt);
+    	$payResult = $paySv->xpayQueryOrder($userEtt, $orderEtt);
+		if (!empty($payResult)) {
+			// 完结订单
+			$this->finishOrder($orderEtt, $payResult, \constant\Order::PAY_STATUS_COMPLETE);
+		}
+    	return $payResult;
     }
     
 }
