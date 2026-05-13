@@ -227,52 +227,7 @@ class Pay extends ServiceBase
 		), 'signType' => 'RSA'];
 		return $params;
 	}
-	
-	/**
-	 * 微信虚拟支付 获取 paySig(虚拟支付)
-	 * 算法：to_hex(hmac_sha256(appKey, uri + '&' + signData))
-	 * @param array $signData 签名字段数组（会自动按 key=value 拼接并排序）
-	 * @param string $appKey 平台密钥 appKey
-	 * @param string $uri 请求接口 URI 如 /xpay/get_prepay_id
-	 * @return string paySig 最终签名
-	 */
-	private function getVirtualPaySig($signData, $appKey, $uri)
-	{
-		// 1. 参数按 key 字典序升序排序
-		ksort($signData);
-		// 2. 拼接成 key1=value1&key2=value2 格式
-		$signStr = '';
-		foreach ($signData as $key => $value) {
-			$signStr .= $key . '=' . $value . '&';
-		}
-		$signStr = rtrim($signStr, '&');
-		// 3. 拼接原文：uri + & + 签名字符串
-		$rawStr = $uri . '&' . $signStr;
-		// 4. hmac_sha256 加密
-		$hmac = hash_hmac('sha256', $rawStr, $appKey, true);
-		// 5. 转 16 进制小写（微信要求）
-		$paySig = bin2hex($hmac);
-		return $paySig;
-	}
-	
-	/**
-	 * 微信虚拟支付 获取 paySig(虚拟支付)
-	 * 
-	 * @return string
-	 */
-	private function getVirtualSignature($signData, $sessionKey)
-	{
-		ksort($signData);
-		$signStr = '';
-		foreach ($signData as $key => $value) {
-			$signStr .= $key . '=' . $value . '&';
-		}
-		$signStr = rtrim($signStr, '&');
-		$hmac = hash_hmac('sha256', $signStr, $sessionKey, true);
-		$signature = bin2hex($hmac);
-		return $signature;
-	}
-	
+
 	/**
 	 * 生成支付签名(虚拟支付)
 	 *
@@ -297,16 +252,24 @@ class Pay extends ServiceBase
 			'outTradeNo' => $data['out_trade_no'],
 			'attach' => 'testdata',
 		);
-$uri = '/xpay/query_order';
+// 		$signDataArr = '';
+// 		foreach ($signData as $key => $value) {
+// 			$signDataArr[]  = $key . '=' . $value;
+// 		}
+// 		$signDataStr = implode('&', $signDataArr);
+		$signDataStr = json_encode($signData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+$uri = '/xpay/query_user_balance';
+$uri = 'requestVirtualPayment';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
-		$paySig = self::getVirtualPaySig($signData, $weChatConf['appKey'], $uri);
-		$signature = self::getVirtualSignature($signData, $sessionKey);
+		$paySig = bin2hex(hash_hmac('sha256', $uri . '&' . $signDataStr, $weChatConf['appKey'], true));
+		$signature = bin2hex(hash_hmac('sha256', $signDataStr, $sessionKey, true));
 		return array(
 			'signData' => $signData,
 			'mode' => $mode,
 			'paySig' => $paySig,
 			'signature' => $signature,
 			'sessionKey' => $sessionKey,
+			'signDataStr' => $signDataStr,
 		);
 	}
 	

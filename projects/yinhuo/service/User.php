@@ -447,12 +447,11 @@ class User extends ServiceBase
     		throw new $this->exception('账号不存在');
     	}
     	// 获取分销下线
-    	$subUserMap = array();
     	$where = "`parentUserId` = {$userId} and `status` != " . \constant\Common::DATA_DELETE;
     	$subUserEttList = $userDao->readListByWhere($where);
-    	$subUserIds = array_column($subUserEttList, 'userId');
     	// 分销下线线
-    	if (!empty($subUserIds)) {
+    	if (!empty($subUserEttList)) {
+    		$subUserIds = array_column($subUserEttList, 'userId');
     		$where = "`parentUserId` in (" . implode(',', $subUserIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
     		$subUserEttList2 = $userDao->readListByWhere($where);
     	}
