@@ -181,6 +181,8 @@ class User extends CtrlBase
     	if (empty($parentUserId)) {
     		throw new $this->exception('请求参数错误');
     	}
+    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
     	$userSv = \service\User::singleton();
     	return $userSv->getUserSubList($this->userId, $parentUserId, $pageNum, $pageLimit);
     }
