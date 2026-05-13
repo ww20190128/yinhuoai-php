@@ -39,12 +39,14 @@ class Vip extends ServiceBase
         $vipConfigEttList = $vipConfigDao->readListByIndex(array(
             'status' => 0,
         ));
+        $weChatConf = $this->frame->conf['weChat'];
         $modelList = array();
         if (is_iteratable($vipConfigEttList)) foreach ($vipConfigEttList as $vipConfigEtt) {
             $model = $vipConfigEtt->getModel();
-            $model['offerId'] =  1450532043;
-            $model['productId'] =  'vip_t';
-            $model['goodsPrice'] =  0.1;
+            $model['offerId'] =  $weChatConf['offerId'];
+            $model['productId'] =  $weChatConf['productId'];
+            $model['goodsPrice'] =  intval($weChatConf['goodsPrice'] * 100); // 道具单价(分)
+            $model['activitySellingPrice'] =  intval($weChatConf['goodsPrice'] * 100); // 道具单价(分)
             $modelList[$model['id']] = $model;
         }
         return $modelList;

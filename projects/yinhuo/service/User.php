@@ -450,8 +450,12 @@ class User extends ServiceBase
     	$subUserMap = array();
     	$where = "`parentUserId` = {$userId} and `status` != " . \constant\Common::DATA_DELETE;
     	$subUserEttList = $userDao->readListByWhere($where);
+    	$subUserIds = array_column($subUserEttList, 'userId');
+    	
+    	print_r($subUserIds);exit;
+    	
     	if (!empty($subUserEttList)) foreach ($subUserEttList as $subUserEtt) {
-    		$subUserMap[$subUserEtt->parentUserId][$subUserEtt->userId] = $subUserEtt->userName;
+    		$subUserMap[$subUserEtt->userId] = $subUserEtt->userName;
     	}
     	 
     	
