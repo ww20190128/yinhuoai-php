@@ -516,7 +516,7 @@ $uri = '/xpay/query_user_balance';
 			print_r($response);exit;
 		} catch (\Exception $e) {
 			
-			
+			print_r($e);exit;
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
