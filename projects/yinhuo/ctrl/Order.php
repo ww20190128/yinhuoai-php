@@ -64,8 +64,12 @@ class Order extends CtrlBase
     {
     	$params = $this->params;
     	$userId = empty($this->userId) ? 0 : $this->userId;
+    	$orderId = $this->paramFilter('orderId', 'intval'); // 订单Id
+    	if (empty($orderId)) {
+    		throw new $this->exception('请求参数错误');
+    	}
     	$orderSv = \service\Order::singleton();
-    	return $orderSv->xpayQueryOrder($userId);
+    	return $orderSv->xpayQueryOrder($userId, $orderId);
     }
    
     /**

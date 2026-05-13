@@ -260,7 +260,7 @@ class Pay extends ServiceBase
 		ksort($signData);
 		$signDataStr = json_encode($signData, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
 $uri = '/xpay/query_user_balance';
-$uri = 'requestVirtualPayment';
+		$uri = 'requestVirtualPayment';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
 		$paySig = bin2hex(hash_hmac('sha256', $uri . '&' . $signDataStr, $weChatConf['appKey'], true));
 		$signature = bin2hex(hash_hmac('sha256', $signDataStr, $sessionKey, true));
@@ -269,8 +269,8 @@ $uri = 'requestVirtualPayment';
 			'mode' => $mode,
 			'paySig' => $paySig,
 			'signature' => $signature,
-			'sessionKey' => $sessionKey,
-			'signDataStr' => $signDataStr,
+			//'sessionKey' => $sessionKey,
+			//'signDataStr' => $signDataStr,
 		);
 		return $result;
 	}
@@ -280,18 +280,51 @@ $uri = 'requestVirtualPayment';
 	 *
 	 * @return array
 	 */
-	public function xpayQueryOrder($info)
+	public function xpayQueryOrder($userEtt, $orderEtt)
 	{
-		$PAY_SIG = '';
-		
-		$url = "https://api.weixin.qq.com/xpay/query_order?access_token={$info['accessToken']}&pay_sig=PAY_SIG";
-		$pay_sig = '';
+		$weChatConf = $this->frame->conf['weChat'];
+		$accessTokenArr = empty($userEtt->accessToken) ? array() : json_decode($userEtt->accessToken, true);
+		$accessToken = $accessTokenArr['access_token'];
+		$tradeInfo = empty($orderEtt->tradeInfo) ? $result : json_decode($orderEtt->tradeInfo, true);
+		$signData = $tradeInfo['signData'];
 		$data = array(
 			'openid' => $userEtt->openid,
-			'env' => $info['env'],
-				'order_id' => $info['order_id'],
-				'wx_order_id' => $info['wx_order_id'],
+			'env' => $tradeInfo['signData']['env'],
+			'order_id' => $tradeInfo['signData']['outTradeNo'],
 		);
+		$apiPath = '/xpay/query_order';
+		$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
+		
+		// 生成 pay_sig 签名
+		$signMessage = $apiPath . '&' . $postBody;
+    	$paySig = hash_hmac('sha256', $signMessage, $weChatConf['appKey']);
+		
+		// 完整请求URL
+		$url = 'https://api.weixin.qq.com' . $apiPath . '?access_token=' . $accessToken . '&pay_sig=' . $paySig;
+
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+		CURLOPT_URL            => $url,
+		CURLOPT_POST           => true,
+		CURLOPT_POSTFIELDS     => $postBody,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_HTTPHEADER     => [
+			'Content-Type: application/json; charset=utf-8',
+		],
+		CURLOPT_TIMEOUT        => 30,
+		]);
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curlErr  = curl_error($ch);
+		curl_close($response);
+		$response = json_decode($response, true);
+		$order = empty($response['order']) ? array() : $response['order'];
+		
+		$tradeInfo = array_merge($order, $tradeInfo);
+		$orderEtt->set('tradeInfo', json_encode($tradeInfo));
+		$orderDao = \dao\Order::singleton();
+		$orderDao->update($orderEtt);
+		return $order;
 	}
 	
 	/**

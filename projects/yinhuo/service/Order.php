@@ -514,8 +514,17 @@ class Order extends ServiceBase
      *
      * @return array
      */
-    public function xpayQueryOrder($userId, $info = array())
+    public function xpayQueryOrder($userId, $orderId)
     {
+    	$orderDao = \dao\Order::singleton();
+    	$orderEtt = $orderDao->readByPrimary($orderId);
+    	$now = $this->frame->now;
+    	if (empty($orderEtt) || $orderEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('订单已删除，请重新下单！');
+    	}
+    	if ($orderEtt->goodsType != \constant\Order::TYPE_GOODS_VIP) {
+    		throw new $this->exception('订单类型错误');
+    	}
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
@@ -546,6 +555,7 @@ class Order extends ServiceBase
     	}
     	$info['accessToken'] = $accessToken;
     	$paySv = \service\Pay::singleton();
-    	$paySv->xpayQueryOrder($userEtt, $info);
+    	return $paySv->xpayQueryOrder($userEtt, $orderEtt);
     }
+    
 }
