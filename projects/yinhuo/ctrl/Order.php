@@ -54,6 +54,19 @@ class Order extends CtrlBase
     	$orderSv = \service\Order::singleton();
     	return $orderSv->vipOrderPay($userId, $orderId, $couponId);
     }
+    
+    /**
+     * vip订单支付
+     *
+     * @return array
+     */
+    public function test()
+    {
+    	echo "x";exit;
+
+    	$paySv = \service\Pay::singleton();
+    	return $paySv->xpayQueryOrder();
+    }
    
     /**
      * 检查vip订单是否需要支付

@@ -227,29 +227,29 @@ class Pay extends ServiceBase
 		), 'signType' => 'RSA'];
 		return $params;
 	}
-
+	
 	/**
-	 * 微信JSAPI 支付
+	 * 微信虚拟支付-订单查询
 	 *
 	 * @return array
 	 */
-	public function prepare($userEtt, $orderEtt, $description, $needProfitSharing = false)
+	public function xpayQueryOrder()
 	{
 		$weChatConf = $this->frame->conf['weChat'];
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
 		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
 		$data = array(
-			'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
-			'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
-			'appid'        => $weChatConf['appId'], // 服务商APPID
-			'description'  => $description, // 商品描述  
-			'notify_url'   => $notify_url, // 商户回调地址
-			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
-			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
+				'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
+				'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
+				'appid'        => $weChatConf['appId'], // 服务商APPID
+				'description'  => $description, // 商品描述
+				'notify_url'   => $notify_url, // 商户回调地址
+				'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
+				'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
 		);
 		if (!empty($needProfitSharing)) { // 分账
 			$data['settle_info'] = array(
-				'profit_sharing' => true,
+					'profit_sharing' => true,
 			);
 		}
 		try {
@@ -258,24 +258,23 @@ class Pay extends ServiceBase
 		} catch (\Exception $e) {
 			return false;
 		}
-    	
+		 
 		$response = empty($response) ? '' : json_decode($response, true);
-		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; // 
+		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
 		if (empty($prepayId)) {
-			return false;
+		return false;
 		}
 		// 获取sign
 		$result = $this->getPaySign($weChatConf, $prepayId);
 		return $result;
 	}
 	
-	
 	/**
 	 * 微信JSAPI 支付
 	 *
 	 * @return array
 	 */
-	public function preparebak($userEtt, $orderEtt, $description, $needProfitSharing = false)
+	public function prepare($userEtt, $orderEtt, $description, $needProfitSharing = false)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
@@ -300,11 +299,14 @@ class Pay extends ServiceBase
 		} catch (\Exception $e) {
 			return false;
 		}
+		
+		$file = CACHE_PATH . 'prepare.txt';
+		@file_put_contents($file, json_encode($response));
 		 
 		$response = empty($response) ? '' : json_decode($response, true);
 		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
 		if (empty($prepayId)) {
-		return false;
+			return false;
 		}
 		// 获取sign
 		$result = $this->getPaySign($weChatConf, $prepayId);
