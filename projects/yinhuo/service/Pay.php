@@ -257,6 +257,7 @@ class Pay extends ServiceBase
 // 			$signDataArr[]  = $key . '=' . $value;
 // 		}
 // 		$signDataStr = implode('&', $signDataArr);
+		ksort($signData);
 		$signDataStr = json_encode($signData, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
 $uri = '/xpay/query_user_balance';
 $uri = 'requestVirtualPayment';
