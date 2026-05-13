@@ -268,10 +268,9 @@ class Pay extends ServiceBase
 			$signStr .= $key . '=' . $value . '&';
 		}
 		$signStr = rtrim($signStr, '&');
-		$rawStr = $signStr;
-		$hmac = hash_hmac('sha256', $rawStr, $sessionKey, true);
-		$paySig = bin2hex($hmac);
-		return $paySig;
+		$hmac = hash_hmac('sha256', $signStr, $sessionKey, true);
+		$signature = bin2hex($hmac);
+		return $signature;
 	}
 	
 	/**
@@ -307,6 +306,7 @@ $uri = '/xpay/query_order';
 			'mode' => $mode,
 			'paySig' => $paySig,
 			'signature' => $signature,
+			'sessionKey' => $sessionKey,
 		);
 	}
 	
@@ -486,12 +486,8 @@ $uri = '/xpay/query_order';
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
-			
-			
-			print_r($response);
 		} catch (\Exception $e) {
-			
-			print_r($e);
+	
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {

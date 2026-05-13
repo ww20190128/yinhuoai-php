@@ -451,15 +451,12 @@ class User extends ServiceBase
     	$where = "`parentUserId` = {$userId} and `status` != " . \constant\Common::DATA_DELETE;
     	$subUserEttList = $userDao->readListByWhere($where);
     	$subUserIds = array_column($subUserEttList, 'userId');
-    	
-    	print_r($subUserIds);exit;
-    	
-    	if (!empty($subUserEttList)) foreach ($subUserEttList as $subUserEtt) {
-    		$subUserMap[$subUserEtt->userId] = $subUserEtt->userName;
+    	// 分销下线线
+    	if (!empty($subUserIds)) {
+    		$where = "`parentUserId` in (" . implode(',', $subUserIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
+    		$subUserEttList2 = $userDao->readListByWhere($where);
     	}
-    	 
-    	
-    	
+
     	$info = array(
     		'searchUserId' => $userId,
     		'searchStatus' => 1,
