@@ -505,6 +505,9 @@ $uri = '/xpay/query_user_balance';
 			'receivers' 		=> $receivers,
 			'unfreeze_unsplit' 	=> true,
 		);
+		
+print_r($data);exit;
+
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();

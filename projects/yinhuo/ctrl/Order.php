@@ -56,11 +56,28 @@ class Order extends CtrlBase
     }
     
     /**
-     * 查询创建的订单
+     * 查询创建的订单(微信-虚拟支付)
      *
      * @return array
      */
     public function xpayQueryOrder()
+    {
+    	$params = $this->params;
+    	$userId = empty($this->userId) ? 0 : $this->userId;
+    	$orderId = $this->paramFilter('orderId', 'intval'); // 订单Id
+    	if (empty($orderId)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$orderSv = \service\Order::singleton();
+    	return $orderSv->xpayQueryOrder($userId, $orderId);
+    }
+    
+    /**
+     * 创建提现订单(微信-虚拟支付)
+     *
+     * @return array
+     */
+    public function createWithdrawOrder()
     {
     	$params = $this->params;
     	$userId = empty($this->userId) ? 0 : $this->userId;
@@ -105,12 +122,12 @@ class Order extends CtrlBase
 // 		$bodyJson = $tmpData['body'];
 
 
-$file = CACHE_PATH . 'payNotify.txt';
-@file_put_contents($file, json_encode(array(
-    		'header' => $header,
-    		'body' => $bodyJson,
-    		'params' => $params,	
-    	)));
+// $file = CACHE_PATH . 'payNotify.txt';
+// @file_put_contents($file, json_encode(array(
+//     		'header' => $header,
+//     		'body' => $bodyJson,
+//     		'params' => $params,	
+//     	)));
 
     	
     	$body = empty($bodyJson) ? array() : json_decode($bodyJson, true);
