@@ -2017,7 +2017,7 @@ function getStaticData($dir, $fileName, $suffixName = 'php')
  */
 function processSubtitle($subtitleData)
 {
-	$punctuationChars = array('，', '。', '！', '？', '、', '；', '：', '.', '!', '?', ';', ':');
+	$punctuationChars = array('，', '。', '！', '？', '、', '；', '：', '.', '!', '?', ';', ':', " ", "\t", "\n");
 	$result = array();
 	if (!empty($subtitleData)) foreach ($subtitleData as $item) {
 		$processedItem = array();
