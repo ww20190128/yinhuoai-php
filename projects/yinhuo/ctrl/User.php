@@ -135,18 +135,54 @@ class User extends CtrlBase
     }
 
     /**
-     * 获取返利订单列表
+     * 获取返利看板
      *
      * @return array
      */
-    public function getProfitSharingList()
+    public function getUserProfitSharingInfo()
     {
     	$params = $this->params;
     	if (empty($this->userId)) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
     	$userSv = \service\User::singleton();
-    	return $userSv->getProfitSharingList($this->userId);
+    	return $userSv->getUserProfitSharingInfo($this->userId);
+    }
+    
+    /**
+     * 佣金明细
+     *
+     * @return array
+     */
+    public function getUserProfitSharingList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$pageNum = $this->paramFilter('pageNum', 'intval', 1); // 页码
+    	$pageLimit = $this->paramFilter('pageLimit', 'intval', 20); // 每页数量限制
+    	$userSv = \service\User::singleton();
+    	return $userSv->getUserProfitSharingList($this->userId, $pageNum, $pageLimit);
+    }
+    
+    /**
+     * 查看下级用户
+     *
+     * @return array
+     */
+    public function getUserSubList()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$parentUserId = $this->paramFilter('parentUserId', 'intval', 0); // 需要查看的用户Id
+    	if (empty($parentUserId)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$userSv = \service\User::singleton();
+    	return $userSv->getUserSubList($this->userId, $parentUserId, $pageNum, $pageLimit);
     }
     
 }

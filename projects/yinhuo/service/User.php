@@ -435,11 +435,11 @@ class User extends ServiceBase
     }
     
     /**
-     * 获取用户的等级，返利关系
+     * 获取用户的分销信息
      *
      * @return array
      */
-    public function getProfitSharingList($userId)
+    public function getUserProfitSharingInfo($userId)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -448,14 +448,89 @@ class User extends ServiceBase
     	}
     	// 获取分销下线
     	$where = "`parentUserId` = {$userId} and `status` != " . \constant\Common::DATA_DELETE;
-    	$subUserEttList = $userDao->readListByWhere($where);
+    	$subUserEttList1 = $userDao->readListByWhere($where);
     	// 分销下线线
-    	if (!empty($subUserEttList)) {
-    		$subUserIds = array_column($subUserEttList, 'userId');
-    		$where = "`parentUserId` in (" . implode(',', $subUserIds) . ") and `status` != " . \constant\Common::DATA_DELETE;
+    	$subUserEttList2 = array();
+    	if (!empty($subUserEttList1)) {
+    		$subUserIds1 = array_column($subUserEttList1, 'userId');
+    		$where = "`parentUserId` in (" . implode(',', $subUserIds1) . ") and `status` != " . \constant\Common::DATA_DELETE;
     		$subUserEttList2 = $userDao->readListByWhere($where);
     	}
-
+    	// 获取分账数据
+    	$profitSharingModels = $this->getProfitSharingDatas($userId);
+    	$totalAddGold = 0;
+    	$totalAddMondy = 0;
+    	foreach ($profitSharingModels as $profitSharingModel) {
+    		if ($profitSharingModel['status'] != 1) {
+    			continue;
+    		}
+    		$totalAddGold += $profitSharingModel['addGold'];
+    		$totalAddMondy += $profitSharingModel['addMondy'];
+    	}
+    	return array(
+    		'subUserNum1' => count($subUserEttList1),
+    		'subUserNum2' => count($subUserEttList2),
+    		'totalAddGold' => $totalAddGold, // 获得的火币收入
+    		'totalAddMondy' => $totalAddMondy, // 获得的人民币收入
+    	);
+    }
+    
+    /**
+     * 佣金明细
+     *
+     * @return array
+     */
+    public function getUserProfitSharingList($userId, $pageNum, $pageLimit)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('账号不存在');
+    	}
+    	// 获取分账数据
+    	$profitSharingModels = $this->getProfitSharingDatas($userId);
+    	// 分页显示
+		$dataList = array_slice($profitSharingModels, ($pageNum - 1) * $pageLimit, $pageLimit);
+    	return array(
+    		'list'     => array_values($dataList),
+    		'totalNum' => count($profitSharingModels),
+    	);
+    }
+    
+    /**
+     * 查看下级
+     *
+     * @return array
+     */
+    public function getUserSubList($userId, $parentUserId, $pageNum, $pageLimit)
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('账号不存在');
+    	}
+    	// 获取分销下线
+    	$where = "`parentUserId` = {$parentUserId} and `status` != " . \constant\Common::DATA_DELETE;
+    	$subUserEttList = $userDao->readListByWhere($where);
+    	$subUserModels = array();
+    	foreach ($subUserEttList as $subUserEtt) {
+    		$subUserModels[] = $subUserEtt->getModel();
+    	}
+    	// 分页显示
+    	$dataList = array_slice($subUserModels, ($pageNum - 1) * $pageLimit, $pageLimit);
+    	return array(
+    		'list'     => array_values($dataList),
+    		'totalNum' => count($subUserModels),
+    	);
+    }
+    
+    /**
+     * 获取用户的等级，返利关系
+     *
+     * @return array
+     */
+    private function getProfitSharingDatas($userId)
+    {
     	$info = array(
     		'searchUserId' => $userId,
     		'searchStatus' => 1,
@@ -472,7 +547,6 @@ class User extends ServiceBase
     	$orderEttList = $orderDao->refactorListByKey($orderEttList);
     	$userSv = \service\User::singleton();
     	$userModels = $userSv->getUserModels(array_merge($fromUserIds, $parentUserIds, $profitSharingUserIds, $userIds));
-    
     	$models = array();
     	foreach ($dataList as $profitSharingEtt) {
     		$orderEtt = empty($orderEttList[$profitSharingEtt->orderId]) ? array() : $orderEttList[$profitSharingEtt->orderId];
@@ -501,6 +575,7 @@ class User extends ServiceBase
     			'outTradeNo' => empty($orderInfo['outTradeNo']) ? '' : $orderInfo['outTradeNo'],
     			'orderInfo' => $orderInfo,
     			'addGold' => intval($profitSharingEtt->addGold),
+    			'addMondy' => $profitSharingEtt->addMondy,
     			'status' => intval($profitSharingEtt->status),
     			'parentUserId' => intval($profitSharingEtt->parentUserId),
     			'topLevel' => $topLevel,
@@ -514,11 +589,7 @@ class User extends ServiceBase
     		);
     	}
     	// 获取查询总数
-    	$totalNum = $profitSharingDao->getList($info, -1);
-    	return array(
-    		'list'     => array_values($models),
-    		'totalNum' => $totalNum,
-    	);
-    	
+    	return $models;
     }
+    
 }

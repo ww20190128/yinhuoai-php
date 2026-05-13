@@ -66,6 +66,14 @@ class ProfitSharing extends EntityBase
     public $currentGold = 0;
 
     /**
+     * 添加的人民币
+     *
+     * @var int
+     */
+    public $addMoney = 0.00;
+    
+    
+    /**
      * 父级
      *
      * @var int
