@@ -507,12 +507,16 @@ $uri = '/xpay/query_user_balance';
 			'unfreeze_unsplit' 	=> true,
 		);
 		
-print_r($data);exit;
+
 
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
+			
+			print_r($response);exit;
 		} catch (\Exception $e) {
+			
+			
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
