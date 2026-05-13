@@ -229,44 +229,86 @@ class Pay extends ServiceBase
 	}
 	
 	/**
-	 * 微信虚拟支付-订单查询
+	 * 微信虚拟支付 获取 paySig(虚拟支付)
+	 * 算法：to_hex(hmac_sha256(appKey, uri + '&' + signData))
+	 * @param array $signData 签名字段数组（会自动按 key=value 拼接并排序）
+	 * @param string $appKey 平台密钥 appKey
+	 * @param string $uri 请求接口 URI 如 /xpay/get_prepay_id
+	 * @return string paySig 最终签名
+	 */
+	private function getVirtualPaySig($signData, $appKey, $uri)
+	{
+		// 1. 参数按 key 字典序升序排序
+		ksort($signData);
+		// 2. 拼接成 key1=value1&key2=value2 格式
+		$signStr = '';
+		foreach ($signData as $key => $value) {
+			$signStr .= $key . '=' . $value . '&';
+		}
+		$signStr = rtrim($signStr, '&');
+		// 3. 拼接原文：uri + & + 签名字符串
+		$rawStr = $uri . '&' . $signStr;
+		// 4. hmac_sha256 加密
+		$hmac = hash_hmac('sha256', $rawStr, $appKey, true);
+		// 5. 转 16 进制小写（微信要求）
+		$paySig = bin2hex($hmac);
+		return $paySig;
+	}
+	
+	/**
+	 * 微信虚拟支付 获取 paySig(虚拟支付)
+	 * 
+	 * @return string
+	 */
+	private function getVirtualSignature($signData, $sessionKey)
+	{
+		ksort($signData);
+		$signStr = '';
+		foreach ($signData as $key => $value) {
+			$signStr .= $key . '=' . $value . '&';
+		}
+		$signStr = rtrim($signStr, '&');
+		$rawStr = $signStr;
+		$hmac = hash_hmac('sha256', $rawStr, $sessionKey, true);
+		$paySig = bin2hex($hmac);
+		return $paySig;
+	}
+	
+	/**
+	 * 生成支付签名(虚拟支付)
 	 *
 	 * @return array
 	 */
-	public function xpayQueryOrder()
+	private function getPaySignVirtual($weChatConf, $prepayId, $data)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
-		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
-		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
-		$data = array(
-				'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
-				'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
-				'appid'        => $weChatConf['appId'], // 服务商APPID
-				'description'  => $description, // 商品描述
-				'notify_url'   => $notify_url, // 商户回调地址
-				'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
-				'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
+		$buyQuantity = ($data['amount']['total'] * 0.01) / $weChatConf['goodsPrice']; // 购买数量
+
+		$serverId = self::$instance->frame->conf['id'];
+		$apiclientDir = CONFIGS_PATH . 'apiclient_' . $serverId . DS;
+		$merchantPrivateKeyInstance = Rsa::from('file://' . $apiclientDir . 'apiclient_key.pem');
+		$signData = array( // 具体支付参数见signData
+			'offerId' => $weChatConf['offerId'], // mp-支付基础配置中的offerid
+			'buyQuantity' => $buyQuantity, // 购买数量
+			'currencyType' => 'CNY', // 币种
+			'productId' => $weChatConf['productId'], // 道具ID, **该字段仅mode=short_series_goods时需要必填**
+			'goodsPrice' => intval($weChatConf['goodsPrice'] * 100), // 道具单价(分)
+			'activitySellingPrice' => intval($weChatConf['goodsPrice'] * 100), // 道具优惠价格（分），**非必填，该字段需与goodsPrice一起传入**。如用户使用优惠券、积分等，需要以低于道具价格下单时可传入，传入后该价格即为实际下单价格。
+			'outTradeNo' => $data['out_trade_no'],
+			'attach' => 'testdata',
 		);
-		if (!empty($needProfitSharing)) { // 分账
-			$data['settle_info'] = array(
-					'profit_sharing' => true,
-			);
-		}
-		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/unifiedorder')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-		} catch (\Exception $e) {
-			return false;
-		}
-		 
-		$response = empty($response) ? '' : json_decode($response, true);
-		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
-		if (empty($prepayId)) {
-		return false;
-		}
-		// 获取sign
-		$result = $this->getPaySign($weChatConf, $prepayId);
-		return $result;
+$uri = '/xpay/query_order';
+		$mode = 'short_series_goods'; // 支付的类型 道具直购
+		$paySig = self::getVirtualPaySig($signData, $weChatConf['appKey'], $uri);
+		// 用户态签名, 详见$sessionKey
+$sessionKey = '';
+		$signature = self::getVirtualSignature($signData, $sessionKey);
+		return array(
+			'signData' => $signData,
+			'mode' => $mode,
+			'paySig' => $paySig,
+			'signature' => $signature,
+		);
 	}
 	
 	/**
@@ -280,36 +322,34 @@ class Pay extends ServiceBase
 		$notify_url = $this->frame->conf['serve_url'] . '/order/payNotify';
 		$actualAmount = ceil(100 * max(0, $orderEtt->price - $orderEtt->redPacketValue));
 		$data = array(
-				'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
-				'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
-				'appid'        => $weChatConf['appId'], // 服务商APPID
-				'description'  => $description, // 商品描述
-				'notify_url'   => $notify_url, // 商户回调地址
-				'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
-				'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
+			'mchid' 	   => $weChatConf['merchantId'], // 服务商商户号  必填
+			'out_trade_no' => $orderEtt->outTradeNo, // 商户订单号
+			'appid'        => $weChatConf['appId'], // 服务商APPID
+			'description'  => $description, // 商品描述
+			'notify_url'   => $notify_url, // 商户回调地址
+			'amount' 	   => array('total' => $actualAmount, 'currency' => 'CNY'), // 订单金额
+			'payer'        => array('openid' => $userEtt->openid) // 用户在服务商appid下的唯一标识
 		);
 		if (!empty($needProfitSharing)) { // 分账
 			$data['settle_info'] = array(
-					'profit_sharing' => true,
+				'profit_sharing' => true,
 			);
 		}
-		try {
-			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-		} catch (\Exception $e) {
-			return false;
-		}
-		
-		$file = CACHE_PATH . 'prepare.txt';
-		@file_put_contents($file, json_encode($response));
-		 
-		$response = empty($response) ? '' : json_decode($response, true);
-		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
-		if (empty($prepayId)) {
-			return false;
-		}
+// 		try {
+// 			$response = self::$weChatPayInstance->chain('v3/pay/transactions/jsapi')->post(array('json' => $data));
+// 			$response = empty($response) ? '' : $response->getBody()->getContents();
+// 		} catch (\Exception $e) {
+// 			return false;
+// 		}
+
+// 		$response = empty($response) ? '' : json_decode($response, true);
+// 		$prepayId = empty($response['prepay_id']) ? '' : $response['prepay_id']; //
+// 		if (empty($prepayId)) {
+// 			return false;
+// 		}
+//$prepayId = 'wx13142238646189f86b2285607b13f10001';
 		// 获取sign
-		$result = $this->getPaySign($weChatConf, $prepayId);
+		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data);
 		return $result;
 	}
 

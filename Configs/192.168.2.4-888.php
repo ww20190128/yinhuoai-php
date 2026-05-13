@@ -88,6 +88,11 @@ $conf = array(
 // 		'APIv2Key' => '194CD48DA6268FD3157F2330AEF22514', // 商户APIv2密钥
 		'RSA' => '775099B06253CAC60E2244C28D0AB82D519E823A', // 平台证书
 		'APIv3Key' => 'F2D48DA62625148F194CD3157F2330AE', // APIv3密钥
+		// 虚拟支付相关
+		'offerId' => 1450532043,
+		'productId' => 'vip_t',
+		'goodsPrice' => 0.1, // 道具单价(元)
+		'appKey' => 'tUqCmiByFWslXwBP6QBFf9HUtXM5Ahg1', // 沙箱AppKey：
 	),
 	'alipay' => array(
 		'appId' => '2021005113605464', // 应用Id
