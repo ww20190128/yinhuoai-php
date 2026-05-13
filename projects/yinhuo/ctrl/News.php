@@ -70,7 +70,7 @@ class News extends CtrlBase
     	if (isset($params['title'])) { // 标题
     		$info['title'] = $this->paramFilter('title', 'string');
     	}
-    	if (isset($params['content'])) { // 内容
+    	if (isset($params['contentHtml'])) { // 内容
     		$info['content'] = $this->paramFilter('contentHtml', 'string');
     	}
     	if (isset($params['source'])) { // 来源
@@ -118,7 +118,7 @@ class News extends CtrlBase
     	if (!empty($params['source'])) {
     		$info['source'] = $this->paramFilter('source', 'string');
     	}
-    	if (!empty($params['content'])) {
+    	if (!empty($params['contentHtml'])) {
     		$info['content'] = $this->paramFilter('contentHtml', 'string');
     	} else {
     		throw new $this->exception('请编辑内容');
