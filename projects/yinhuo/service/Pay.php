@@ -454,9 +454,7 @@ $uri = '/xpay/query_user_balance';
 			return false;
 		}
 		$now = $this->frame->now;
-		
-		
-		print_r($profitSharingEttList);exit;
+
 		// 添加分账关系
 		$receivers = array();
 		foreach ($profitSharingEttList as $key => $profitSharingEtt) {
@@ -509,13 +507,12 @@ $uri = '/xpay/query_user_balance';
 			'unfreeze_unsplit' 	=> true,
 		);
 		
-
+print_r($data);exit;
 
 		try {
 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
 		} catch (\Exception $e) {
-	
 			return false;
 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
