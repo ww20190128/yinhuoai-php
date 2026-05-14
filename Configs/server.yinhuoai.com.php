@@ -98,7 +98,7 @@ $conf = array(
 			// 虚拟支付相关
 			'offerId' => '1450532043',
 			'productId' => 'vip_t',
-			'goodsPrice' => 0.1, // 道具单价(元)
+			'goodsPrice' => 1980, // 道具单价(元)
 			'appKey' => 'tUqCmiByFWslXwBP6QBFf9HUtXM5Ahg1', // 沙箱AppKey
 			'appKey' => 'rxDj3OHR0nca6vj2LEMFkR89JI3YfsPD', // 现网AppKey
 			'env' => 0,
