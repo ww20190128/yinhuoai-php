@@ -100,6 +100,8 @@ $conf = array(
 			'productId' => 'vip_t',
 			'goodsPrice' => 0.1, // 道具单价(元)
 			'appKey' => 'tUqCmiByFWslXwBP6QBFf9HUtXM5Ahg1', // 沙箱AppKey
+			//'appKey' => 'rxDj3OHR0nca6vj2LEMFkR89JI3YfsPD', // 现网AppKey
+			'env' => 0,
 	),
 	// php CertificateDownloader.php -k F8F194CD3157F2330AE2D48DA6262514 -m 1708405300 -f /data/www/mood-php/Configs/xince/apiclient_key.pem -s 407D6C1B24DBF31F53D46E20B4C76C38117C196D -o /data/www/mood-php/Configs/xince/
 	

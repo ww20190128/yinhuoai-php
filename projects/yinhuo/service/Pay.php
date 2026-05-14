@@ -245,7 +245,7 @@ class Pay extends ServiceBase
 			'offerId' => $weChatConf['offerId'], // mp-支付基础配置中的offerid
 			'buyQuantity' => $buyQuantity, // 购买数量
 			'currencyType' => 'CNY', // 币种
-			'env' => 1,
+			'env' => $weChatConf['env'],
 			'productId' => $weChatConf['productId'], // 道具ID, **该字段仅mode=short_series_goods时需要必填**
 			'goodsPrice' => intval($weChatConf['goodsPrice'] * 100), // 道具单价(分)
 			'activitySellingPrice' => intval($weChatConf['goodsPrice'] * 100), // 道具优惠价格（分），**非必填，该字段需与goodsPrice一起传入**。如用户使用优惠券、积分等，需要以低于道具价格下单时可传入，传入后该价格即为实际下单价格。
