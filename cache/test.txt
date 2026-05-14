@@ -1,0 +1,24 @@
+GuzzleHttp\Exception\ClientException: Client error: `POST https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi` resulted in a `401 Unauthorized` response:
+{"code":"SIGN_ERROR","message":"签名错误，请检查后再试"}
+ in /data/www/yinhuoai-php/vendor/guzzlehttp/guzzle/src/Exception/RequestException.php:111
+Stack trace:
+#0 /data/www/yinhuoai-php/vendor/guzzlehttp/guzzle/src/Middleware.php(72): GuzzleHttp\Exception\RequestException::create(Object(GuzzleHttp\Psr7\Request), Object(GuzzleHttp\Psr7\Response), NULL, Array, NULL)
+#1 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(209): GuzzleHttp\Middleware::GuzzleHttp\{closure}(Object(GuzzleHttp\Psr7\Response))
+#2 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(158): GuzzleHttp\Promise\Promise::callHandler(1, Object(GuzzleHttp\Psr7\Response), NULL)
+#3 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/TaskQueue.php(52): GuzzleHttp\Promise\Promise::GuzzleHttp\Promise\{closure}()
+#4 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(251): GuzzleHttp\Promise\TaskQueue->run(true)
+#5 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(227): GuzzleHttp\Promise\Promise->invokeWaitFn()
+#6 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(272): GuzzleHttp\Promise\Promise->waitIfPending()
+#7 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(229): GuzzleHttp\Promise\Promise->invokeWaitList()
+#8 /data/www/yinhuoai-php/vendor/guzzlehttp/promises/src/Promise.php(69): GuzzleHttp\Promise\Promise->waitIfPending()
+#9 /data/www/yinhuoai-php/vendor/guzzlehttp/guzzle/src/Client.php(189): GuzzleHttp\Promise\Promise->wait()
+#10 /data/www/yinhuoai-php/vendor/wechatpay/wechatpay/src/ClientDecorator.php(138): GuzzleHttp\Client->request('POST', 'v3/pay/transact...', Array)
+#11 /data/www/yinhuoai-php/vendor/wechatpay/wechatpay/src/BuilderTrait.php(45): WeChatPay\ClientDecorator->request('POST', 'v3/pay/transact...', Array)
+#12 /data/www/yinhuoai-php/projects/yinhuo/service/Pay.php(249): class@anonymous->post(Array)
+#13 /data/www/yinhuoai-php/projects/yinhuo/service/Order.php(192): service\Pay->prepare(Object(entity\User), Object(entity\Order), 'VIP\xE5\xB9\xB4\xE5\x8D\xA1')
+#14 /data/www/yinhuoai-php/projects/yinhuo/ctrl/Order.php(55): service\Order->vipOrderPay(1, 1, 0)
+#15 /data/www/yinhuoai-php/Dispatch/drive/dispatcher/DispatcherBase.php(101): ctrl\Order->vipOrderPay()
+#16 /data/www/yinhuoai-php/Dispatch/drive/dispatcher/WebDispatcher.php(74): drive\dispatcher\DispatcherBase->distribute()
+#17 /data/www/yinhuoai-php/Dispatch/Application.php(105): drive\dispatcher\WebDispatcher->distribute()
+#18 /data/www/yinhuoai-php/Webroot/index.php(14): Application::run()
+#19 {main}
