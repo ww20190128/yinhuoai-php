@@ -390,4 +390,84 @@ class App extends ServiceBase
     		'qrCode' => $url,
     	);
     }
+    
+    /**
+     * 文本内容安全识别
+     *
+     * @return array
+     */
+    public function getAccessToken()
+    {
+    	$accessTokenFile = CACHE_PATH . 'accessToken.txt';
+    	$response = file_get_contents($accessTokenFile);
+    	$response = empty($response) ? array() : json_decode($response, true);
+    	$now = $this->frame->now;
+    	if (!empty($response['access_token']) && !empty($response['expires_in']) 
+    		&& ($now - $response['createTime']) <= $response['expires_in']) {
+    		return $response['access_token'];
+    	}
+    	$weChat = empty($this->frame->conf['weChat']) ? array() : $this->frame->conf['weChat'];
+    	if (empty($weChat)) {
+    		return '';
+    	}
+    	$appId = $weChat['appId'];
+    	$appSecret = $weChat['appSecret'];
+    	$url = "https://api.weixin.qq.com/cgi-bin/token?appid={$appId}&secret={$appSecret}&grant_type=client_credential";
+    	$response = httpGetContents($url);
+    	$response = empty($response) ? array() : json_decode($response, true);
+    	if (empty($response['access_token'])) {
+    		throw new $this->exception("获取access_token失败！");
+    	}
+    	$response['createTime'] = $now;
+		@file_put_contents($accessTokenFile, json_encode($response));
+    	return $response['access_token'];
+    }
+    
+    /**
+     * 文本内容安全识别
+     *
+     * @return array
+     */
+    public function msgSecCheck($userId, $content, $info = array())
+    {
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt)) {
+    		return false;
+    	}
+    	$accessToken = $this->getAccessToken();
+    	$weChatConf = $this->frame->conf['weChat'];
+    	$data = array(
+    		'content' => $content,
+    		'version' => empty($info['version']) ? 2 : $info['version'],
+    		'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
+    		'openid' => $userEtt->openid,
+    	);
+    	$apiPath = '/wxa/msg_sec_check';
+    	$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
+    	$signMessage = $apiPath . '&' . $postBody;
+    	$paySig = hash_hmac('sha256', $signMessage, $weChatConf['appKey']);
+    
+    	// 完整请求URL
+    	$url = 'https://api.weixin.qq.com' . $apiPath . '?access_token=' . $accessToken . '&pay_sig=' . $paySig;
+    
+    	$ch = curl_init();
+    	curl_setopt_array($ch, [
+    	CURLOPT_URL            => $url,
+    	CURLOPT_POST           => true,
+    	CURLOPT_POSTFIELDS     => $postBody,
+    	CURLOPT_RETURNTRANSFER => true,
+    	CURLOPT_HTTPHEADER     => [
+    	'Content-Type: application/json; charset=utf-8',
+    	],
+    	CURLOPT_TIMEOUT        => 30,
+    	]);
+    	$response = curl_exec($ch);
+    	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    	$curlErr  = curl_error($ch);
+    	curl_close($response);
+    	$response = json_decode($response, true);
+    	return $response;
+    }
+    
 }

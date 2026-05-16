@@ -530,30 +530,7 @@ class Order extends ServiceBase
     	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
-    	$accessTokenArr = empty($userEtt->accessToken) ? array() : json_decode($userEtt->accessToken, true);
-    	$now = $this->frame->now;
-    	$accessToken = '';
-    	if (!empty($accessTokenArr['access_token']) && $now - $accessTokenArr['createTime'] <= $accessTokenArr['expires_in']) {
-    		$accessToken = $accessTokenArr['access_token'];
-    	} else {
-    		$weChat = empty($this->frame->conf['weChat']) ? array() : $this->frame->conf['weChat'];
-    		if (empty($weChat)) {
-    			throw new $this->exception('获取微信配置失败！');
-    		}
-    		$appId = $weChat['appId'];
-    		$appSecret = $weChat['appSecret'];
-    		$url = "https://api.weixin.qq.com/cgi-bin/token?appid={$appId}&secret={$appSecret}&grant_type=client_credential";
-    		$response = httpGetContents($url);
-    		$response = empty($response) ? array() : json_decode($response, true);
-    		if (empty($response['access_token'])) {
-    			throw new $this->exception("获取access_token失败！");
-    		}
-    		$response['createTime'] = $now;
-    		$userEtt->set('accessToken', json_encode($response));
-    		$userDao->update($userEtt);
-    		$accessToken = $response['access_token'];
-    	}
-    	$info['accessToken'] = $accessToken;
+    	
     	$paySv = \service\Pay::singleton();
     	$payResult = $paySv->xpayQueryOrder($userEtt, $orderEtt);
 		if (!empty($payResult)) {
@@ -562,5 +539,32 @@ class Order extends ServiceBase
 		}
     	return $payResult;
     }
+
+    /**
+     * 创建提现订单(微信-虚拟支付)
+     *
+     * @return array
+     */
+    public function createWithdrawOrder($userId, $orderId)
+    {
+    	$orderDao = \dao\Order::singleton();
+    	$orderEtt = $orderDao->readByPrimary($orderId);
+    	$now = $this->frame->now;
+    	if (empty($orderEtt) || $orderEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('订单已删除，请重新下单！');
+    	}
+    	if ($orderEtt->goodsType != \constant\Order::TYPE_GOODS_VIP) {
+    		throw new $this->exception('订单类型错误');
+    	}
+    	$userDao = \dao\User::singleton();
+    	$userEtt = $userDao->readByPrimary($userId);
+    	if (empty($userEtt) || $userEtt->status == \constant\Common::DATA_DELETE) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
     
+    	$paySv = \service\Pay::singleton();
+    	$createWithdrawOrderResult = $paySv->createWithdrawOrder($userEtt, $orderEtt);
+    
+    	return $createWithdrawOrderResult;
+    }
 }

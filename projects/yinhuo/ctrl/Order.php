@@ -80,13 +80,15 @@ class Order extends CtrlBase
     public function createWithdrawOrder()
     {
     	$params = $this->params;
-    	$userId = empty($this->userId) ? 0 : $this->userId;
-    	$orderId = $this->paramFilter('orderId', 'intval'); // 订单Id
-    	if (empty($orderId)) {
-    		throw new $this->exception('请求参数错误');
-    	}
-    	$orderSv = \service\Order::singleton();
-    	return $orderSv->xpayQueryOrder($userId, $orderId);
+//     	$userId = empty($this->userId) ? 0 : $this->userId;
+//     	$orderId = $this->paramFilter('orderId', 'intval'); // 订单Id
+//     	if (empty($orderId)) {
+//     		throw new $this->exception('请求参数错误');
+//     	}
+    	$orderId = 1;
+    	$accessToken = '103_uFE14uLgLZs7kD-G7kNsWgneKIEs_QmXC8zedihqgys3Q7GsmcULweUHqS3zfj8KAB1-ibn2b0AAaia3Kk6hfJj3SoCFYhk8wp1itsWdbXSwoWpOFxL3FQqj6D4FUFfAAARGR';
+    	$paySv = \service\Pay::singleton();
+    	return $paySv->createWithdrawOrder($accessToken, $orderId);
     }
    
     /**
@@ -310,5 +312,6 @@ class Order extends CtrlBase
     	$orderSv = \service\Order::singleton();
     	return $orderSv->getProfitSharingList($this->userId, $info, $pageNum, $pageLimit);
     }
+    
     
 }

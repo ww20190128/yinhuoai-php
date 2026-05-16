@@ -283,8 +283,8 @@ $uri = '/xpay/query_user_balance';
 	public function xpayQueryOrder($userEtt, $orderEtt)
 	{
 		$weChatConf = $this->frame->conf['weChat'];
-		$accessTokenArr = empty($userEtt->accessToken) ? array() : json_decode($userEtt->accessToken, true);
-		$accessToken = $accessTokenArr['access_token'];
+		$appSv = \service\App::singleton();
+    	$accessToken = $appSv->getAccessToken();
 		$tradeInfo = empty($orderEtt->tradeInfo) ? $result : json_decode($orderEtt->tradeInfo, true);
 		$signData = $tradeInfo['signData'];
 		$data = array(
@@ -538,6 +538,69 @@ $prepayId = '';
 			$profitSharingDao->update($profitSharingEtt);
 		}
 		return true;
+	}
+	
+	/**
+	 * 创建提现订单(微信-虚拟支付)
+	 *
+	 * @return array
+	 */
+	public function createWithdrawOrder($userEtt, $orderEtt)
+	{
+		$weChat = empty($this->frame->conf['weChat']) ? array() : $this->frame->conf['weChat'];
+		if (empty($weChat)) {
+			throw new $this->exception('获取微信配置失败！');
+		}
+		$appSv = \service\App::singleton();
+		$accessToken = $appSv->getAccessToken();
+
+		$appId = $weChat['appId'];
+		$appSecret = $weChat['appSecret'];
+
+		$weChatConf = $this->frame->conf['weChat'];
+		$data = array(
+			'withdraw_no' => '20260514135936111111',
+			'withdraw_amount' => 0.01,
+			'env' => $weChat['env'],
+		);
+		$apiPath = '/xpay/create_withdraw_order';
+		$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
+	
+		// 生成 pay_sig 签名
+		$signMessage = $apiPath . '&' . $postBody;
+		$paySig = hash_hmac('sha256', $signMessage, $weChatConf['appKey']);
+	
+		// 完整请求URL
+		$url = 'https://api.weixin.qq.com' . $apiPath . '?access_token=' . $accessToken . '&pay_sig=' . $paySig;
+	
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+		CURLOPT_URL            => $url,
+		CURLOPT_POST           => true,
+		CURLOPT_POSTFIELDS     => $postBody,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_HTTPHEADER     => [
+		'Content-Type: application/json; charset=utf-8',
+		],
+		CURLOPT_TIMEOUT        => 30,
+		]);
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curlErr  = curl_error($ch);
+		curl_close($response);
+		$response = json_decode($response, true);
+		
+		
+		print_r($response);exit;
+		$order = empty($response['order']) ? array() : $response['order'];
+		$tradeInfo = array_merge($order, $tradeInfo);
+		$orderEtt->set('tradeInfo', json_encode($tradeInfo));
+		$orderDao = \dao\Order::singleton();
+		$orderDao->update($orderEtt);
+		if (empty($order['status']) || !in_array($order['status'], array(2,3,4))) {
+			return false;
+		}
+		return $tradeInfo;
 	}
 	
 }

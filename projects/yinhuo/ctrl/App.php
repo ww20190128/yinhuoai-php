@@ -199,4 +199,27 @@ EOT;
     	return $appSv->getQrCode($url);
     }
     
+    /**
+     * 文本内容安全识别
+     *
+     * @return array
+     */
+    public function msgSecCheck()
+    {
+    	$params = $this->params;
+    	if (empty($this->userId)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$content = $this->paramFilter('content', 'string'); // 内容
+    	if (empty($content)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$info = array(
+    		'version' => $this->paramFilter('version', 'intval'),	
+    		'scene' => $this->paramFilter('scene', 'intval'),
+    	);
+    	$appSv = \service\App::singleton();
+    	return $appSv->msgSecCheck($this->userId, $content, $info);
+    }
+    
 }
