@@ -237,19 +237,17 @@ EOT;
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
     	$media_url = $this->paramFilter('media_url', 'string'); // 内容
-    	if (empty($media_url)) {
-    		throw new $this->exception('请求参数错误');
-    	}
     	$media_type = $this->paramFilter('media_type', 'intval', 1); // 媒体类型
-    	if (empty($media_type)) {
+    	if (empty($media_type) || empty($media_url)) {
     		throw new $this->exception('请求参数错误');
     	}
     	$info = array(
-    			'openid' => $openid,
-    			'version' => $this->paramFilter('version', 'intval'),
-    			'scene' => $this->paramFilter('scene', 'intval'),
+    		'openid' => $openid,
+    		'version' => $this->paramFilter('version', 'intval'),
+    		'scene' => $this->paramFilter('scene', 'intval'),
     	);
     	$appSv = \service\App::singleton();
     	return $appSv->mediaCheckAsync($this->userId, $media_type, $media_url, $info);
     }
+    
 }

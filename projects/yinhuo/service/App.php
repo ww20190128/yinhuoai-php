@@ -478,7 +478,7 @@ class App extends ServiceBase
      *
      * @return array
      */
-    public function mediaCheckAsync($userId, $media_type, $media_url, $info = array())
+    public function mediaCheckAsync($userId, $media_type, $media_url,  $info = array())
     {
     	if (empty($info['openid'])) {
     		$userDao = \dao\User::singleton();
@@ -491,13 +491,13 @@ class App extends ServiceBase
     	$accessToken = $this->getAccessToken();
     	$weChatConf = $this->frame->conf['weChat'];
     	$data = array(
-    			'media_url' => $media_url,
-    			'media_type' => intval($media_type),
-    			'version' => empty($info['version']) ? 2 : $info['version'],
-    			'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
-    			'openid' => $info['openid'],
+    		'media_url' => $media_url,
+    		'media_type' => intval($media_type),
+    		'version' => empty($info['version']) ? 2 : $info['version'],
+    		'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
+    		'openid' => $info['openid'],
     	);
-    	$apiPath = '/wxa/mediaCheckAsync';
+    	$apiPath = '/wxa/media_check_async';
     	$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
     	$signMessage = $apiPath . '&' . $postBody;
     	$paySig = hash_hmac('sha256', $signMessage, $weChatConf['appKey']);
