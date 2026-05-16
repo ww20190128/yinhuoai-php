@@ -207,7 +207,8 @@ EOT;
     public function msgSecCheck()
     {
     	$params = $this->params;
-    	if (empty($this->userId)) {
+    	$openid = $this->paramFilter('openid', 'string'); // 内容
+    	if (empty($this->userId) && empty($openid)) {
     		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
     	}
     	$content = $this->paramFilter('content', 'string'); // 内容
@@ -215,6 +216,7 @@ EOT;
     		throw new $this->exception('请求参数错误');
     	}
     	$info = array(
+    		'openid' => $openid,
     		'version' => $this->paramFilter('version', 'intval'),	
     		'scene' => $this->paramFilter('scene', 'intval'),
     	);

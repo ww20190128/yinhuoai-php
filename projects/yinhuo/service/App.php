@@ -430,10 +430,13 @@ class App extends ServiceBase
      */
     public function msgSecCheck($userId, $content, $info = array())
     {
-    	$userDao = \dao\User::singleton();
-    	$userEtt = $userDao->readByPrimary($userId);
-    	if (empty($userEtt)) {
-    		return false;
+    	if (empty($info['openid'])) {
+    		$userDao = \dao\User::singleton();
+    		$userEtt = $userDao->readByPrimary($userId);
+    		if (empty($userEtt)) {
+    			return false;
+    		}
+    		$info['openid'] = $userEtt->openid;
     	}
     	$accessToken = $this->getAccessToken();
     	$weChatConf = $this->frame->conf['weChat'];
@@ -441,7 +444,7 @@ class App extends ServiceBase
     		'content' => $content,
     		'version' => empty($info['version']) ? 2 : $info['version'],
     		'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
-    		'openid' => $userEtt->openid,
+    		'openid' => $info['openid'],
     	);
     	$apiPath = '/wxa/msg_sec_check';
     	$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
