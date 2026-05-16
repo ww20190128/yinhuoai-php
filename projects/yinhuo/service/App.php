@@ -473,4 +473,55 @@ class App extends ServiceBase
     	return $response;
     }
     
+    /**
+     * 文本内容安全识别
+     *
+     * @return array
+     */
+    public function mediaCheckAsync($userId, $media_type, $media_url, $info = array())
+    {
+    	if (empty($info['openid'])) {
+    		$userDao = \dao\User::singleton();
+    		$userEtt = $userDao->readByPrimary($userId);
+    		if (empty($userEtt)) {
+    			return false;
+    		}
+    		$info['openid'] = $userEtt->openid;
+    	}
+    	$accessToken = $this->getAccessToken();
+    	$weChatConf = $this->frame->conf['weChat'];
+    	$data = array(
+    			'media_url' => $media_url,
+    			'media_type' => $media_type,
+    			'version' => empty($info['version']) ? 2 : $info['version'],
+    			'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
+    			'openid' => $info['openid'],
+    	);
+    	$apiPath = '/wxa/mediaCheckAsync';
+    	$postBody = json_encode($data, JSON_UNESCAPED_UNICODE);
+    	$signMessage = $apiPath . '&' . $postBody;
+    	$paySig = hash_hmac('sha256', $signMessage, $weChatConf['appKey']);
+    
+    	// 完整请求URL
+    	$url = 'https://api.weixin.qq.com' . $apiPath . '?access_token=' . $accessToken . '&pay_sig=' . $paySig;
+    
+    	$ch = curl_init();
+    	curl_setopt_array($ch, [
+    	CURLOPT_URL            => $url,
+    	CURLOPT_POST           => true,
+    	CURLOPT_POSTFIELDS     => $postBody,
+    	CURLOPT_RETURNTRANSFER => true,
+    	CURLOPT_HTTPHEADER     => [
+    	'Content-Type: application/json; charset=utf-8',
+    	],
+    	CURLOPT_TIMEOUT        => 30,
+    	]);
+    	$response = curl_exec($ch);
+    	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    	$curlErr  = curl_error($ch);
+    	curl_close($response);
+    	$response = json_decode($response, true);
+    	return $response;
+    }
+    
 }

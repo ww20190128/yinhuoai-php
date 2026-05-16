@@ -224,4 +224,32 @@ EOT;
     	return $appSv->msgSecCheck($this->userId, $content, $info);
     }
     
+    /**
+     * 文本内容安全识别
+     *
+     * @return array
+     */
+    public function mediaCheckAsync()
+    {
+    	$params = $this->params;
+    	$openid = $this->paramFilter('openid', 'string'); // 内容
+    	if (empty($this->userId) && empty($openid)) {
+    		throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
+    	}
+    	$media_url = $this->paramFilter('media_url', 'string'); // 内容
+    	if (empty($media_url)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$media_type = $this->paramFilter('media_type', 'string'); // 内容
+    	if (empty($media_type)) {
+    		throw new $this->exception('请求参数错误');
+    	}
+    	$info = array(
+    			'openid' => $openid,
+    			'version' => $this->paramFilter('version', 'intval'),
+    			'scene' => $this->paramFilter('scene', 'intval'),
+    	);
+    	$appSv = \service\App::singleton();
+    	return $appSv->mediaCheckAsync($this->userId, $media_type, $media_url, $info);
+    }
 }
