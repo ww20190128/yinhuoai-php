@@ -492,7 +492,7 @@ class App extends ServiceBase
     	$weChatConf = $this->frame->conf['weChat'];
     	$data = array(
     			'media_url' => $media_url,
-    			'media_type' => $media_type,
+    			'media_type' => intval($media_type),
     			'version' => empty($info['version']) ? 2 : $info['version'],
     			'scene' => empty($info['scene']) ? 1 : $info['scene'], // 1 资料；2 评论；3 论坛；4 社交日志
     			'openid' => $info['openid'],

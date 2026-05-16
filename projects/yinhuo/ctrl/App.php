@@ -240,7 +240,7 @@ EOT;
     	if (empty($media_url)) {
     		throw new $this->exception('请求参数错误');
     	}
-    	$media_type = $this->paramFilter('media_type', 'string'); // 内容
+    	$media_type = $this->paramFilter('media_type', 'intval', 1); // 媒体类型
     	if (empty($media_type)) {
     		throw new $this->exception('请求参数错误');
     	}
