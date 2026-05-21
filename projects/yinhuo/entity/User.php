@@ -198,20 +198,7 @@ class User extends ModelBase
      * @var int
      */
     public $shareKsAccess = '';
-    
-    /**
-     * 分享收益
-     *
-     * @var varchar
-     */
-    public $shareYield = '0.00';
-    
-    /**
-     * 已提现金额
-     *
-     * @var varchar
-     */
-    public $withdrawAmount = '0.00';
+
 // 表结构end
 
     /**
