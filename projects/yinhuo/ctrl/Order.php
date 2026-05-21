@@ -38,7 +38,7 @@ class Order extends CtrlBase
     }
     
     /**
-     * vip订单支付
+     * vip订单支付【废弃】
      * 
      * @return array
      */
@@ -56,7 +56,7 @@ class Order extends CtrlBase
     }
     
     /**
-     * 查询创建的订单(微信-虚拟支付)
+     * 查询创建的订单，完成订单(微信-虚拟支付)
      *
      * @return array
      */

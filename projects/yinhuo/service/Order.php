@@ -199,6 +199,7 @@ class Order extends ServiceBase
     		$profitSharingEtt1->orderId = $orderEtt->id;
     		$profitSharingEtt1->status = 0;
     		$profitSharingEtt1->addGold = intval($vipConfigEtt->topGold1);
+    		$profitSharingEtt1->addMoney = $vipConfigEtt->topProfitSharing1;
     		$profitSharingEtt1->currentGold = intval($parentUserEtt->gold);
     		$profitSharingEtt1->parentUserId = intval($parentUserEtt->parentUserId);
     		$profitSharingEtt1->fromUserId = $userEtt->userId;
@@ -230,6 +231,7 @@ class Order extends ServiceBase
     			$profitSharingEtt2->orderId = $orderEtt->id;
     			$profitSharingEtt2->status = 0;
     			$profitSharingEtt2->addGold = intval($vipConfigEtt->topGold2);
+    			$profitSharingEtt2->addMoney = $vipConfigEtt->topProfitSharing2;
     			$profitSharingEtt2->currentGold = intval($parentUserEtt2->gold);
     			$profitSharingEtt2->parentUserId = intval($parentUserEtt2->parentUserId);
     			$profitSharingEtt2->fromUserId = $parentUserEtt->userId;
@@ -310,7 +312,6 @@ class Order extends ServiceBase
     		$userVipEtt->updateTime = $now;
     		$userVipDao->create($userVipEtt);
     	} 
-    	
     	return true;
     }
 

@@ -116,8 +116,7 @@ class Brokerage extends ServiceBase
     	$shareYield = $userEtt->shareYield; // 累积的分享收益
     	$residueAmount = max(0, $shareYield - $userEtt->withdrawAmount); // 可提现金额
     	if ($residueAmount <= 0) {
-    		throw new $this->exception('您当前无可提现金额，请分享获得收益！');
-    		throw new $this->exception('超出您的提现余额，请修改金额');
+    		throw new $this->exception('您当前无可提现金额');
     	}
     	// 2. 检查提现金额是否足够
     	if ($withdrawValue > $residueAmount) {
@@ -174,7 +173,7 @@ class Brokerage extends ServiceBase
     		);
     	}
     	$todayWithdraw = empty($todayWithdrawMap) ? 0 : array_sum($todayWithdrawMap);
-    	if (($todayWithdraw + $withdrawValue) >= 200) {
+    	if (($todayWithdraw + $withdrawValue) > 200) {
     		throw new $this->exception("超出每日限额200RMB，请联系客服操作！");
     	}
     	// 已经成功提现的次数

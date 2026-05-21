@@ -198,6 +198,20 @@ class User extends ModelBase
      * @var int
      */
     public $shareKsAccess = '';
+    
+    /**
+     * 分享收益
+     *
+     * @var varchar
+     */
+    public $shareYield = '0.00';
+    
+    /**
+     * 已提现金额
+     *
+     * @var varchar
+     */
+    public $withdrawAmount = '0.00';
 // 表结构end
 
     /**
@@ -218,7 +232,9 @@ class User extends ModelBase
     		'phone'    		=> intval($this->phone),
     		'signature'     => $this->signature,
     		'gold'    		=> intval($this->gold),
-    		'award'    		=> intval($this->award),
+    		'award'    		=> $this->award,
+    			'shareYield'    		=> $this->shareYield,
+    			'withdrawAmount'    		=> $this->withdrawAmount,
     		'parentUserId'  => intval($this->parentUserId),
 			'openid'        => $this->openid,
     		'session_key'   => $this->session_key,

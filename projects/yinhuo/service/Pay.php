@@ -365,7 +365,7 @@ $uri = '/xpay/query_user_balance';
 // 		if (empty($prepayId)) {
 // 			return false;
 // 		}
-$prepayId = '';
+		$prepayId = '';
 		// 获取sign
 		$result = $this->getPaySignVirtual($weChatConf, $prepayId, $data, $userEtt->session_key);
 		$tradeInfo = empty($orderEtt->tradeInfo) ? $result : json_decode($orderEtt->tradeInfo, true);
@@ -410,6 +410,7 @@ $prepayId = '';
 	 */
 	public function profitsharingReceiversAdd($openid)
 	{
+	return false;
 		$weChatConf = $this->frame->conf['weChat'];
 		$data = array(
 			'appid' => $weChatConf['appId'], // 服务商APPID
@@ -463,7 +464,7 @@ $prepayId = '';
 				unset($profitSharingEttList[$key]);
 				continue;
 			}
-			if (empty($profitSharingEtt->receiverAddOpenId)) {
+			if (empty($profitSharingEtt->receiverAddOpenId) && false) {
 				$receiverAddOpenId = $this->profitsharingReceiversAdd($profitSharingUserEtt->receiverAddOpenId);
 				if (empty($receiverAddOpenId)) {
 					unset($profitSharingEttList[$key]);
@@ -493,8 +494,7 @@ $prepayId = '';
 				'description' => $description
 			);
 		}
-		
-		print_r($e);exit;
+	
 		if (empty($receivers)) {
 			return false;
 		}
@@ -509,18 +509,12 @@ $prepayId = '';
 			'unfreeze_unsplit' 	=> true,
 		);
 		
-
-
-		try {
-			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
-			$response = empty($response) ? '' : $response->getBody()->getContents();
-			
-			print_r($response);exit;
-		} catch (\Exception $e) {
-			
-			print_r($e);exit;
-			return false;
-		}
+// 		try {
+// 			$response = self::$weChatPayInstance->chain('v3/profitsharing/orders')->post(array('json' => $data));
+// 			$response = empty($response) ? '' : $response->getBody()->getContents();
+// 		} catch (\Exception $e) {
+// 			return false;
+// 		}
 		foreach ($profitSharingEttList as $profitSharingEtt) {
 			// 添加火币
 			$profitSharingUserEtt = $userDao->readByPrimary($profitSharingEtt->userId);
@@ -528,7 +522,8 @@ $prepayId = '';
 				continue;
 			}
 			if ($profitSharingEtt->status == 0) {
-				$profitSharingUserEtt->add('gold', $profitSharingEtt->addGold);
+				$profitSharingUserEtt->add('gold', $profitSharingEtt->addGold); // 添加火币
+				$profitSharingUserEtt->add('award', $profitSharingEtt->addMoney); // 添加现金
 				$profitSharingUserEtt->set('updateTime', $now);
 				$userDao->update($profitSharingUserEtt);
 			}
