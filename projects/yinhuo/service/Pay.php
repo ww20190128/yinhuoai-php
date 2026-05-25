@@ -129,7 +129,7 @@ class Pay extends ServiceBase
 		$data = array(
 			'appid' => $weChatConf['appId'],
 			'out_bill_no' => $out_bill_no, // 单号
-			'transfer_scene_id' => '1005', // 转账场景ID
+			'transfer_scene_id' => '1000', // 转账场景ID
 			'openid' => $userEtt->openid, // 用户openid
 			'transfer_amount' => $transferAmount * 100, // 转账金额(分)
 			'transfer_remark' => $appConfig['name'] . '-分销佣金', // 转账备注
