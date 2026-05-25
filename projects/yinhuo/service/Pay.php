@@ -135,11 +135,11 @@ class Pay extends ServiceBase
 			'transfer_remark' => $appConfig['name'] . '-分销佣金', // 转账备注
 			'transfer_scene_report_infos'=> array( // 转账场景报备信息参数 https://pay.weixin.qq.com/doc/v3/merchant/4013774588
 				array(
-					'info_type' => '岗位类型',
+					'info_type' => '活动名称',
 					'info_content' => '分销',
 				),
 				array(
-					'info_type' => '报酬说明',
+					'info_type' => '奖励说明',
 					'info_content' => '分销佣金',
 				),
 			),
