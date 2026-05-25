@@ -136,11 +136,11 @@ class Pay extends ServiceBase
 			'transfer_scene_report_infos'=> array( // 转账场景报备信息参数 https://pay.weixin.qq.com/doc/v3/merchant/4013774588
 				array(
 					'info_type' => '岗位类型',
-					'info_content' => '推广员',
+					'info_content' => '分销',
 				),
 				array(
 					'info_type' => '报酬说明',
-					'info_content' => '分享佣金',
+					'info_content' => '分销佣金',
 				),
 			),
 			'notify_url' => $notify_url,
