@@ -227,7 +227,7 @@ $body = '{"id":"17d3afe0-6625-5e00-b284-61333ca0c50c","create_time":"2026-05-25T
 		$notifyResult = openssl_decrypt($ctext, 'aes-256-gcm', $aesKey, OPENSSL_RAW_DATA, $nonceStr, $authTag, $associatedData);
 		$notifyResult = empty($notifyResult) ? array() : json_decode($notifyResult, true);
 
-		print_r($notifyResult);exit;
+	
 		if (empty($notifyResult) || empty($notifyResult['out_bill_no']) 
 			|| empty($notifyResult['state'])|| $notifyResult['state'] != 'SUCCESS') {
 			return false;
