@@ -54,8 +54,6 @@ class Brokerage extends CtrlBase
     	$withdrawValue = str_replace(',', '', $withdrawValue);
     	// 转换为浮点数
     	$withdrawValue = (float)$withdrawValue;
-    	
-$withdrawValue =1;
     	if (empty($withdrawValue) || $withdrawValue <= 0) {
     		throw new $this->exception("请输入正确的提现金额");
     	}
