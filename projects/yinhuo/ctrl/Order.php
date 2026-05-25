@@ -201,11 +201,12 @@ class Order extends CtrlBase
     	$params = $this->params;
     	$body = file_get_contents('php://input');
     
-$file = CACHE_PATH . 'xcTransferNotify.txt';
- @file_put_contents($file, $body);
+// $file = CACHE_PATH . 'xcTransferNotify.txt';
+//  @file_put_contents($file, $body);
 
-//$body = '{"id":"9bacbd00-5c83-5bee-afc5-ff3a91094a8a","create_time":"2025-04-07T15:09:07+08:00","resource_type":"encrypt-resource","event_type":"MCHTRANSFER.BILL.FINISHED","summary":"商家转账单据终态通知","resource":{"original_type":"mch_payment","algorithm":"AEAD_AES_256_GCM","ciphertext":"Yl2D7u1iopCs9YP4mfyloNWkSWH6iLW65bec29dcgzVlbXnnslX63oMEG/gpMJx7ONMGG8FtLpoJFcjn00kaq/1iqxwdxoQQA4usVovUqKetuAlmKHqcd1p23U5m/aFI/TZSQnNGFntJQQA5PBqBp2hVNI4XSA4vMdKOauJ+L3HMOKF+DpNE3xGYNANTZ0gPEo1WCRQ26DTFuy2cClckQ1yeMJv0E0/QlzGbe0FQZYvfgL6ygBaMn35M4nldiPtanfoomxmAFXj/dh5ySrTAUpR0Yflnh3ojNRvLEtMh53MiSXSMXxC9zAgLpzoe8JDGaryEhESv0TdHSNzi0nXs+efWB9DZoKc5AfyJyE35FgrXzmL9PsJ0wqbVChmm0w8ofwcnQP3AfPyWGSNDU1o4vtBQtGTWRQGuSeZa59k=","associated_data":"mch_payment","nonce":"wsSDmYr377VK"}}';    	
-    	$bodyArr = empty($body) ? array() : json_decode($body, true);
+$body = '{"id":"17d3afe0-6625-5e00-b284-61333ca0c50c","create_time":"2026-05-25T13:47:21+08:00","resource_type":"encrypt-resource","event_type":"MCHTRANSFER.BILL.FINISHED","summary":"商家转账单据终态通知","resource":{"original_type":"mch_payment","algorithm":"AEAD_AES_256_GCM","ciphertext":"MBBoPJXIS3jEln49hX9mdYAn2JpuAtslLZCuLod2ZBytSZO1UBy87CFndhVrOEB0OKQmpGU8C/JVnIWtzKdOm0uZRfXhVSxE1dPqhBhtpH0T8GvZZOwP9YhLMxcmGBiW4gPxIC3oXcjsc9+xlDSZ0Aq77P1b1pBSlU79SqfZB9vaShqvOJWUGIUcw/ta1npK8TRv+YCmn8lMUGCH5SL7w3lbT05JVdO5EcQUwtHPJhdcgxRYna+SrRssJcyeLgiAPvc3IJRRjwQMg7ekuhvl8tsGJHQ6PveVgsJG4ABtEROyN4npVJKCuA6m1wfo6T91AAUzmIqgJJh5pFQGR2diNRWADQdt3FKZ/4zGRvcfQjbhF62msWW3wZ/H41XsRLy4eQDozNXaVWIxVQPlZP/wNnDNZmfzJWCoz2UDPA==","associated_data":"mch_payment","nonce":"iRvQWCzgfrF5"}}';
+
+		$bodyArr = empty($body) ? array() : json_decode($body, true);
     	$ciphertext = empty($bodyArr['resource']['ciphertext']) ? '' : base64_decode($bodyArr['resource']['ciphertext']);
 
 		if (empty($ciphertext)) {
@@ -226,6 +227,7 @@ $file = CACHE_PATH . 'xcTransferNotify.txt';
 		$notifyResult = openssl_decrypt($ctext, 'aes-256-gcm', $aesKey, OPENSSL_RAW_DATA, $nonceStr, $authTag, $associatedData);
 		$notifyResult = empty($notifyResult) ? array() : json_decode($notifyResult, true);
 
+		print_r($notifyResult);exit;
 		if (empty($notifyResult) || empty($notifyResult['out_bill_no']) 
 			|| empty($notifyResult['state'])|| $notifyResult['state'] != 'SUCCESS') {
 			return false;
