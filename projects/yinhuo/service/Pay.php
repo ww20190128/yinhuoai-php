@@ -132,7 +132,7 @@ class Pay extends ServiceBase
 			'transfer_scene_id' => '1005', // 转账场景ID
 			'openid' => $userEtt->openid, // 用户openid
 			'transfer_amount' => $transferAmount * 100, // 转账金额(分)
-			'transfer_remark' => $appConfig['name'] . '-分享佣金', // 转账备注
+			'transfer_remark' => $appConfig['name'] . '-分销佣金', // 转账备注
 			'transfer_scene_report_infos'=> array( // 转账场景报备信息参数 https://pay.weixin.qq.com/doc/v3/merchant/4013774588
 				array(
 					'info_type' => '岗位类型',
@@ -151,7 +151,10 @@ class Pay extends ServiceBase
 		try {
 			$response = self::$weChatPayInstance->chain('v3/fund-app/mch-transfer/transfer-bills')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
+			
+print_r($response);exit;
 		} catch (\Exception $e) {
+print_r($e);exit;
 			return false;
 		}
 		$response = empty($response) ? array() : json_decode($response, true);

@@ -94,8 +94,8 @@ class Brokerage extends ServiceBase
     	$shareYield = $userEtt->shareYield; // 累积分享收益
     	$residueAmount = max(0, $shareYield - $userEtt->withdrawAmount); // 可提现金额
     	return array(
-    		'shareYield' => number_format($shareYield, 2), // 累积推广收益
     		'residueAmount' => number_format($residueAmount, 2), // 可提现金额
+    		'shareYield' => number_format($shareYield, 2), // 累积推广收益
     	);
     }
 
