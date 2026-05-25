@@ -151,10 +151,7 @@ class Pay extends ServiceBase
 		try {
 			$response = self::$weChatPayInstance->chain('v3/fund-app/mch-transfer/transfer-bills')->post(array('json' => $data));
 			$response = empty($response) ? '' : $response->getBody()->getContents();
-			
-print_r($response);exit;
 		} catch (\Exception $e) {
-print_r($e);exit;
 			return false;
 		}
 		$response = empty($response) ? array() : json_decode($response, true);
