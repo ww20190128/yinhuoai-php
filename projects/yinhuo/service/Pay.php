@@ -125,7 +125,7 @@ class Pay extends ServiceBase
 		$weChatConf = $this->frame->conf['weChat'];
 		$notify_url = $this->frame->conf['serve_url'] . '/order/wxTransferNotify';
 		
-print_r($notify_url);exit;
+
 		$now = self::$instance->frame->now;
 		$out_bill_no = date('YmdHis', $now) . $userEtt->userId . rand(10, 99) . rand(10, 99);
 		$data = array(
