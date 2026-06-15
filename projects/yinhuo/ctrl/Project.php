@@ -593,7 +593,7 @@ EOT;
 	
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true, 512, JSON_INVALID_UTF8_IGNORE);
 
-		
+//print_r($chipParam);exit;	
 	
 		$aliEditingSv = \service\AliEditing::singleton();
 		$tries = 3;

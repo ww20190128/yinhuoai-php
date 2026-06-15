@@ -1035,10 +1035,10 @@ $lensRow['transitionIds'] = array('windowslice');
 		$timeline = self::getTimeline($chipParam);
 		$orientation = 'Horizontal';
 		$width = $height = 0;
-		if ($chipParam['ratio'] == '9:16') {
-			$orientation = 'Horizontal';
+		if ($chipParam['ratio'] == '9:16') { //Horizontal
+			$orientation = 'Vertical'; // 垂直
 		} elseif ($chipParam['ratio'] == '16:9') {
-			$orientation = 'Vertical';
+			$orientation = 'Horizontal'; // 
 		} elseif ($chipParam['ratio'] == '1:1') {
 			$width = 900;
 			$height = 900;
