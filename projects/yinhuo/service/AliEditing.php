@@ -873,7 +873,7 @@ class AliEditing extends ServiceBase
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffect = array(); // 镜头的效果-转场 在素材间转场，1种效果
 			
-$lensRow['transitionIds'] = array('windowblinds');
+$lensRow['transitionIds'] = array('linearblur');
 			if (!empty($lensRow['transitionIds']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
