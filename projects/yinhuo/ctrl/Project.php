@@ -574,4 +574,44 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 		print_r($preview);exit;
 	}
 	
+	
+	/**
+	 * 生成成片
+	 * 
+	 * @return array
+	 */
+	public function testClip()
+	{
+		$params = $this->params;
+		$chipParam = <<<EOT
+{"id":47,"name":"20260614-剪辑","topic":"","title":"","ratio":"9:16","durationType":2,"fps":30,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1781444927,"createTime":1781407310,"lensList":[{"id":160,"name":"片头","index":-1,"type":1,"createTime":1781407310,"updateTime":1781444389,"mediaIds":[189],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[912],"dubMediaIds":[],"mediaInfo":{"id":189,"name":"tmp_120c11d5fccab67b6e77ecb30b60491b81337c73c9145d5f.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/1\/e4813826d2aeceb603573d9c8e5b7598.mp4","updateTime":1781443979,"createTime":1781443979,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/5d36fe6a69e5ea134f17c2ae6b83addc.jpg","duration":2,"size":2236761},"dubCaptionInfo":{"id":912,"editingId":47,"text":"武汉的宝子们\n快看过来！\n正宗新疆炒米粉\n十年老店","font":{"text-align":"center","position":80,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444274,"updateTime":1781444389,"dubKey":"462d61e4f212555baee58ba07abc1d4a","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/dubAudio\/462d61e4f212555baee58ba07abc1d4a.mp3","duration":"6.773625"}},{"id":161,"name":"片中1","index":1,"type":2,"createTime":1781407310,"updateTime":1781444372,"mediaIds":[197],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[913],"dubMediaIds":[],"mediaInfo":{"id":197,"name":"tmp_a93d503a46d2399fb3d223a990378df0620169217cfb999e.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/2\/91a53740b9863e1606990c09aa544d2f.jpg","updateTime":1781444058,"createTime":1781444058,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":913,"editingId":47,"text":"椒顽上新品了\n四种辣度一次吃过瘾","font":{"text-align":"center","position":80,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444372,"updateTime":1781444372,"dubKey":"7c81c417dab1df0db7102d6c3e219e93","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/dubAudio\/7c81c417dab1df0db7102d6c3e219e93.mp3","duration":"4.037625"}},{"id":163,"name":"片中2","index":2,"type":2,"createTime":1781444123,"updateTime":1781444503,"mediaIds":[190],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[914],"dubMediaIds":[],"mediaInfo":{"id":190,"name":"tmp_51f67d01a30bc12d0f0de6563d31f4a8bc227d374d212d58.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/6\/3ccaa96caf1b375e6b9df43ce3df2a9a.jpg","updateTime":1781444056,"createTime":1781444056,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":914,"editingId":47,"text":"锅气十足","font":{"text-align":"center","position":80,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444412,"updateTime":1781444503,"dubKey":"8c0116c64b1126dd0da4c22020335c03","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/dubAudio\/8c0116c64b1126dd0da4c22020335c03.mp3","duration":"1.128000"}},{"id":164,"name":"片中3","index":3,"type":2,"createTime":1781444174,"updateTime":1781444544,"mediaIds":[196],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[915],"dubMediaIds":[],"mediaInfo":{"id":196,"name":"tmp_5cc3071e612c087951483296a56f08bc8bbf73459fe1f362.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/3\/8343b7cbbfd1337b335566973cfc164b.jpg","updateTime":1781444057,"createTime":1781444057,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":915,"editingId":47,"text":"带上你的小伙伴们\n快来进店品尝吧","font":{"text-align":"center","position":80,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444543,"updateTime":1781444543,"dubKey":"fe777c15bc2eb2e94ecf68f073c076da","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/dubAudio\/fe777c15bc2eb2e94ecf68f073c076da.mp3","duration":"3.149625"}},{"id":162,"name":"片尾","index":100,"type":3,"createTime":1781407310,"updateTime":1781444705,"mediaIds":[185],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[916],"dubMediaIds":[],"mediaInfo":{"id":185,"name":"tmp_c18a2bb56f42a2380f074776ff851aac4cf9ee47ec88905c.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/6\/8fb18047db6b6131a95e71295470644c.mp4","updateTime":1781443889,"createTime":1781443889,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/a57b20216ba1a627daa47d962432f45c.jpg","duration":5,"size":9512834},"dubCaptionInfo":{"id":916,"editingId":47,"text":"椒顽新疆炒米粉\n让这个夏天\n辣气十足\n火辣冲天","font":{"text-align":"center","position":80,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444705,"updateTime":1781444705,"dubKey":"b67e3029fb0db832f06b52613a2d01cd","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/dubAudio\/b67e3029fb0db832f06b52613a2d01cd.mp3","duration":"5.765625"}}],"actorInfo":{"name":"轻盈朵朵","id":"ICL_zh_female_qingyingduoduo_cs_tob","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/portal\/bigtts\/ICL_zh_female_qingyingduoduo_cs_tob.mp3","classify":"客服场景","resourceId":"seed-tts-1.0","language":""},"previewMediaId":189}
+EOT;
+	
+		$chipParam = preg_replace('/[\x00-\x1F\x7F]/', ',', $chipParam);
+
+
+	
+		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true, 512, JSON_INVALID_UTF8_IGNORE);
+
+		
+	
+		$aliEditingSv = \service\AliEditing::singleton();
+		$tries = 3;
+		do {
+			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+		} while (empty($jobId) && --$tries > 0);
+		//sleep(10);
+		//$jobId = 'ac33f7841bf84a5f8288505a260c5d49';
+		$tries = 3;
+		do {
+			$mediaProducingJob = $aliEditingSv->getMediaProducingJob($jobId);
+		} while (empty($mediaProducingJob) && --$tries > 0);
+	
+		$preview = array();
+		$preview['jobStatus'] = $mediaProducingJob['status'];
+		$preview['mediaURL'] = empty($mediaProducingJob['mediaURL']) ? '' : $mediaProducingJob['mediaURL'];
+		$preview['duration'] = empty($mediaProducingJob['duration']) ? 0 : ceil($mediaProducingJob['duration']);
+	
+		print_r($preview);exit;
+	}
 }

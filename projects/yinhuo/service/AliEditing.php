@@ -89,12 +89,11 @@ class AliEditing extends ServiceBase
 	 */
 	private static function captionToAudioTrackClipByUrl($captionRow, $editingInfo, $lensRow = array())
 	{
-
 		$folderSv = \service\Folder::singleton();
-		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0)) {
+		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0) || empty($captionRow['subtitles'])) {
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
-			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);
+			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);		
 			if (!empty($ttsResult['url'])) {
 				$captionRow['url'] = $ttsResult['url'];
 				$captionRow['subtitles'] = $ttsResult['subtitles'];
@@ -115,6 +114,7 @@ class AliEditing extends ServiceBase
 		}
 		// 字幕
 		$subtitles = empty($captionRow['subtitles']) ? array() : $captionRow['subtitles'];
+	
 		$subtitleTrackClips = array();
 		if (!empty($subtitles)) {
 			foreach ($subtitles as $subtitleRow) {
@@ -202,7 +202,7 @@ class AliEditing extends ServiceBase
 				$effectAI_ASR['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$effectAI_ASR['Font'] = $captionRow['font']['font-family'];
@@ -275,7 +275,7 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48 
-				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
@@ -343,7 +343,8 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size']));
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
+				
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
@@ -871,6 +872,8 @@ class AliEditing extends ServiceBase
 			// #关闭原声  #转场设置  #选择时长
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffect = array(); // 镜头的效果-转场 在素材间转场，1种效果
+			
+$lensRow['transitionIds'] = array('directional');
 			if (!empty($lensRow['transitionIds']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
