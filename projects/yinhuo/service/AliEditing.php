@@ -873,7 +873,7 @@ class AliEditing extends ServiceBase
 			$lensVolumeEffect = array(); // 镜头的效果-关闭原声
 			$lensTransitionEffect = array(); // 镜头的效果-转场 在素材间转场，1种效果
 			
-$lensRow['transitionIds'] = array('polarfunction');
+$lensRow['transitionIds'] = array('crazyparametricfun');
 			if (!empty($lensRow['transitionIds']) && $lensKey != count($editingInfo['lensList']) - 1) { // #转场设置
 				$lensTransitionEffect = array(
 					'Type' => 'Transition',
@@ -1035,10 +1035,16 @@ $lensRow['transitionIds'] = array('polarfunction');
 		$timeline = self::getTimeline($chipParam);
 		$orientation = 'Horizontal';
 		$width = $height = 0;
-		if ($chipParam['ratio'] == '9:16') { //Horizontal
-			$orientation = 'Vertical'; // 垂直
+		if ($chipParam['ratio'] == '9:16') { // Horizontal
+			$orientation = 'Vertical'; // 竖屏
+			
+			$width = 900;
+			$height = 1600;
 		} elseif ($chipParam['ratio'] == '16:9') {
-			$orientation = 'Horizontal'; // 
+			$orientation = 'Horizontal'; // 横屏
+			
+			$width = 1600;
+			$height = 900;
 		} elseif ($chipParam['ratio'] == '1:1') {
 			$width = 900;
 			$height = 900;
@@ -1051,9 +1057,12 @@ $lensRow['transitionIds'] = array('polarfunction');
 				'Fps' => $chipParam['fps'], // 输出视频流帧率
 			),	
 		);
+		
+		
 		if (!empty($orientation)) {
 			$outputMediaConfig['Video']['Orientation'] = $orientation;
 		}
+
 		if (!empty($width) && !empty($height)) {
 			$outputMediaConfig['Width'] = $width;
 			$outputMediaConfig['Height'] = $height;
