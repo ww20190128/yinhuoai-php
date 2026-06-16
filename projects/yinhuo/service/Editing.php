@@ -1416,7 +1416,7 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['actorList'])) {
     		$editingInfo['actorInfo'] = self::randomOne($editingInfo['actorList']);
     	}
-    		
+	
     	// 全局配音
     	// 手动配音
     	$folderSv = \service\Folder::singleton();
@@ -1471,10 +1471,12 @@ class Editing extends ServiceBase
     			unset($editingInfo['lensList'][$lensKey]);
     			continue;
     		}
-    		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 没有全局配音
+    		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 没有全局配音，使用镜头配音
     			$lensDub = array(); // 镜头配音
     			if (!empty($lensRow['dubCaptionList'])) {
     				$dubCaptionInfo = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
+    				
+    				
     				if (!empty($editingInfo['actorInfo'])) { // 演员
     					$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
     					if (!empty($ttsResult['id'])) { // 配音成功

@@ -632,7 +632,7 @@ class Project extends ServiceBase
      *
      * @return array
      */
-    public function createProjectClipsByNum($userId, $id, $needCreateNum)
+    public function createProjectClipsByNum($userId, $projectId, $needCreateNum)
     {
     	$userDao = \dao\User::singleton();
     	$userEtt = $userDao->readByPrimary($userId);
@@ -640,7 +640,7 @@ class Project extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$projectDao = \dao\Project::singleton();
-    	$projectEtt = $projectDao->readByPrimary($id);
+    	$projectEtt = $projectDao->readByPrimary($projectId);
     	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
     		throw new $this->exception('剪辑工程已删除');
     	}
@@ -657,6 +657,7 @@ class Project extends ServiceBase
     	$chipParamList = array();
     	for ($index = 1; $index <= $needCreateNum; $index++) {
     		$chipParam = $editingSv->randomChipParam($editingInfo);
+ 
     		if (empty($chipParam)) {
     			continue;
     		}

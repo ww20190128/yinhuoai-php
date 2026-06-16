@@ -237,7 +237,7 @@ class Project extends CtrlBase
 	}
 	
 	/**
-	 * 生成成片
+	 * 重新生成成片
 	 *
 	 * @return array
 	 */
@@ -247,7 +247,7 @@ class Project extends CtrlBase
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
-		$ids =  $this->paramFilter('ids', 'array');
+		$ids =  $this->paramFilter('ids', 'array'); // 成品Id
 		if (empty($ids)) {
 			throw new $this->exception('请求参数错误');
 		}
@@ -262,12 +262,15 @@ class Project extends CtrlBase
 	 */
 	public function createProjectClipsByNum()
 	{
+// $this->userId = 48;
+// $this->params->id = 'f08e0c36280943c4adecbdd0e230d687';
+// $this->params->num = 1;
 		$params = $this->params;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
-		$id = $this->paramFilter('id', 'string');
-		if (empty($id)) {
+		$projectId = $this->paramFilter('id', 'string'); // 工程Id
+		if (empty($projectId)) {
 			throw new $this->exception('请求参数错误');
 		}
 		$num = $this->paramFilter('num', 'intval');
@@ -275,10 +278,11 @@ class Project extends CtrlBase
 			throw new $this->exception('请求参数错误');
 		}
 		if ($num > 200) {
-			throw new $this->exception('一次最多生成200个');
+			throw new $this->exception('一次最多生成200个成片');
 		}
+
 		$projectSv = \service\Project::singleton();
-		return $projectSv->createProjectClipsByNum($this->userId, $id, $num);
+		return $projectSv->createProjectClipsByNum($this->userId, $projectId, $num);
 	}
 	
 	/**
@@ -584,7 +588,7 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 	{
 		$params = $this->params;
 		$chipParam = <<<EOT
-{"id":47,"name":"20260614-剪辑","topic":"","title":"","ratio":"9:16","durationType":2,"fps":30,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1781515161,"createTime":1781407310,"lensList":[{"id":160,"name":"片头","index":-1,"type":1,"createTime":1781407310,"updateTime":1781515231,"mediaIds":[189],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[912],"dubMediaIds":[],"mediaInfo":{"id":189,"name":"tmp_120c11d5fccab67b6e77ecb30b60491b81337c73c9145d5f.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/1\/e4813826d2aeceb603573d9c8e5b7598.mp4","updateTime":1781443979,"createTime":1781443979,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/5d36fe6a69e5ea134f17c2ae6b83addc.jpg","duration":2,"size":2236761},"dubCaptionInfo":{"id":912,"editingId":47,"text":"武汉的宝子们\n快看过来！\n正宗新疆炒米粉\n十年老店","font":{"text-align":"center","position":80,"font-size":35,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444274,"updateTime":1781515231,"dubKey":"77c6d879120184754f8e4a44a0b1a271","url":"","duration":0}},{"id":161,"name":"片中1","index":1,"type":2,"createTime":1781407310,"updateTime":1781515247,"mediaIds":[197],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[913],"dubMediaIds":[],"mediaInfo":{"id":197,"name":"tmp_a93d503a46d2399fb3d223a990378df0620169217cfb999e.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/2\/91a53740b9863e1606990c09aa544d2f.jpg","updateTime":1781444058,"createTime":1781444058,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":913,"editingId":47,"text":"椒顽上新品了\n四种辣度一次吃过瘾","font":{"text-align":"center","position":80,"font-size":35,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444372,"updateTime":1781515247,"dubKey":"91d80b4dcebce6289be3ca8200b7082a","url":"","duration":0}},{"id":163,"name":"片中2","index":2,"type":2,"createTime":1781444123,"updateTime":1781515306,"mediaIds":[190],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[914],"dubMediaIds":[],"mediaInfo":{"id":190,"name":"tmp_51f67d01a30bc12d0f0de6563d31f4a8bc227d374d212d58.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/6\/3ccaa96caf1b375e6b9df43ce3df2a9a.jpg","updateTime":1781444056,"createTime":1781444056,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":914,"editingId":47,"text":"锅气十足","font":{"text-align":"center","position":80,"font-size":35,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444412,"updateTime":1781515306,"dubKey":"6ee5c5b090bd5b1621f4e0e6980e81b5","url":"","duration":0}},{"id":164,"name":"片中3","index":3,"type":2,"createTime":1781444174,"updateTime":1781515296,"mediaIds":[196],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[915],"dubMediaIds":[],"mediaInfo":{"id":196,"name":"tmp_5cc3071e612c087951483296a56f08bc8bbf73459fe1f362.jpg","type":"image","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/image\/3\/8343b7cbbfd1337b335566973cfc164b.jpg","updateTime":1781444057,"createTime":1781444057,"coverURL":"","duration":0,"size":0},"dubCaptionInfo":{"id":915,"editingId":47,"text":"带上你的小伙伴们\n快来进店品尝吧","font":{"text-align":"center","position":80,"font-size":35,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444543,"updateTime":1781515296,"dubKey":"87aa0ed8414c26789e8d69e7a8cf25c9","url":"","duration":0}},{"id":162,"name":"片尾","index":100,"type":3,"createTime":1781407310,"updateTime":1781515280,"mediaIds":[185],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[916],"dubMediaIds":[],"mediaInfo":{"id":185,"name":"tmp_c18a2bb56f42a2380f074776ff851aac4cf9ee47ec88905c.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/6\/8fb18047db6b6131a95e71295470644c.mp4","updateTime":1781443889,"createTime":1781443889,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/a57b20216ba1a627daa47d962432f45c.jpg","duration":5,"size":9512834},"dubCaptionInfo":{"id":916,"editingId":47,"text":"椒顽新疆炒米粉\n让这个夏天\n辣气十足","font":{"text-align":"center","position":80,"font-size":35,"font-family":"Alibaba PuHuiTi"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781444705,"updateTime":1781515280,"dubKey":"2df1ac3ca67ee9a671e2cf56202de5f7","url":"","duration":0}}],"actorInfo":{"name":"妹坨洁儿","id":"zh_female_meituojieer_moon_bigtts","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/portal\/bigtts\/妹坨洁儿.mp3","classify":"趣味口音","resourceId":"seed-tts-1.0","language":""},"previewMediaId":189,"titleInfo":{"id":167,"updateTime":1781514962,"createTime":1781514962,"start":0,"end":6,"captionIds":[917],"title":"椒顽新疆炒米粉","captionList":[{"id":917,"editingId":47,"text":"椒顽新疆炒米粉","font":{"text-align":"center","position":13,"font-size":48,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781514962,"updateTime":1781514962}]},"musicInfo":{"id":226,"conId":5,"type":1,"url":"https:\/\/pyp-xmt.oss-cn-beijing.aliyuncs.com\/hot_music\/4\/765721312249655.mp3","name":"想你（我和你的关系）","duration":42,"updateTime":1781515341,"createTime":1781515341}}
+{"id":60,"name":"20260602-剪辑","topic":"十年老店,辣到爽,爱吃辣,美食推荐,新疆炒米粉","title":"椒顽新疆炒米粉湖大店，十年正宗新疆炒米粉老店,椒顽新疆炒米粉湖大店，湖大学生私藏炒米粉神店,椒顽新疆炒米粉湖大店，猛火现炒锅气拉满拒绝预制,椒顽新疆炒米粉湖大店，必打卡新疆炒米粉","ratio":"9:16","durationType":2,"fps":30,"volume":[],"transitionIds":[],"filterIds":[],"color":null,"background":{"type":1,"color":"","mediaList":[]},"showCaption":1,"dubType":1,"updateTime":1781618821,"createTime":1781618821,"lensList":[{"id":213,"name":"片头","index":-1,"type":1,"createTime":1781618821,"updateTime":1781618949,"mediaIds":[201,202,206,209,210,211,215,218],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[1626,1630,1631,1632,1633,1634],"dubMediaIds":[],"mediaInfo":{"id":210,"name":"1.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/6\/0f4ff6b26687557ecf1d33f597412aa1.mp4","updateTime":1781595689,"createTime":1781595689,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/69dbb65c0509a1745404e323470fc623.jpg","duration":3,"size":6247767},"dubCaptionInfo":{"id":1634,"editingId":60,"text":"湖大后街,超火新疆炒米粉","font":{"text-align":"center","position":70,"font-size":30,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781618821,"updateTime":1781618949,"dubKey":"ba7e8bd69743ecb2aa033613baba673f","url":"","duration":0}},{"id":214,"name":"片中1","index":1,"type":2,"createTime":1781618821,"updateTime":1781618995,"mediaIds":[221,222,223,224,225],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[1627,1635,1636,1637,1638,1639],"dubMediaIds":[],"mediaInfo":{"id":225,"name":"6月16日(5).mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/6\/ae95a664e5465a55d8dbe1f74f71b6d5.mp4","updateTime":1781595752,"createTime":1781595752,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/6a38a453e9d7f757c97eb89bb80eb207.jpg","duration":7,"size":11838958},"dubCaptionInfo":{"id":1635,"editingId":60,"text":"武汉首家十年老店,猛火现炒满是锅气","font":{"text-align":"center","position":70,"font-size":30,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781618821,"updateTime":1781618963,"dubKey":"03796dcab92b1ebc9eb5cc5fa15c8b47","url":"","duration":0}},{"id":216,"name":"片中2","index":2,"type":2,"createTime":1781618821,"updateTime":1781619034,"mediaIds":[207,208,216,217],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[1628,1640,1641,1642,1643,1644],"dubMediaIds":[],"mediaInfo":{"id":208,"name":"3-2.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/2\/2066d42344236add936a4226f9cc9929.mp4","updateTime":1781594946,"createTime":1781594946,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/cf01de59d3a903eb846627118912612b.jpg","duration":5,"size":8467887},"dubCaptionInfo":{"id":1642,"editingId":60,"text":"酱料新疆原产地发货,米粉爽滑挂汁","font":{"text-align":"center","position":70,"font-size":30,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781618821,"updateTime":1781619021,"dubKey":"06c978d9d41b50403f176e4058ac2680","url":"","duration":0}},{"id":215,"name":"片尾","index":100,"type":3,"createTime":1781618821,"updateTime":1781619069,"mediaIds":[212,213,214,219,220,226,227],"originalSound":0,"transitionType":1,"transitionIds":[],"duration":0,"dubType":1,"dubCaptionIds":[1629,1645,1646,1647,1648,1649],"dubMediaIds":[],"mediaInfo":{"id":219,"name":"2-3.mp4","type":"video","url":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/video\/2\/f4a105542453d42fb5d521bcf9d05484.mp4","updateTime":1781595740,"createTime":1781595740,"coverURL":"https:\/\/yinhuo-ai.oss-cn-beijing.aliyuncs.com\/resources\/cover\/38e71d59cdc16cae537177f7ebfb0887.jpg","duration":5,"size":8915644},"dubCaptionInfo":{"id":1647,"editingId":60,"text":"下课夜宵来一份,热辣治愈超满足","font":{"text-align":"center","position":70,"font-size":30,"font-family":"Microsoft YaHei"},"style":{"styleType":1,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000001"},"createTime":1781618821,"updateTime":1781619058,"dubKey":"2b5c37c85efb6914f2757fb5148b7aaa","url":"","duration":0}}],"actorInfo":{"name":"霸气青叔","id":"zh_male_baqiqingshu_mars_bigtts","url":"https:\/\/lf3-static.bytednsdoc.com\/obj\/eden-cn\/lm_hz_ihsph\/ljhwZthlaukjlkulzlp\/console\/bigtts\/zh_male_baqiqingshu_mars_bigtts.mp3","classify":"豆包大模型2.0","resourceId":"seed-tts-1.0","language":""},"previewMediaId":210,"titleInfo":{"id":393,"updateTime":1781618821,"createTime":1781618821,"start":0,"end":5,"captionIds":[1622],"title":"椒顽新疆炒米粉\n湖大店不用赴疆吃地道炒米粉","captionList":[{"id":1622,"editingId":60,"text":"椒顽新疆炒米粉\n湖大店不用赴疆吃地道炒米粉","font":{"text-align":"center","position":20,"font-size":40,"font-family":"SimSun"},"style":{"styleType":2,"color":"#ffffff","fontType":1,"background":"#ffffff","border-color":"#ffffff","border-size":2,"effectColorStyle":"CS0001-000005"},"createTime":1781618821,"updateTime":1781618821}]},"musicInfo":{"id":490,"conId":916,"type":1,"url":"https:\/\/pyp-xmt.oss-cn-beijing.aliyuncs.com\/hot_music\/1\/765731198455882.mp3","name":"青丝（创业进行曲）","duration":68,"updateTime":1781618821,"createTime":1781618821}}
 EOT;
 	
 		$chipParam = preg_replace('/[\x00-\x1F\x7F]/', ',', $chipParam);
@@ -592,9 +596,8 @@ EOT;
 
 	
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true, 512, JSON_INVALID_UTF8_IGNORE);
+//$chipParam['fps'] = 60;
 
-print_r($chipParam);exit;	
-	
 		$aliEditingSv = \service\AliEditing::singleton();
 		$tries = 3;
 		do {

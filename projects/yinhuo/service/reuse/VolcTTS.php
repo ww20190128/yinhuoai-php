@@ -278,6 +278,7 @@ print_r($response);exit;
     		curl_close($ch); // 关闭 cURL 资源
     	}
     	preg_match_all('/\{\s*"code":.*?\}(?=\s*\{|\s*$)/s', $responseContent, $ttsContentArr);
+
     	$content = '';
     	$subtitles = array();
     	if (!empty($ttsContentArr['0'])) foreach ($ttsContentArr['0'] as $row) {
