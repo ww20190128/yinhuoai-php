@@ -605,10 +605,7 @@ class Folder extends ServiceBase
     			$dubFileEtt->set('url', $url);
     			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
     				$dubFileEtt->set('duration', $mediaInfo['duration']);
-    			} else {
-    				var_export($url);
-    				var_export($mediaInfo);exit;
-    			}
+    			} 
     			$dubFileDao->update($dubFileEtt);
     		} else {
     		
