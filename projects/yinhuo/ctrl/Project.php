@@ -590,10 +590,12 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 			'speaker' => 'zh_male_ruyayichen_emo_v2_mars_bigtts',
 		);
 		$folderSv = \service\Folder::singleton();
-		$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
+		//$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
 		
+		$url = '';
+		$mediaInfo = $folderSv->getMediaInfoByUrl($url); // 注册到媒资
 		
-		print_r($ttsResult);exit;
+		print_r($mediaInfo);exit;
 		
 		
 		$params = $this->params;
