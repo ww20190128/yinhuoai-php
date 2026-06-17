@@ -1033,7 +1033,7 @@ $lensRow['transitionIds'] = array('fade');
 	public function submitMediaProducingJob($chipParam)
 	{
 		$timeline = self::getTimeline($chipParam);
-		
+	print_r($timeline);exit;	
 
 		$orientation = 'Horizontal';
 		$width = $height = 0;
