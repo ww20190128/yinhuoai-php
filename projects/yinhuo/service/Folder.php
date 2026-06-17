@@ -557,7 +557,6 @@ class Folder extends ServiceBase
     		$tries = 3;
     		do {
     			$ttsResult = $volcTTSSv->runByV3($dubCaptionInfo['text'], $speaker, $ttsParams);
- 
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content'])) { // 配音成功
     			$content = $ttsResult['content'];
@@ -592,15 +591,17 @@ class Folder extends ServiceBase
     		if (!empty($ossResult)) {
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     			$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
-    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
-    			$dubFileEtt->set('url', $url);
-    			$dubFileEtt->set('duration', empty($mediaInfo['duration']) ? 0 : $mediaInfo['duration']);
-    			$dubFileDao->update($dubFileEtt);
+    			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
+    				$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    				$dubFileEtt->set('url', $url);
+    				$dubFileEtt->set('duration', $mediaInfo['duration']);
+    				$dubFileDao->update($dubFileEtt);
+    			}
     		}
     	} elseif (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {
     		$mediaInfo = $this->getMediaInfoByUrl($dubFileEtt->url); // 注册到媒资
-    		if (!empty($mediaInfo)) {
-    			$dubFileEtt->set('duration', empty($mediaInfo['duration']) ? 0 : $mediaInfo['duration']);
+    		if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
+    			$dubFileEtt->set('duration', $mediaInfo['duration']);
     			$dubFileDao->update($dubFileEtt);
     		}
     	}
