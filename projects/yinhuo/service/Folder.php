@@ -552,6 +552,9 @@ class Folder extends ServiceBase
     			$content = @file_get_contents($ttsFile);
     		}
     	}
+    	$extension = 'mp3';
+    	$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
+    	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     	if (empty($content)) { // 没有原内容，从火山云获取
     		$tries = 3;
     		do {
@@ -559,17 +562,24 @@ class Folder extends ServiceBase
     		} while (empty($ttsResult['content']) && --$tries > 0);
     		if (!empty($ttsResult['content']) && strlen($ttsResult['content']) > 0) { // 配音成功
     			$content = $ttsResult['content'];
-    			@file_put_contents($ttsFile, $content);
+ 				@file_put_contents($ttsFile, $content);
     		} else { // 生成失败
     			return false;
     		}
     		$subtitles = empty($ttsResult['subtitles']) ? '' : $ttsResult['subtitles'];
+    		$maxEndTime = 0;
+    		foreach ($subtitles as $val) {
+    			$subtitlesArr = empty($val['subtitles']) ? array() : $val['subtitles'];
+    			foreach ($subtitlesArr as $v) {
+    				$maxEndTime = max($maxEndTime, $v['endTime']);
+    			}
+    		}
     		if (empty($dubFileEtt) && !empty($subtitles)) {
     			$dubFileEtt = $dubFileDao->getNewEntity();
     			$dubFileEtt->id = $dubId;
     			$dubFileEtt->content = json_encode($subtitles, JSON_UNESCAPED_UNICODE);
     			$dubFileEtt->url = '';
-    			$dubFileEtt->duration = 0;
+    			$dubFileEtt->duration = $maxEndTime;
     			$dubFileEtt->actorSpeaker = $speaker;
     			$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
     			$dubFileEtt->text = $dubCaptionInfo['text'];
@@ -584,28 +594,24 @@ class Folder extends ServiceBase
     		$ossSv = \service\reuse\OSS::singleton();
     		$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
-    		$extension = 'mp3';
-    		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
     		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
-    			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
-
     			$tries = 3;
     			do {
     				$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
     			} while (empty($mediaInfo['duration']) && --$tries > 0);
+    			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+    			$dubFileEtt->set('url', $url);
     			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
-    				$dubFileEtt = $dubFileDao->readByPrimary($dubId);
-    				$dubFileEtt->set('url', $url);
     				$dubFileEtt->set('duration', $mediaInfo['duration']);
-    				$dubFileDao->update($dubFileEtt);
     			} else {
-    				
+
     				var_export($url);
     				var_export($mediaInfo);exit;
     			}
+    			$dubFileDao->update($dubFileEtt);
     		} else {
-    			var_export($ossResult);exit;
+    		
     		}
     	} 
     	if (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {

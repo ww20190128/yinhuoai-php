@@ -590,9 +590,9 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 			'speaker' => 'zh_male_ruyayichen_emo_v2_mars_bigtts',
 		);
 		$folderSv = \service\Folder::singleton();
-		//$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
+	$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
 		
-		$url = '';
+		$url = 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/resources/dubAudio/4053bb5d1ac75863d3a37e0edad0937d.mp3';
 		$mediaInfo = $folderSv->getMediaInfoByUrl($url); // 注册到媒资
 		
 		print_r($mediaInfo);exit;
