@@ -267,8 +267,6 @@ print_r($response);exit;
     			return false;
     		}
     		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    		
-
     		if ($httpCode !== 200) {
     			return false;
     		}
@@ -292,7 +290,7 @@ print_r($response);exit;
     			if (empty($words)) {
     				continue;
     			}
-    			$text = $rowArr['sentence']['text'];
+    			$sentenceText = $rowArr['sentence']['text'];
     			$wordArr = array();
     			foreach ($words as $word) {
     				$wordArr[] = array(
@@ -302,7 +300,7 @@ print_r($response);exit;
     				);
     			}
     			$subtitles[] = array(
-    				'text' => $text,
+    				'text' => $sentenceText,
     				'words' => $wordArr,
     			);
     			
@@ -314,7 +312,6 @@ print_r($response);exit;
     			$content .= $subContent;
     		}
     	}
-    	
     	// 字幕分段
     	$subtitles = processSubtitle($subtitles);
     	return array(
@@ -422,7 +419,7 @@ print_r($response);exit;
     			if (empty($words)) {
     				continue;
     			}
-    			$text = $rowArr['sentence']['text'];
+    			$sentenceText = $rowArr['sentence']['text'];
     			$wordArr = array();
     			foreach ($words as $word) {
     				$wordArr[] = array(
@@ -432,7 +429,7 @@ print_r($response);exit;
     				);
     			}
     			$subtitles[] = array(
-    				'text' => $text,
+    				'text' => $sentenceText,
     				'words' => $wordArr,
     			);
     			

@@ -2058,9 +2058,9 @@ function processSubtitle($subtitleData)
 			// 遇到标点，完成当前分段
 			if ($hasPunctuation && !empty($currentText)) {
 				$processedItem['subtitles'][] = array(
-						'text' => $currentText,
-						'startTime' => $currentStartTime,
-						'endTime' => $currentEndTime
+					'text' => $currentText,
+					'startTime' => $currentStartTime,
+					'endTime' => $currentEndTime
 				);
 				// 重置当前分段
 				$currentText = '';
