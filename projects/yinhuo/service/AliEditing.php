@@ -45,16 +45,23 @@ class AliEditing extends ServiceBase
 	/**
 	 * 视频默认时长
 	 *
-	 * @var object
+	 * @var int
 	 */
 	const VIDEO_DEFAULT_DURATION = 7;
 	
 	/**
 	 * 转场时长
 	 *
-	 * @var object
+	 * @var int
 	 */
 	const TRANSITION_DURATION = 1;
+	
+	/**
+	 * 字号放大比例，4倍
+	 *
+	 * @var int
+	 */
+	const FONT_RATION = 4;
 	
 	/**
 	 * 单例模式
@@ -202,7 +209,7 @@ class AliEditing extends ServiceBase
 				$effectAI_ASR['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
+				$effectAI_ASR['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * self::FONT_RATION;
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$effectAI_ASR['Font'] = $captionRow['font']['font-family'];
@@ -272,10 +279,10 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClip['Alignment'] = $captionRow['font']['text-align'] == 'center' ? 'TopCenter' : 'TopLeft';
 			}
 			if (!empty($captionRow['font']['position'])) { // 位置 0~ 100
-				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
+				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position'])) * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48 
-				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * self::FONT_RATION;
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
@@ -343,8 +350,7 @@ class AliEditing extends ServiceBase
 				$subtitleTrackClip['Y'] = min(100, max(0, $captionRow['font']['position']))  * 0.01;
 			}
 			if (!empty($captionRow['font']['font-size'])) { // 字号  12 ~ 48
-				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * 3;
-				
+				$subtitleTrackClip['FontSize'] = min(48, max(12, $captionRow['font']['font-size'])) * self::FONT_RATION;
 			}
 			if (!empty($captionRow['font']['font-family'])) { // 字体
 				$subtitleTrackClip['Font'] = $captionRow['font']['font-family'];
@@ -1036,21 +1042,19 @@ $lensRow['transitionIds'] = array('fade');
 	{
 		$timeline = self::getTimeline($chipParam);
 
-		$orientation = 'Horizontal';
+		//$orientation = 'Vertical';
 		$width = $height = 0;
-		if ($chipParam['ratio'] == '9:16') { // Horizontal
-			$orientation = 'Vertical'; // 竖屏
-			
-			$width = 900;
-			$height = 1600;
+		if ($chipParam['ratio'] == '9:16') {
+			//$orientation = 'Vertical'; // 竖屏
+			$height = 1920;
+			$width = 1080;
 		} elseif ($chipParam['ratio'] == '16:9') {
-			$orientation = 'Horizontal'; // 横屏
-			
-			$width = 1600;
-			$height = 900;
+			//$orientation = 'Horizontal'; // 横屏
+			$width = 1920;
+			$height = 1080;
 		} elseif ($chipParam['ratio'] == '1:1') {
-			$width = 900;
-			$height = 900;
+			$width = 1080;
+			$height = 1080;
 		}
 		$aliEditingConf = self::$instance->frame->conf['aliEditing'];
 		$mediaURL = $aliEditingConf['chipUrlBase'] . $chipParam['id'] . '_' . strtotime(date('Y-m-d H:i:s')) . '_' . rand(1, 99999) . '.mp4';
@@ -1060,8 +1064,6 @@ $lensRow['transitionIds'] = array('fade');
 				'Fps' => $chipParam['fps'], // 输出视频流帧率
 			),	
 		);
-		
-		
 		if (!empty($orientation)) {
 			$outputMediaConfig['Video']['Orientation'] = $orientation;
 		}
@@ -1070,6 +1072,7 @@ $lensRow['transitionIds'] = array('fade');
 			$outputMediaConfig['Width'] = $width;
 			$outputMediaConfig['Height'] = $height;
 		}
+
 		$serveUrl = $aliEditingConf = self::$instance->frame->conf['serve_url'];
 		$userData = array(
 			'NotifyAddress' => $serveUrl . '?op=Project.producingJobcallback', // 为任务完成的回调url
@@ -1081,8 +1084,6 @@ $lensRow['transitionIds'] = array('fade');
 		    $request->userData = json_encode($userData, JSON_UNESCAPED_UNICODE);
 		    $response = self::$client->submitMediaProducingJob($request);
 		    $jobId = empty($response->body->jobId) ? array() : $response->body->jobId;
-		    
-
 		} catch (DaraUnableRetryException $e) {
 			return false;
 		} catch (TeaUnableRetryError $e) {

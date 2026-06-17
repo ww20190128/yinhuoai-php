@@ -244,10 +244,6 @@ class Project extends CtrlBase
 	public function createProjectClips()
 	{
 		$params = $this->params;
-		
-$params->ids = 190;
-$this->userId = 48;
-
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
 		}
@@ -266,9 +262,6 @@ $this->userId = 48;
 	 */
 	public function createProjectClipsByNum()
 	{
-$this->userId = 48;
-$this->params->id = 'f48a353bcc814e66ac6141b87860c39b';
-$this->params->num = 1;
 		$params = $this->params;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
@@ -597,7 +590,19 @@ EOT;
 		$chipParam = preg_replace('/[\x00-\x1F\x7F]/', ',', $chipParam);
 
 		$chipParam = empty($chipParam) ? array() : json_decode($chipParam, true, 512, JSON_INVALID_UTF8_IGNORE);
-//$chipParam['fps'] = 60;
+
+
+		/**
+		 * 标题 
+		 * 12 * 5~48
+		 * 
+		 * 
+		 */
+$chipParam['titleInfo']['captionList']['0']['font']['position'] = 50;
+$chipParam['titleInfo']['captionList']['0']['font']['font-size'] = 12; 
+$chipParam['ratio'] = '9:16';
+
+
 
 		$aliEditingSv = \service\AliEditing::singleton();
 		$tries = 3;
