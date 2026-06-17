@@ -575,6 +575,7 @@ class Folder extends ServiceBase
     				$maxEndTime = max($maxEndTime, $v['endTime']);
     			}
     		}
+    		$maxEndTime += 0.5; // 加上停顿
     		if (empty($dubFileEtt) && !empty($subtitles)) {
     			$dubFileEtt = $dubFileDao->getNewEntity();
     			$dubFileEtt->id = $dubId;
