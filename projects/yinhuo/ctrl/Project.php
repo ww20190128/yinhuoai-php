@@ -266,9 +266,9 @@ $this->userId = 48;
 	 */
 	public function createProjectClipsByNum()
 	{
-// $this->userId = 48;
-// $this->params->id = 'f08e0c36280943c4adecbdd0e230d687';
-// $this->params->num = 1;
+$this->userId = 48;
+$this->params->id = 'f48a353bcc814e66ac6141b87860c39b';
+$this->params->num = 1;
 		$params = $this->params;
 		if (empty($this->userId)) {
 			throw new $this->exception('登录已过期，请重新登录', array('status' => 2));
@@ -284,7 +284,6 @@ $this->userId = 48;
 		if ($num > 200) {
 			throw new $this->exception('一次最多生成200个成片');
 		}
-
 		$projectSv = \service\Project::singleton();
 		return $projectSv->createProjectClipsByNum($this->userId, $projectId, $num);
 	}

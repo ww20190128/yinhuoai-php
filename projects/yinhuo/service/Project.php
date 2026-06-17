@@ -607,7 +607,7 @@ class Project extends ServiceBase
 				continue;
 			}
 			if (!empty($projectClipEtt->mediaURL)) { // 有生成
-			//	continue;
+				continue;
 			}
 			$tries = 3;
 			do {
@@ -653,11 +653,9 @@ class Project extends ServiceBase
     		$projectEtt->set('editingInfo', json_encode($editingInfo, JSON_UNESCAPED_UNICODE));
     		$projectDao->update($projectEtt);
     	}
-
     	$chipParamList = array();
     	for ($index = 1; $index <= $needCreateNum; $index++) {
     		$chipParam = $editingSv->randomChipParam($editingInfo);
- 
     		if (empty($chipParam)) {
     			continue;
     		}
@@ -665,7 +663,7 @@ class Project extends ServiceBase
     	}
     	$projectClipDao = \dao\ProjectClip::singleton();
     	$clipNum = 0;
-    	foreach ($chipParamList as $chipParam) {
+    	if (!empty($chipParamList)) foreach ($chipParamList as $chipParam) {
     		$projectClipEtt = $projectClipDao->getNewEntity();
     		$projectClipEtt->projectId = $projectEtt->id;
     		$projectClipEtt->chipParam = json_encode($chipParam, JSON_UNESCAPED_UNICODE);
@@ -673,13 +671,13 @@ class Project extends ServiceBase
     		$projectClipEtt->updateTime = $now;
     		$tries = 3;
     		do {
-    			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam);
+    			$jobId = $aliEditingSv->submitMediaProducingJob($chipParam); // 创建合成任务
     		} while (empty($jobId) && --$tries > 0);
     		if (empty($jobId)) {
     			continue;
     		}
     		$projectClipEtt->jobId = $jobId;
-    		$projectClipEtt->jobStatus = 'Processing';
+    		$projectClipEtt->jobStatus = 'Processing'; // 合成中
     		$projectClipId = $projectClipDao->create($projectClipEtt);
     		$clipNum++;
     	}
