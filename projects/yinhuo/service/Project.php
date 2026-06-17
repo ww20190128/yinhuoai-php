@@ -382,7 +382,7 @@ class Project extends ServiceBase
     		throw new $this->exception('用户不存在');
     	}
     	$projectDao = \dao\Project::singleton();
-    	if (is_numeric($projectEtt)) {
+    	if (is_string($projectEtt)) {
     		$projectEtt = $projectDao->readByPrimary($projectEtt);
     	}  	
     	if (empty($projectEtt) || $projectEtt->status == \constant\Common::DATA_DELETE) {
