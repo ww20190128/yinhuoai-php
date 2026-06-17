@@ -554,6 +554,7 @@ class Folder extends ServiceBase
     	}
     	$extension = 'mp3';
     	$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
+    	$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
     	$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     	if (empty($content)) { // 没有原内容，从火山云获取
     		$tries = 3;
@@ -592,7 +593,7 @@ class Folder extends ServiceBase
     	// 需要生成音频链接
     	if (empty($dubFileEtt->url) && !empty($content)) {
     		$ossSv = \service\reuse\OSS::singleton();
-    		$ossConf = cfg('server.oss.yinhuo'); // 阿里云配置
+    		
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
@@ -605,7 +606,6 @@ class Folder extends ServiceBase
     			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
     				$dubFileEtt->set('duration', $mediaInfo['duration']);
     			} else {
-
     				var_export($url);
     				var_export($mediaInfo);exit;
     			}
