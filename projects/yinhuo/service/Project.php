@@ -607,7 +607,7 @@ class Project extends ServiceBase
 				continue;
 			}
 			if (!empty($projectClipEtt->mediaURL)) { // 有生成
-				continue;
+			//	continue;
 			}
 			$tries = 3;
 			do {
