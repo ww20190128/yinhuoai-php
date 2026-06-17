@@ -56,7 +56,7 @@ class DubFile extends EntityBase
      *
      * @var varchar
      */
-    public $actorName = 256;
+    public $actorName = '';
 
     /**
      * 配音分类

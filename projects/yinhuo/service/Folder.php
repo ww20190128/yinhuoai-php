@@ -568,7 +568,7 @@ class Folder extends ServiceBase
     			return false;
     		}
     		$subtitles = empty($ttsResult['subtitles']) ? '' : $ttsResult['subtitles'];
-    		$maxEndTime = 0;
+    		$maxEndTime = 0; // 最大的播放时长
     		foreach ($subtitles as $val) {
     			$subtitlesArr = empty($val['subtitles']) ? array() : $val['subtitles'];
     			foreach ($subtitlesArr as $v) {
@@ -580,6 +580,7 @@ class Folder extends ServiceBase
     			$dubFileEtt->id = $dubId;
     			$dubFileEtt->content = json_encode($subtitles, JSON_UNESCAPED_UNICODE);
     			$dubFileEtt->url = '';
+    			$dubFileEtt->actorName = $maxEndTime;
     			$dubFileEtt->duration = $maxEndTime;
     			$dubFileEtt->actorSpeaker = $speaker;
     			$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
@@ -589,11 +590,9 @@ class Folder extends ServiceBase
     			$dubFileDao->create($dubFileEtt);
     		}
     	}
-  
     	// 需要生成音频链接
     	if (empty($dubFileEtt->url) && !empty($content)) {
     		$ossSv = \service\reuse\OSS::singleton();
-    		
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
