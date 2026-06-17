@@ -656,6 +656,8 @@ class Project extends ServiceBase
     	$chipParamList = array();
     	for ($index = 1; $index <= $needCreateNum; $index++) {
     		$chipParam = $editingSv->randomChipParam($editingInfo);
+    		
+    		print_r($chipParam);exit;
     		if (empty($chipParam)) {
     			continue;
     		}
