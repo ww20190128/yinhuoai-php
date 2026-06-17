@@ -586,7 +586,7 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 			'id' => 'zh_male_ruyayichen_emo_v2_mars_bigtts',
 		);
 		$captionRow = array(
-			'text' => '秘制酱料新疆邮寄,粉条筋道入味',
+			'text' => '武汉首家十年老店,猛火现炒满是锅气',
 			'speaker' => 'zh_male_ruyayichen_emo_v2_mars_bigtts',
 		);
 		$folderSv = \service\Folder::singleton();

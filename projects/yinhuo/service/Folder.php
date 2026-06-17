@@ -586,7 +586,7 @@ class Folder extends ServiceBase
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$extension = 'mp3';
     		$profileKey = "resources/dubAudio/{$dubId}.{$extension}"; // 上传的目录
-    		$ossResult = $ossSv::publicUploadContent($ossConf['BUCKET'], $profileKey, $content);
+    		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
     			$url = trim($ossConf['JSOSS'], 'resources/') . DS . $profileKey;
     			$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
@@ -595,9 +595,11 @@ class Folder extends ServiceBase
     				$dubFileEtt->set('url', $url);
     				$dubFileEtt->set('duration', $mediaInfo['duration']);
     				$dubFileDao->update($dubFileEtt);
+    			} else {
+    				var_export($mediaInfo);exit;
     			}
     		} else {
-    			
+    			var_export($ossResult);exit;
     		}
     	} 
     	if (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {
