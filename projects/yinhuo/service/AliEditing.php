@@ -100,11 +100,18 @@ class AliEditing extends ServiceBase
 		if (empty($captionRow['url']) || (isset($captionRow['duration']) && $captionRow['duration'] <= 0) || empty($captionRow['subtitles'])) {
 			// 配音演员
 			$actorInfo = empty($editingInfo['actorInfo']) ? array() : $editingInfo['actorInfo'];
-			$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);		
-			if (!empty($ttsResult['url'])) {
+			$tries = 3;
+			do {
+				$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
+			} while (empty($ttsResult['duration']) && --$tries > 0);
+	
+			if (!empty($ttsResult['url']) && !empty($ttsResult['duration'])) {
 				$captionRow['url'] = $ttsResult['url'];
 				$captionRow['subtitles'] = $ttsResult['subtitles'];
 				$captionRow['duration'] = $ttsResult['duration'];
+			} else {
+				// 配音失败
+				@file_put_contents(CACHE_PATH . 'getTts.txt', json_encode($ttsResult));
 			}
 		}
 
@@ -443,6 +450,7 @@ class AliEditing extends ServiceBase
 			}
 		} else {
 			$lensDubAudioTrackClipsResult = self::getLensDubAudioTrackClips($editingInfo);
+
 			if (!empty($lensDubAudioTrackClipsResult['audioTrackClips'])) {
 				$lensDubAudioTrackClips = $lensDubAudioTrackClipsResult['audioTrackClips'];
 			}
@@ -519,9 +527,7 @@ class AliEditing extends ServiceBase
 					'VideoTrackClips' => array_values($lensMediaVideoTrackClips),
 				);
 			} elseif (!empty($lensDubAudioTrackClips)) { // 镜头配音
-				
-				
-			
+
 				$timelineIn = 0;
 				$dubTimelineInMap = array(); // 配音时间轴（入点）
 				foreach ($lensMediaVideoTrackClips as $lensIndex => $VideoTrackClip) {
@@ -609,6 +615,7 @@ class AliEditing extends ServiceBase
 				}
 			}
 			if (!empty($dubSubtitleTrackClips)) {
+		
 				$result['SubtitleTracks'][] = array(
 					'SubtitleTrackClips' => $dubSubtitleTrackClips,
 				);
@@ -701,6 +708,15 @@ class AliEditing extends ServiceBase
 		$subtitleTrackClips = array();
 		if (!empty($editingInfo['titleInfo']))  {
 			$titleInfo = $editingInfo['titleInfo'];
+			if (!empty($titleInfo['captionList'])) {
+				usort($titleInfo['captionList'], function($a, $b) {
+					// 取各自position值比较
+					$posA = empty($a['font']['position']) ? 0 : $a['font']['position'];
+					$posB = empty($b['font']['position']) ? 0 : $b['font']['position'];
+					// 升序：小的放前面
+					return $posA - $posB;
+				});
+			}
 			if (!empty($titleInfo['captionList'])) foreach ($titleInfo['captionList'] as $captionRow) {
 				$subtitleTrackClip = self::captionToSubtitleTrack($captionRow, $titleInfo);
 				if (!empty($subtitleTrackClip)) {

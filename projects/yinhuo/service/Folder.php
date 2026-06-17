@@ -533,7 +533,7 @@ class Folder extends ServiceBase
     	if (!empty($actorInfo['language'])) {
     		$ttsParams['language'] = $actorInfo['language'];
     	}
-    	$dubId = md5($speaker . $dubCaptionInfo['text']); // 字幕唯一标识
+    	$dubId = md5($speaker . $dubCaptionInfo['text']); // 字幕的唯一标识
     	$dubFileDao = \dao\DubFile::singleton();
     	$dubFileEtt = $dubFileDao->readByPrimary($dubId);
     	$volcTTSSv = \service\reuse\VolcTTS::singleton();
@@ -568,9 +568,9 @@ class Folder extends ServiceBase
     	if (empty($dubFileEtt)) {
     		$dubFileEtt = $dubFileDao->getNewEntity();
     		$dubFileEtt->id = $dubId;
-    		$dubFileEtt->duration = 0;
     		$dubFileEtt->content = empty($ttsResult['subtitles']) ? '' : json_encode($ttsResult['subtitles'], JSON_UNESCAPED_UNICODE);
     		$dubFileEtt->url = '';
+    		$dubFileEtt->duration = 0;
     		$dubFileEtt->actorSpeaker = $speaker;
     		$dubFileEtt->resourceId = empty($ttsResult['resourceId']) ? '' : $ttsResult['resourceId'];
     		$dubFileEtt->text = $dubCaptionInfo['text'];

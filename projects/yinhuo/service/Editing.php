@@ -1423,12 +1423,19 @@ class Editing extends ServiceBase
     	if (!empty($editingInfo['dubCaptionList'])) {
     		$dubCaptionInfo = self::randomOne($editingInfo['dubCaptionList']);
     		if (!empty($editingInfo['actorInfo']) && !empty($dubCaptionInfo['text'])) {
-    			$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
-    			if (!empty($ttsResult['id'])) { // 配音成功
+    			$tries = 3;
+    			do {
+    				$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
+    			} while (empty($ttsResult['duration']) && --$tries > 0);
+    			
+    			if (!empty($ttsResult['id']) && !empty($ttsResult['duration'])) { // 配音成功
     				$dubCaptionInfo['dubKey'] = $ttsResult['id'];
     				$dubCaptionInfo['url'] = $ttsResult['url'];
     				$dubCaptionInfo['duration'] = $ttsResult['duration'];
     				$editingInfo['dubCaptionInfo'] = $dubCaptionInfo;
+    			} else {
+    				// 配音失败
+    				@file_put_contents(CACHE_PATH . 'getTts.txt', json_encode($ttsResult));
     			}
     		}
     	}
@@ -1458,7 +1465,7 @@ class Editing extends ServiceBase
     	
     	$lensList = $editingInfo['lensList'];
     	$editingInfo['previewMediaId'] = 0; // 预览视频的媒体id
-    	
+
     	foreach ($editingInfo['lensList'] as $lensKey => $lensRow) {
     		// 媒体
     		if (!empty($lensRow['mediaList'])) {
@@ -1472,15 +1479,22 @@ class Editing extends ServiceBase
     		}
     		if (empty($editingInfo['dubCaptionInfo']) && empty($editingInfo['dubMediaInfo'])) { // 没有全局配音，使用镜头配音
     			$lensDub = array(); // 镜头配音
+    	
     			if (!empty($lensRow['dubCaptionList'])) {
     				$dubCaptionInfo = $lensRow['dubCaptionList'][array_rand($lensRow['dubCaptionList'], 1)];
     				if (!empty($editingInfo['actorInfo'])) { // 演员
-    					$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
-    					if (!empty($ttsResult['id'])) { // 配音成功
+    					$tries = 3;
+    					do {
+    						$ttsResult = $folderSv->getTts($editingInfo['actorInfo'], $dubCaptionInfo);
+    					} while (empty($ttsResult['duration']) && --$tries > 0);
+    					if (!empty($ttsResult['id']) && !empty($ttsResult['duration'])) { // 配音成功
     						$dubCaptionInfo['dubKey'] = $ttsResult['id'];
     						$dubCaptionInfo['url'] = $ttsResult['url'];
     						$dubCaptionInfo['duration'] = $ttsResult['duration'];
     						$lensDub['dubCaptionInfo'] = $dubCaptionInfo;
+    					} else { // 生成配音失败
+    						// 配音失败
+    						@file_put_contents(CACHE_PATH . 'getTts.txt', json_encode($ttsResult));
     					}
     				}
     			}
