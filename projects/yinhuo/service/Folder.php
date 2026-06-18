@@ -597,30 +597,32 @@ class Folder extends ServiceBase
     		$ossSv->init($ossConf['ACCESS_KEY_ID'], $ossConf['ACCESS_KEY_SECRET']);
     		$ossResult = $ossSv::privateUploadContent($ossConf['BUCKET'], $profileKey, $content);
     		if (!empty($ossResult)) {
-    			$tries = 3;
-    			do {
-    				$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
-    			} while (empty($mediaInfo['duration']) && --$tries > 0);
     			$dubFileEtt = $dubFileDao->readByPrimary($dubId);
+//     			$tries = 3;
+//     			do {
+//     				$mediaInfo = $this->getMediaInfoByUrl($url); // 注册到媒资
+//     			} while (empty($mediaInfo['duration']) && --$tries > 0);
+//     			
+    			
+//     			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
+//     				$dubFileEtt->set('duration', $mediaInfo['duration']);
+//     			} 
     			$dubFileEtt->set('url', $url);
-    			if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
-    				$dubFileEtt->set('duration', $mediaInfo['duration']);
-    			} 
     			$dubFileDao->update($dubFileEtt);
     		} else {
     		
     		}
     	} 
-    	if (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {
-    		$tries = 3;
-    		do {
-    			$mediaInfo = $this->getMediaInfoByUrl($dubFileEtt->url); // 注册到媒资
-    		} while (empty($mediaInfo['duration']) && --$tries > 0);
-    		if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
-    			$dubFileEtt->set('duration', $mediaInfo['duration']);
-    			$dubFileDao->update($dubFileEtt);
-    		}
-    	}
+//     	if (!empty($dubFileEtt->url) && $dubFileEtt->duration <= 0) {
+//     		$tries = 3;
+//     		do {
+//     			$mediaInfo = $this->getMediaInfoByUrl($dubFileEtt->url); // 注册到媒资
+//     		} while (empty($mediaInfo['duration']) && --$tries > 0);
+//     		if (!empty($mediaInfo['duration']) && $mediaInfo['duration'] > 0) {
+//     			$dubFileEtt->set('duration', $mediaInfo['duration']);
+//     			$dubFileDao->update($dubFileEtt);
+//     		}
+//     	}
     	return array(
     		'id' 		=> $dubId,
     		'duration'	=> $dubFileEtt->duration,

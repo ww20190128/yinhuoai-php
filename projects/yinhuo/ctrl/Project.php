@@ -591,7 +591,9 @@ $chipParam1 = empty($chipParam1) ? array() : json_decode($chipParam1, true);
 		);
 		$folderSv = \service\Folder::singleton();
 	$ttsResult = $folderSv->getTts($actorInfo, $captionRow, true);	
-		
+
+	_e();exit;
+	print_r($ttsResult);exit;
 		$url = 'https://yinhuo-ai.oss-cn-beijing.aliyuncs.com/resources/dubAudio/4053bb5d1ac75863d3a37e0edad0937d.mp3';
 		$mediaInfo = $folderSv->getMediaInfoByUrl($url); // 注册到媒资
 		
