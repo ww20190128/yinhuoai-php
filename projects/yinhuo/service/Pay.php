@@ -260,7 +260,7 @@ class Pay extends ServiceBase
 // 		}
 // 		$signDataStr = implode('&', $signDataArr);
 		ksort($signData);
-		$signDataStr = json_encode($signData, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+		$signDataStr = json_encode($signData, JSON_UNESCAPED_UNICODE);
 $uri = '/xpay/query_user_balance';
 		$uri = 'requestVirtualPayment';
 		$mode = 'short_series_goods'; // 支付的类型 道具直购
