@@ -271,7 +271,7 @@ $uri = '/xpay/query_user_balance';
 			'mode' => $mode,
 			'paySig' => $paySig,
 			'signature' => $signature,
-			//'sessionKey' => $sessionKey,
+			'sessionKey' => $sessionKey,
 			'signDataStr' => $signDataStr,
 		);
 		return $result;
