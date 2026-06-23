@@ -218,12 +218,15 @@ class User extends ServiceBase
 
     	// 绑定分享用户
     	$level = empty($userEtt->parentUserId) ? 1 : $userEtt->level;
-    	
+   print_r($info);
+   
+   print_r($userEtt);
     	if (!empty($info['parentUserId']) && $info['parentUserId'] != $userEtt->parentUserId) {
     		if (!empty($userEtt->parentUserId)) {
     			throw new $this->exception('账号已绑定过分销');
     		}
     		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId); // 上级
+print_r($parentUserEtt);
     		if (!empty($parentUserEtt) && $parentUserEtt->status != \constant\Common::DATA_DELETE) {
     			if (!empty($parentUserEtt->parentUserId)) {
     				$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
@@ -237,6 +240,8 @@ class User extends ServiceBase
     			}
     			$userEtt->set('level', $level);
     			$userEtt->set('parentUserId', $info['parentUserId']);
+    			
+    			echo "xxx";
     		}
     	}
     	if (!empty($info['imageInfo'])) {
