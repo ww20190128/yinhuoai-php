@@ -218,9 +218,9 @@ class User extends ServiceBase
 
     	// 绑定分享用户
     	$level = empty($userEtt->parentUserId) ? 1 : $userEtt->level;
-   print_r($info);
-   
-   print_r($userEtt);
+    	
+    	
+var_dump($info['parentUserId'] != $userEtt->parentUserId);
     	if (!empty($info['parentUserId']) && $info['parentUserId'] != $userEtt->parentUserId) {
     		if (!empty($userEtt->parentUserId)) {
     			throw new $this->exception('账号已绑定过分销');
