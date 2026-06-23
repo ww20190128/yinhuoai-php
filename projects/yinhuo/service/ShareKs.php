@@ -51,22 +51,17 @@ class ShareKs extends ServiceBase
 
 		$response = httpGetContents($url);
     	$response = empty($response) ? array() : json_decode($response, true);
-
     	if (empty($response['access_token'])) {
     		throw new $this->exception('授权失败');
     	}
-
     	$shareKsAccess = array(
     		'access_token' => $response['access_token'],
     		'refresh_token' => $response['refresh_token'],
     	);
-
     	$userEtt->set('shareKsAccess', json_encode($shareKsAccess));
     	$userDao->update($userEtt);
     	$shareKsAccess['url'] = "https://static.yinhuoai.com/kuaishou-publish?userId={$userId}";
-    	
     	header('Location: ' . $shareKsAccess['url']);
-    	
     	// 跳转后立即终止脚本执行（必须加，防止后续代码运行）
     	exit;
     	return $shareKsAccess;

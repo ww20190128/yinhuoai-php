@@ -224,7 +224,7 @@ class User extends ServiceBase
     			throw new $this->exception('账号已绑定过分销');
     		}
     		$parentUserEtt = $userDao->readByPrimary($userEtt->parentUserId); // 上级
-    		if (!empty($parentUserEtt) && $userEtt->status != \constant\Common::DATA_DELETE) {
+    		if (!empty($parentUserEtt) && $parentUserEtt->status != \constant\Common::DATA_DELETE) {
     			if (!empty($parentUserEtt->parentUserId)) {
     				$parentUserEtt2 = $userDao->readByPrimary($parentUserEtt->parentUserId);
     				if (empty($parentUserEtt2->parentUserId)) {
