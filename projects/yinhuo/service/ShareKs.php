@@ -258,7 +258,7 @@ class ShareKs extends ServiceBase
 	    $url .= '?' . $urlParams;
 	    $postData = array(
 	        'cover' => $cover, // 封面文件
-	        'caption' => $caption // 标题
+	        'caption' => empty($caption) ? '测试' : $caption // 标题（必须要内容，否则快速无法发布）
 	    );
 	    $curlHandler = curl_init($url);
 	    curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, TRUE);
