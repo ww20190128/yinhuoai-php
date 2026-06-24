@@ -207,7 +207,7 @@ class ShareKs extends ServiceBase
     	$result = array(
     		'name'	=> $projectEtt->name, // 工程名称
     		'topic'	=> $editingInfo['topic'], // 话题
-    		'title'	=> $editingInfo['title'], // 标题
+    		'title'	=> empty($editingInfo['title']) ? '测试' : $editingInfo['title'], // 标题
     		'clip'	=> $publicClipModel,
     	);
     	return $result;
