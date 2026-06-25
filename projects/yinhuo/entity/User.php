@@ -224,7 +224,7 @@ class User extends ModelBase
     		'withdrawAmount'    		=> $this->withdrawAmount,
     		'parentUserId'  => intval($this->parentUserId),
 			//'openid'        => $this->openid,
-    		'session_key'   => $this->session_key,
+    		//'session_key'   => $this->session_key,
     		'shareUrl'      => $this->level >= 3 ? '' : $shareUrl,
     		'level'  		=> intval($this->level),
 //          'sex'           => intval($this->sex),
