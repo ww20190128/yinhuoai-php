@@ -79,7 +79,7 @@ class App extends ServiceBase
      */
     public function sysnMusic($authorization)
     {
-    	//$this->uploadMusic();exit;
+//     $this->uploadMusic();exit;
     	$musicDao = \dao\Music::singleton();
 		$musicClassifyDao = \dao\MusicClassify::singleton();
     	$url = "https://api.pyp.canzan.com/company/material/hot_music_cate";

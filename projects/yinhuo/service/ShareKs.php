@@ -207,7 +207,7 @@ class ShareKs extends ServiceBase
     	$result = array(
     		'name'	=> $projectEtt->name, // 工程名称
     		'topic'	=> $editingInfo['topic'], // 话题
-    		'title'	=> $editingInfo['title'], // 标题
+    		'title'	=> empty($editingInfo['title']) ? '测试' : $editingInfo['title'], // 标题
     		'clip'	=> $publicClipModel,
     	);
     	return $result;
@@ -258,7 +258,7 @@ class ShareKs extends ServiceBase
 	    $url .= '?' . $urlParams;
 	    $postData = array(
 	        'cover' => $cover, // 封面文件
-	        'caption' => $caption // 标题
+	        'caption' => empty($caption) ? '测试' : $caption // 标题（必须要内容，否则快速无法发布）
 	    );
 	    $curlHandler = curl_init($url);
 	    curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, TRUE);
